@@ -1,0 +1,80 @@
+Disease name	Abbreviation	ICD10	File download
+Atopic dermatitis	AD	L20	hum0197.v5.finemap.AD.v1
+Atrial fibrillation	AFib	I48	hum0197.v5.finemap.AF.v1
+Albumin/Globulin ratio	AG	-	hum0197.v5.finemap.AG.v1
+Age at menarche	Age_at_Menarche	-	hum0197.v5.finemap.Men.v1
+Age at menopause	Age_at_Menopause	-	hum0197.v5.finemap.MP.v1
+Autoimmune disease	AID	M35	hum0197.v5.finemap.AID.v1
+Albumin	Alb	-	hum0197.v5.finemap.Alb.v1
+Alkaline phosphatase	ALP	-	hum0197.v5.finemap.ALP.v1
+Alanine aminotransferase	ALT	-	hum0197.v5.finemap.ALT.v2
+Aspartate aminotransferase	AST	-	hum0197.v5.finemap.AST.v2
+Asthma	Asthma	J45	hum0197.v5.finemap.As.v1
+Basophil	Baso	-	hum0197.v5.finemap.BAS.v1
+Body mass index	BMI	-	hum0197.v5.finemap.BMI.v1
+Breast cancer	BrC	C50	hum0197.v5.finemap.BC.v1
+Blood urea nitrogen	BUN	-	hum0197.v5.finemap.BUN.v1
+Body weight	BW	-	hum0197.v5.finemap.BW.v1
+Calcium	Ca	-	hum0197.v5.finemap.Ca.v1
+Coronary artery disease	CAD	I200、I209、I219 	hum0197.v5.finemap.CAD.v1
+Cataract	Cataract	H25/H26	hum0197.v5.finemap.Cat.v1
+Cerebral aneurysm	CeAn	I67.1	hum0197.v5.finemap.CeAn.v1
+Cholelithiasis	Cholelithiasis	K80	hum0197.v5.finemap.CL.v1
+Cirrhosis	Cirrhosis	K74.6	hum0197.v5.finemap.Cir.v1
+Chronic obstructive pulmonary disease	COPD	J44	hum0197.v5.finemap.COPD.v1
+Colorectal cancer	CRC	C18	hum0197.v5.finemap.CC.v1
+C-reactive protein	CRP	-	hum0197.v5.finemap.CRP.v1
+Diastolic blood pressure	DBP	-	hum0197.v5.finemap.DBP.v1
+Estimated glomerular filtration rate	eGFR	-	hum0197.v5.finemap.eGFR.v1
+Endometriosis	Endometriosis	N80	hum0197.v5.finemap.EM.v1
+Eosinophil	Eosino	-	hum0197.v5.finemap.EOS.v1
+Esophageal cancer	EsC	C15	hum0197.v5.finemap.EC.v1
+Gastric cancer	GaC	C16	hum0197.v5.finemap.GC.v1
+Gastric ulcer	Gastric_Ulcer	K25	hum0197.v5.finemap.GU.v1
+Graves' disease	GD	E05.0	hum0197.v5.finemap.GD.v1
+γ-glutamyl transpeptidase	GGT	-	hum0197.v5.finemap.GGT.v1
+Glaucoma	Glaucoma	H40	hum0197.v5.finemap.Gla.v1
+Glucose	Glucose	-	hum0197.v5.finemap.Glucose.v1
+Hemoglobin	Hb	-	hum0197.v5.finemap.Hb.v1
+HbA1c	HbA1c	-	hum0197.v5.finemap.HbA1c.v1
+HDL-cholesterol	HDLC	-	hum0197.v5.finemap.HDLC.v1
+Height	Height	-	hum0197.v5.finemap.Hei.v2
+Hematocrit	Ht	-	hum0197.v5.finemap.Ht.v1
+Inguinal hernia	Inguinal_Hernia	K40	hum0197.v5.finemap.InH.v1
+Interstitial lung disease	IPF	J84.1/J84.8/J84.9	hum0197.v5.finemap.ILD.v1
+Ischemic stroke	IS	I63	hum0197.v5.finemap.IS.v1
+Keloid	Keloid	L91.0	hum0197.v5.finemap.Kel.v1
+LDL-cholesterol	LDLC	-	hum0197.v5.finemap.LDLC.v1
+Mosaic loss of chromosome Y	LOY	Q998	hum0197.v5.finemap.LOY.v1
+Lung cancer	LuC	C34	hum0197.v5.finemap.LuC.v1
+Lymphocyte	Lym	-	hum0197.v5.finemap.LYM.v1
+Malignant tumor	Malignant_Neoplasms	C00-C97	hum0197.v5.finemap.MT.v1
+Mean arterial pressure	MAP	-	hum0197.v5.finemap.MAP.v1
+Mean corpuscular hemoglobin	MCH	-	hum0197.v5.finemap.MCH.v1
+Mean corpuscular hemoglobin concentration	MCHC	-	hum0197.v5.finemap.MCHC.v1
+Mean corpuscular volume	MCV	-	hum0197.v5.finemap.MCV.v1
+Myocardial infarction	MI	I21/I22/I23/I24/I25	hum0197.v5.finemap.MI.v1
+Monocyte	Mono	-	hum0197.v5.finemap.MON.v1
+Non-albumin protein	NAP	-	hum0197.v5.finemap.NAP.v1
+Neutrophil	Neutro	-	hum0197.v5.finemap.NEU.v1
+Phosphate	P	-	hum0197.v5.finemap.P.v1
+Peripheral arterial disease	PAD	I73.9	hum0197.v5.finemap.PAD.v1
+Platelet	Plt	-	hum0197.v5.finemap.PLT.v1
+Pulse pressure	PP	-	hum0197.v5.finemap.PP.v1
+Prostate cancer	PrC	C61	hum0197.v5.finemap.PrC.v1
+Rheumatoid arthritis	RA	M06	hum0197.v5.finemap.RA.v1
+Red blood cell	RBC	-	hum0197.v5.finemap.RBC.v1
+Systolic blood pressure	SBP	-	hum0197.v5.finemap.SBP.v1
+Serum creatinine	sCr	-	hum0197.v5.finemap.sCr.v1
+Cigarettes per day	Smoking_CPD	-	hum0197.v5.finemap.cpd.v1
+Smoking (ever vs never)	Smoking_Ever_Never	-	hum0197.v5.finemap.ens.v1
+Type 1 diabetes	T1D	E10	hum0197.v5.finemap.T1D.v1
+Type 2 diabetes	T2D	E11	hum0197.v5.finemap.T2D.v1
+Total bilirubin	TBil	-	hum0197.v5.finemap.TBil.v1
+Total cholesterol	TC	-	hum0197.v5.finemap.TC.v1
+Triglycerides	TG	-	hum0197.v5.finemap.TG.v1
+Total protein	TP	-	hum0197.v5.finemap.TP.v1
+Uric acids	UA	-	hum0197.v5.finemap.UA.v1
+Uterine fibroids	UF	D25	hum0197.v5.finemap.UF.v1
+Urolithiasis	Urolithiasis	N20.0/N20.2	hum0197.v5.finemap.Uro.v1
+White blood cell	WBC	-	hum0197.v5.finemap.WBC.v1

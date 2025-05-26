@@ -1,0 +1,25 @@
+RefSeq	type	sequence	assembly_unit	chr	length
+NC_000001.11	Chromosome	1	Primary Assembly	chr1	248956422
+NC_000002.12	Chromosome	2	Primary Assembly	chr2	242193529
+NC_000003.12	Chromosome	3	Primary Assembly	chr3	198295559
+NC_000004.12	Chromosome	4	Primary Assembly	chr4	190214555
+NC_000005.10	Chromosome	5	Primary Assembly	chr5	181538259
+NC_000006.12	Chromosome	6	Primary Assembly	chr6	170805979
+NC_000007.14	Chromosome	7	Primary Assembly	chr7	159345973
+NC_000008.11	Chromosome	8	Primary Assembly	chr8	145138636
+NC_000009.12	Chromosome	9	Primary Assembly	chr9	138394717
+NC_000010.11	Chromosome	10	Primary Assembly	chr10	133797422
+NC_000011.10	Chromosome	11	Primary Assembly	chr11	135086622
+NC_000012.12	Chromosome	12	Primary Assembly	chr12	133275309
+NC_000013.11	Chromosome	13	Primary Assembly	chr13	114364328
+NC_000014.9	Chromosome	14	Primary Assembly	chr14	107043718
+NC_000015.10	Chromosome	15	Primary Assembly	chr15	101991189
+NC_000016.10	Chromosome	16	Primary Assembly	chr16	90338345
+NC_000017.11	Chromosome	17	Primary Assembly	chr17	83257441
+NC_000018.10	Chromosome	18	Primary Assembly	chr18	80373285
+NC_000019.10	Chromosome	19	Primary Assembly	chr19	58617616
+NC_000020.11	Chromosome	20	Primary Assembly	chr20	64444167
+NC_000021.9	Chromosome	21	Primary Assembly	chr21	46709983
+NC_000022.11	Chromosome	22	Primary Assembly	chr22	50818468
+NC_000023.11	Chromosome	X	Primary Assembly	chrX	156040895
+NC_000024.10	Chromosome	Y	Primary Assembly	chrY	57227415

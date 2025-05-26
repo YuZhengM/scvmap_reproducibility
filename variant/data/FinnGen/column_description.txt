@@ -1,0 +1,22 @@
+name	Description
+trait	phenotype
+region	region for which the fine-mapping was run
+v	variant
+index	running index
+rsid	rs variant identifier
+chromosome	chromosome
+position	position
+allele1	reference allele
+allele2	alternative allele
+maf	alternative allele frequency
+beta	original marginal effect size
+se	original standard error
+z	original zscore
+prob	post inclusion probability
+log10bf	log10 bayes factor
+mean	marginalized shrinkage estimates of the posterior effect size mean
+sd	marginalized shrinkage estimates of the posterior effect standard deviation
+mean_incl	conditional estimates of the posterior effect size mean
+sd_incl	conditional estimates of the posterior effect size standard deviation
+p	original p-value
+csx	credible set index for given number of causal variants x

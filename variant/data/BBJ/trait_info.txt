@@ -1,0 +1,80 @@
+trait_abbr	trait_code	index	trait	ICD10	file_name
+AD	BBJ_AD_1	1	Atopic dermatitis	L20	hum0197.v5.finemap.AD.v1
+AFib	BBJ_AFib_2	2	Atrial fibrillation	I48	hum0197.v5.finemap.AF.v1
+AG	BBJ_AG_3	3	Albumin/Globulin ratio	-	hum0197.v5.finemap.AG.v1
+AID	BBJ_AID_4	4	Autoimmune disease	M35	hum0197.v5.finemap.AID.v1
+ALP	BBJ_ALP_5	5	Alkaline phosphatase	-	hum0197.v5.finemap.ALP.v1
+ALT	BBJ_ALT_6	6	Alanine aminotransferase	-	hum0197.v5.finemap.ALT.v2
+AST	BBJ_AST_7	7	Aspartate aminotransferase	-	hum0197.v5.finemap.AST.v2
+Age_at_Menarche	BBJ_Age_at_Menarche_8	8	Age at menarche	-	hum0197.v5.finemap.Men.v1
+Age_at_Menopause	BBJ_Age_at_Menopause_9	9	Age at menopause	-	hum0197.v5.finemap.MP.v1
+Alb	BBJ_Alb_10	10	Albumin	-	hum0197.v5.finemap.Alb.v1
+Asthma	BBJ_Asthma_11	11	Asthma	J45	hum0197.v5.finemap.As.v1
+BMI	BBJ_BMI_12	12	Body mass index	-	hum0197.v5.finemap.BMI.v1
+BUN	BBJ_BUN_13	13	Blood urea nitrogen	-	hum0197.v5.finemap.BUN.v1
+BW	BBJ_BW_14	14	Body weight	-	hum0197.v5.finemap.BW.v1
+Baso	BBJ_Baso_15	15	Basophil	-	hum0197.v5.finemap.BAS.v1
+BrC	BBJ_BrC_16	16	Breast cancer	C50	hum0197.v5.finemap.BC.v1
+CAD	BBJ_CAD_17	17	Coronary artery disease	I200、I209、I219 	hum0197.v5.finemap.CAD.v1
+COPD	BBJ_COPD_18	18	Chronic obstructive pulmonary disease	J44	hum0197.v5.finemap.COPD.v1
+CRC	BBJ_CRC_19	19	Colorectal cancer	C18	hum0197.v5.finemap.CC.v1
+CRP	BBJ_CRP_20	20	C-reactive protein	-	hum0197.v5.finemap.CRP.v1
+Ca	BBJ_Ca_21	21	Calcium	-	hum0197.v5.finemap.Ca.v1
+Cataract	BBJ_Cataract_22	22	Cataract	H25/H26	hum0197.v5.finemap.Cat.v1
+CeAn	BBJ_CeAn_23	23	Cerebral aneurysm	I67.1	hum0197.v5.finemap.CeAn.v1
+Cholelithiasis	BBJ_Cholelithiasis_24	24	Cholelithiasis	K80	hum0197.v5.finemap.CL.v1
+Cirrhosis	BBJ_Cirrhosis_25	25	Cirrhosis	K74.6	hum0197.v5.finemap.Cir.v1
+DBP	BBJ_DBP_26	26	Diastolic blood pressure	-	hum0197.v5.finemap.DBP.v1
+Endometriosis	BBJ_Endometriosis_27	27	Endometriosis	N80	hum0197.v5.finemap.EM.v1
+Eosino	BBJ_Eosino_28	28	Eosinophil	-	hum0197.v5.finemap.EOS.v1
+EsC	BBJ_EsC_29	29	Esophageal cancer	C15	hum0197.v5.finemap.EC.v1
+GD	BBJ_GD_30	30	Graves' disease	E05.0	hum0197.v5.finemap.GD.v1
+GGT	BBJ_GGT_31	31	γ-glutamyl transpeptidase	-	hum0197.v5.finemap.GGT.v1
+GaC	BBJ_GaC_32	32	Gastric cancer	C16	hum0197.v5.finemap.GC.v1
+Gastric_Ulcer	BBJ_Gastric_Ulcer_33	33	Gastric ulcer	K25	hum0197.v5.finemap.GU.v1
+Glaucoma	BBJ_Glaucoma_34	34	Glaucoma	H40	hum0197.v5.finemap.Gla.v1
+Glucose	BBJ_Glucose_35	35	Glucose	-	hum0197.v5.finemap.Glucose.v1
+HDLC	BBJ_HDLC_36	36	HDL-cholesterol	-	hum0197.v5.finemap.HDLC.v1
+Hb	BBJ_Hb_37	37	Hemoglobin	-	hum0197.v5.finemap.Hb.v1
+HbA1c	BBJ_HbA1c_38	38	HbA1c	-	hum0197.v5.finemap.HbA1c.v1
+Height	BBJ_Height_39	39	Height	-	hum0197.v5.finemap.Hei.v2
+Ht	BBJ_Ht_40	40	Hematocrit	-	hum0197.v5.finemap.Ht.v1
+IPF	BBJ_IPF_41	41	Interstitial lung disease	J84.1/J84.8/J84.9	hum0197.v5.finemap.ILD.v1
+IS	BBJ_IS_42	42	Ischemic stroke	I63	hum0197.v5.finemap.IS.v1
+Inguinal_Hernia	BBJ_Inguinal_Hernia_43	43	Inguinal hernia	K40	hum0197.v5.finemap.InH.v1
+Keloid	BBJ_Keloid_44	44	Keloid	L91.0	hum0197.v5.finemap.Kel.v1
+LDLC	BBJ_LDLC_45	45	LDL-cholesterol	-	hum0197.v5.finemap.LDLC.v1
+LOY	BBJ_LOY_46	46	Mosaic loss of chromosome Y	Q998	hum0197.v5.finemap.LOY.v1
+LuC	BBJ_LuC_47	47	Lung cancer	C34	hum0197.v5.finemap.LuC.v1
+Lym	BBJ_Lym_48	48	Lymphocyte	-	hum0197.v5.finemap.LYM.v1
+MAP	BBJ_MAP_49	49	Mean arterial pressure	-	hum0197.v5.finemap.MAP.v1
+MCH	BBJ_MCH_50	50	Mean corpuscular hemoglobin	-	hum0197.v5.finemap.MCH.v1
+MCHC	BBJ_MCHC_51	51	Mean corpuscular hemoglobin concentration	-	hum0197.v5.finemap.MCHC.v1
+MCV	BBJ_MCV_52	52	Mean corpuscular volume	-	hum0197.v5.finemap.MCV.v1
+MI	BBJ_MI_53	53	Myocardial infarction	I21/I22/I23/I24/I25	hum0197.v5.finemap.MI.v1
+Malignant_Neoplasms	BBJ_Malignant_Neoplasms_54	54	Malignant tumor	C00-C97	hum0197.v5.finemap.MT.v1
+Mono	BBJ_Mono_55	55	Monocyte	-	hum0197.v5.finemap.MON.v1
+NAP	BBJ_NAP_56	56	Non-albumin protein	-	hum0197.v5.finemap.NAP.v1
+Neutro	BBJ_Neutro_57	57	Neutrophil	-	hum0197.v5.finemap.NEU.v1
+P	BBJ_P_58	58	Phosphate	-	hum0197.v5.finemap.P.v1
+PAD	BBJ_PAD_59	59	Peripheral arterial disease	I73.9	hum0197.v5.finemap.PAD.v1
+PP	BBJ_PP_60	60	Pulse pressure	-	hum0197.v5.finemap.PP.v1
+Plt	BBJ_Plt_61	61	Platelet	-	hum0197.v5.finemap.PLT.v1
+PrC	BBJ_PrC_62	62	Prostate cancer	C61	hum0197.v5.finemap.PrC.v1
+RA	BBJ_RA_63	63	Rheumatoid arthritis	M06	hum0197.v5.finemap.RA.v1
+RBC	BBJ_RBC_64	64	Red blood cell	-	hum0197.v5.finemap.RBC.v1
+SBP	BBJ_SBP_65	65	Systolic blood pressure	-	hum0197.v5.finemap.SBP.v1
+Smoking_CPD	BBJ_Smoking_CPD_66	66	Cigarettes per day	-	hum0197.v5.finemap.cpd.v1
+Smoking_Ever_Never	BBJ_Smoking_Ever_Never_67	67	Smoking (ever vs never)	-	hum0197.v5.finemap.ens.v1
+T1D	BBJ_T1D_68	68	Type 1 diabetes	E10	hum0197.v5.finemap.T1D.v1
+T2D	BBJ_T2D_69	69	Type 2 diabetes	E11	hum0197.v5.finemap.T2D.v1
+TBil	BBJ_TBil_70	70	Total bilirubin	-	hum0197.v5.finemap.TBil.v1
+TC	BBJ_TC_71	71	Total cholesterol	-	hum0197.v5.finemap.TC.v1
+TG	BBJ_TG_72	72	Triglycerides	-	hum0197.v5.finemap.TG.v1
+TP	BBJ_TP_73	73	Total protein	-	hum0197.v5.finemap.TP.v1
+UA	BBJ_UA_74	74	Uric acids	-	hum0197.v5.finemap.UA.v1
+UF	BBJ_UF_75	75	Uterine fibroids	D25	hum0197.v5.finemap.UF.v1
+Urolithiasis	BBJ_Urolithiasis_76	76	Urolithiasis	N20.0/N20.2	hum0197.v5.finemap.Uro.v1
+WBC	BBJ_WBC_77	77	White blood cell	-	hum0197.v5.finemap.WBC.v1
+eGFR	BBJ_eGFR_78	78	Estimated glomerular filtration rate	-	hum0197.v5.finemap.eGFR.v1
+sCr	BBJ_sCr_79	79	Serum creatinine	-	hum0197.v5.finemap.sCr.v1
