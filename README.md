@@ -1,4 +1,4 @@
-# SCVDB 处理过程
+# SCVdb 处理过程
 
 > 对文件夹的叙述
 
@@ -156,53 +156,161 @@ chr11	307696	307696	rs7480524	0.131486	baso
   - 📁project_code: 存储代码
     - 📁scvdb_reproducibility: 此文件夹表示本项目的根路径
   - 📁scATAC: 
-    - 📁`{scATAC-seq}`: 
+    - 📁`{GSE_ID}`: 存储不同单细胞样本整体的处理流程数据
+      - 📁data: 存储通过来源 rds 文件处理成统一规格的数据
+        - `{scATAC-seq}`: 存储不同单细胞样本处理成统一规格的数据
+          - 📁meta: 存储单细胞样本的元数据
+            - 📄barcodes.tsv: barcodes 信息
+            - 📄matrix.mtx: 稀疏矩阵信息
+            - 📄peaks.bed: peak 信息
+          - 📄annotation.txt: 未处理前所有细胞注释的文件
+          - 📄annotation_stdn.txt: 未处理单细胞注释的统一规范文件
+          - 📄`{scATAC-seq}_sc_atac.h5ad`: 未预处理的单细胞样本文件
+          - 📄`{scATAC-seq}_fragments.tsv.gz`: 单细胞样本的 fragments 文件
+          - 📄`{scATAC-seq}_sc_atac_snapATAC2.h5ad`: 预处理后的单细胞样本文件
+          - 📄`{scATAC-seq}_cell_anno.txt`: 单细胞预处理后细胞注释的文件
+          - 📄`{scATAC-seq}_cell_anno_stdn.txt`: 单细胞预处理后细胞注释的统一规范文件
+          - 📄`{scATAC-seq}_cell_type_stdn.txt`: 单细胞预处理后细胞类型注释的统一规范文件
+          - 📄`{scATAC-seq}_gene_expression_data.h5ad`: 单细胞样本的基因表达数据
+          - 📄`{scATAC-seq}_difference_gene.h5ad`: 单细胞样本的差异基因数据
+          - 📄`{scATAC-seq}_gene_enrichment.txt`: 单细胞样本的差异基因富集文件
+          - 📄`{scATAC-seq}_difference_peak.h5ad`: 单细胞样本的差异 peak 数据
+          - 📄`{scATAC-seq}_tf_activity_data.h5ad`: 单细胞样本的差异转录因子文件
+      - 📄`{scATAC-seq}_ATAC.rds`: 不同单细胞样本的来源 rds 文件
+      - 📄`{scATAC-seq}_metadata.txt`: 不同单细胞样本的来源的注释文件
   - 📁topic: 
   - 📁variant: 
-
-
+    - 📁source: 所有 fine-mapping 结果文件的来源数据
+      - 📁BBJ: 所有 BBJ 队列 fine-mapping 结果文件的来源数据
+        - 📁decompression: 对所有下载的文件进行压缩
+          - 📄`BBJ.{trait}.Kanai2021.FINEMAP.tsv.gz`: FINEMAP 软件跑出来的结果
+          - 📄`BBJ.{trait}.Kanai2021.SuSiE.tsv.gz`: SuSiE软件跑出来的结果 (未使用)
+        - 📁download: 下载 BBJ 的所有 fine-mapping 结果文件
+          - 📄`hum0197.v5.finemap.{trait}.v1.zip`: 下载的 BBJ 的性状或疾病文件
+        - 📁finemap: 对所有 FINEMAP 软件跑出来的结果进行压缩
+          - 📄`BBJ.{trait}.Kanai2021.FINEMAP.tsv.txt`: 对 FINEMAP 方法得到的结果解压后的文件
+      - 📁CAUSALdb: 所有 CAUSALdb 队列 fine-mapping 结果文件的来源数据
+        - 📁download: 下载 fine-mapping 结果文件
+          - 📁credible_set.v2.1.20240623: fine-mapping 结果解压后的文件夹
+            - 📁v2.1: fine-mapping 结果解压后的文件夹
+              - 📄credible_set.txt: 每个性状或疾病的详细内容信息
+              - 📄meta.txt: 每个性状或疾病的概述文件
+          - 📄credible_set.v2.1.20240623.tar.gz: 下载 fine-mapping 结果的压缩文件
+      - 📁FinnGen: 所有 FinnGen 队列 fine-mapping 结果文件的来源数据
+        - 📁decompression: 对所有下载的文件进行压缩
+          - 📄`finngen_R11_{trait}.txt`: 解压后的文件
+        - 📁download: 下载 FinnGen 的所有 fine-mapping 结果文件
+          - 📄`finngen_R11_{trait}.gz`: 下载的压缩文件
+      - 📁UKBB: 所有 UKBB 队列 fine-mapping 结果文件的来源数据
+        - 📁decompression: 对 UKBB_94traits_release1.bed.gz 文件进行压缩
+          - 📄UKBB_94traits_release1.bed: 解压后的文件
+        - 📁download: 下载 UKBB 的 fine-mapping 结果文件
+          - 📁release1.1: 对下载 fine-mapping 结果文件进行解压
+            - 📄README.html
+            - 📄README.md
+            - 📄UKBB_94traits_release1.bed.gz
+            - 📄UKBB_94traits_release1.bed.gz.tbi
+            - 📄UKBB_94traits_release1.cols
+            - 📄UKBB_94traits_release1.traits
+            - 📄UKBB_94traits_release1_regions.bed.gz
+            - 📄UKBB_94traits_release1_regions.bed.gz.tbi
+            - 📄UKBB_94traits_release1_regions.cols
+          - 📄UKBB_94traits_release1.1.tar.gz: 下载 fine-mapping 结果文件
+    - 📁output: 对所有下载后解压的文件进行处理成统一的规范格式存储路径
+      - 📁`{source}`: 不同的来源队列
+        - 📁finemap: 形成 SCAVENGE 的算法输入格式, 以及跑 HOMER, MAGMA 的输入格式
+        - 📁trait: 形成对性状或者疾病详细内容的文件
+    - 📁filter: 这里存储的是通过一定规则过滤 fine-mapping 数据并且通过 liftOver 进行转化为对应的参考基因组数据
+      - 📁finemap: output 文件夹内的 finemap 过滤后的数据
+      - 📁input_hg19: 需要转化为 hg38 的输入性状或疾病数据
+      - 📁input_hg38: 需要转化为 hg19 的输入性状或疾病数据
+      - 📁output_hg19: 已经是 hg19 的和转化为 hg19 的输出数据
+      - 📁output_hg38: 已经是 hg38 的和转化为 hg38 的输出数据
+      - 📁result_hg19: hg38 的输出数据转化为统一的规范格式数据
+      - 📁result_hg38: hg19 的输出数据转化为统一的规范格式数据
+      - 📁trait: output 文件夹内的 trait 过滤后的数据
+      - 📁unmap_hg19: 转化为 hg19 的未映射的数据
+      - 📁unmap_hg38: 转化为 hg38 的未映射的数据
+    - 📁finish: fine-mapping 结果数据统一处理后的最终文件, 此数据用于跑 g-chromVAR, SCAVENGE, HOMER, MAGMA 等方法的输入文件
+      - 📁hg19: 参考基因组为 hg19 的 fine-mapping 结果最终数据
+        - 📄`{trait_label}.bed`: 性状或疾病算法的输入数据
+      - 📁hg38: 参考基因组为 hg38 的 fine-mapping 结果最终数据
+        - 📄`{trait_label}.bed`: 性状或疾病算法的输入数据
+      - 📁trait: fine-mapping 结果数据统一处理后的最终文件, 此路径下的是详细的性状或疾病的内容信息
+        - 📄`{trait_label}.txt`: 性状或疾病的详细内容信息
+    - 📁homer: 所有性状或疾病跑 HOMER 的结果数据
+      - 📁hg19: 参考基因组为 hg19 的所有性状或疾病跑 HOMER 的结果数据
+        - 📁`{trait_label}`: 参考基因组为 hg19 的此性状或疾病跑 HOMER 的结果数据
+      - 📁hg38: 参考基因组为 hg38 的所有性状或疾病跑 HOMER 的结果数据
+        - 📁`{trait_label}`: 参考基因组为 hg38 的此性状或疾病跑 HOMER 的结果数据
+    - 📁magma: 所有性状或疾病跑 MAGMA 的结果数据
+      - 📁gene: MAGMA 参考基因数据
+        - 📄gene_hg19.bed
+        - 📄gene_hg38.bed
+      - 📁magma_input: 形成的 MAGMA 输入的文件数据信息
+        - 📁g1000_afr: African 参考背景模板数据
+        - 📁g1000_amr: American 参考背景模板数据
+        - 📁g1000_eas: East Asian 参考背景模板数据
+        - 📁g1000_eur: European 参考背景模板数据
+        - 📁g1000_sas: South Asian 参考背景模板数据
+        - 📁hg19: 参考基因组为 hg19 的 MAGMA 输入的文件
+          - `{trait_label}.bim`: 用于第一步的基因匹配 SNP 位点
+          - `{trait_label}.txt`: 用于第二步的基因富集注释
+        - 📁hg38: 参考基因组为 hg38 的 MAGMA 输入的文件
+          - `{trait_label}.bim`: 用于第一步的基因匹配 SNP 位点
+          - `{trait_label}.txt`: 用于第二步的基因富集注释
+      - 📁magma_output: 
+        - 📁hg19_anno: 参考基因组为 hg19 的 MAGMA 第一步的输出文件
+        - 📁hg19_gene: 参考基因组为 hg19 的 MAGMA 第二步的输出文件
+        - 📁hg38_anno: 参考基因组为 hg38 的 MAGMA 第一步的输出文件
+        - 📁hg38_gene: 参考基因组为 hg38 的 MAGMA 第二步的输出文件
 
 ```shell
-source_path="/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table"
+source_path="/public/home/lcq/rgzn/yuzhengmin/keti"
 target_path="/mnt/data3/workspace/SCVdb"
 
 # scATAC-seq
-scp -r "$source_path/download/scatac/*" "root@bio.liclab.net:$target_path/data/data/download/scatac/"
+scp -r "$source_path/database/sc_variant/table/download/scatac" "root@bio.liclab.net:$target_path/data/data/download/"
 
 # HOMER
-scp -r "$source_path/homer/hg19/*" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/hg19/"
-scp -r "$source_path/homer/hg38/*" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/hg38/"
-scp -r "$source_path/homer/t_homer_trait_tf.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/hg19" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/hg38" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/t_homer_trait_tf.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
 
 # MAGMA
-scp -r "$source_path/magma/hg19/*" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/hg19/"
-scp -r "$source_path/magma/hg19_anno/*" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/hg19_anno/"
-scp -r "$source_path/magma/hg38/*" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/hg38/"
-scp -r "$source_path/magma/hg38_anno/*" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/hg38_anno/"
-scp -r "$source_path/magma/gene_enrichment_trait_table/*" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/gene_enrichment_trait_table/"
-scp -r "$source_path/magma/t_magma.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/hg19" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/hg19_anno" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/hg38" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/hg38_anno" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait_table" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/t_magma.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
 
 # scATAC-seq
-scp -r "$source_path/scatac/difference_gene/*" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/difference_gene"
-scp -r "$source_path/scatac/difference_tf/*" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/difference_tf"
-scp -r "$source_path/scatac/gene_enrichment_table/*" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/gene_enrichment_table"
-scp -r "$source_path/scatac/difference_gene_data.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
-scp -r "$source_path/scatac/difference_tf_data.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
-scp -r "$source_path/scatac/sample_gene_data.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_tf" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_gene_data.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_tf_data.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/sample_gene_data.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
 
 # Overlap
-scp -r "$source_path/trait_variant_overlap/gchromvar_sample_enrichment.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample/"
-scp -r "$source_path/trait_variant_overlap/scavenge_sample_enrichment.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample/"
-scp -r "$source_path/trait_variant_overlap/trs_overlap_gchromvar.h5ad" "root@bio.liclab.net:$target_path/data/data/trait_variant_overlap/"
-scp -r "$source_path/trait_variant_overlap/trs_overlap_scavenge.h5ad" "root@bio.liclab.net:$target_path/data/data/trait_variant_overlap/"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/gchromvar_sample_enrichment.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample/"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/scavenge_sample_enrichment.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample/"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/trs_overlap_gchromvar.h5ad" "root@bio.liclab.net:$target_path/data/data/trait_variant_overlap/"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/trs_overlap_scavenge.h5ad" "root@bio.liclab.net:$target_path/data/data/trait_variant_overlap/"
 
 # variant
-scp -r "$source_path/variant/*" "root@bio.liclab.net:$target_path/mysql/mysqlfile/variant/"
+scp -r "$source_path/database/sc_variant/table/variant" "root@bio.liclab.net:$target_path/mysql/mysqlfile/"
 
 # TRS
-scp -r "$source_path/trs/*" "root@bio.liclab.net:$target_path/data/data/trs/"
-scp -r "$source_path/trs_big/*" "root@bio.liclab.net:$target_path/data/data/download/trs_big/"
+scp -r "$source_path/database/sc_variant/table/trs" "root@bio.liclab.net:$target_path/data/data/"
+scp -r "$source_path/database/sc_variant/table/trs_big" "root@bio.liclab.net:$target_path/data/data/download/"
 
+# HOMER
+scp -r "$source_path/variant/homer" "root@bio.liclab.net:$target_path/data/data/"
+
+# MAGMA
+scp -r "$source_path/variant/magma" "root@bio.liclab.net:$target_path/data/data/"
 
 ```
 
