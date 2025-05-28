@@ -24,7 +24,7 @@ class LiftOver:
     This step requires entering the path in the subsystem or server for execution
     """
 
-    def __init__(self, path: str, genome: str = "hg38", lift_over: str = "/mnt/f/software/liftOver"):
+    def __init__(self, path: str, genome: str = "hg38", lift_over: str = "/public/home/lcq/rgzn/yuzhengmin/software/liftOver"):
         """
         liftOver
         :param path: base path

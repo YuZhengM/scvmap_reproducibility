@@ -1,17 +1,5 @@
 # SCVdb 处理过程
 
-> 对文件夹的叙述
-
-| 文件夹          | 说明                        |
-|--------------|---------------------------|
-| database     | 形成数据库文件                   |
-| find_mapping | find_mapping 流程           |
-| fragments    | 将三个文件处理成 fragments 文件     |
-| variant      | 对下载的突变数据进行处理              |
-| liftOver     | 将 hg19 突变数据转化为 hg38 突变数据  |
-| R            | 将突变数据和 scATAC 数据整合后结果处理内容 |
-| uti          | 公共方法类                     |
-
 ## 1. 收集 scATAC 和 variant 数据
 
 ### 1.1 收集 scATAC 数据
@@ -153,6 +141,31 @@ chr11	307696	307696	rs7480524	0.131486	baso
         - 📄fine_mapping_result.pkl: 用文件存储所有参考基因组的 fine-mapping 结果的数据
         - 📄fine_mapping_result_hg19.pkl: 用文件存储参考基因组为 hg19 的 fine-mapping 结果的数据
         - 📄fine_mapping_result_hg38.pkl: 用文件存储参考基因组为 hg19 的 fine-mapping 结果的数据
+  - 📁gene: 存储基因相关的数据
+    - 📁download: 现在与 SnapATAC2 一致的基因版本
+      - 📄gencode.v41.annotation.gtf.gz: 参考基因组为 hg38
+      - 📄gencode.v41lift37.annotation.gtf.gz: 参考基因组为 hg19
+    - 📁result: 通过 download 数据进行处理后的规范表格数据
+      - 📄gene_hg19_all.txt: 形成表格的数据, 含有所有列
+      - 📄gene_hg38_all.txt: 形成表格的数据, 含有所有列
+      - 📄gene_data.txt: 形成输入数据库中的数据, 与数据库中 `t_gene` 表对应
+      - 📄gene_hg19_data.txt: 从 gene_data.txt 表抽取 hg19 数据
+      - 📄gene_hg38_data.txt: 从 gene_data.txt 表抽取 hg38 数据
+    - 📁regulation: 带有基因注释的相关文件
+      - 📄`human_{annotation}.bed`
+    - 📁liftOver: 对基因注释文件进行 liftOver 转化
+      - 📁input: 转成 hg19 的输入文件
+        - 📁hg19
+          - 📄`t_{annotation}.bed`
+      - 📁output: 转成 hg19 的输出文件
+        - 📁hg19
+          - 📄`t_{annotation}.bed`
+      - 📁result: 最终不同参考基因组的基因注释文件
+        - 📁hg19: 参考基因组为 hg19 的基因注释文件
+          - 📄`t_{annotation}_hg19.bed`: 与数据库中 `t_{annotation}_hg19` 表对应
+        - 📁hg38: 参考基因组为 hg38 的基因注释文件
+          - 📄`t_{annotation}_hg38.bed`: 与数据库中 `t_{annotation}_hg38` 表对应
+      - 📁unmap: 转化参考基因组未映射到的数据
   - 📁project_code: 存储代码
     - 📁scvdb_reproducibility: 此文件夹表示本项目的根路径
   - 📁scATAC: 
@@ -178,8 +191,8 @@ chr11	307696	307696	rs7480524	0.131486	baso
           - 📄`{scATAC-seq}_tf_activity_data.h5ad`: 单细胞样本的差异转录因子文件
       - 📄`{scATAC-seq}_ATAC.rds`: 不同单细胞样本的来源 rds 文件
       - 📄`{scATAC-seq}_metadata.txt`: 不同单细胞样本的来源的注释文件
-  - 📁topic: 
-  - 📁variant: 
+  - 📁topic: SCIV 算法的根路径信息内容
+  - 📁variant: 关于所有 fine-mapping 结果文件的存储 (来源到最终)
     - 📁source: 所有 fine-mapping 结果文件的来源数据
       - 📁BBJ: 所有 BBJ 队列 fine-mapping 结果文件的来源数据
         - 📁decompression: 对所有下载的文件进行压缩
@@ -238,6 +251,8 @@ chr11	307696	307696	rs7480524	0.131486	baso
         - 📄`{trait_label}.bed`: 性状或疾病算法的输入数据
       - 📁trait: fine-mapping 结果数据统一处理后的最终文件, 此路径下的是详细的性状或疾病的内容信息
         - 📄`{trait_label}.txt`: 性状或疾病的详细内容信息
+      - 📄variant_id.txt: 存储突变位点和 rsId 映射关系文件
+      - 📄variant_id_tmp.txt: 存储临时突变位点和 rsId 映射关系文件
     - 📁homer: 所有性状或疾病跑 HOMER 的结果数据
       - 📁hg19: 参考基因组为 hg19 的所有性状或疾病跑 HOMER 的结果数据
         - 📁`{trait_label}`: 参考基因组为 hg19 的此性状或疾病跑 HOMER 的结果数据
@@ -310,7 +325,10 @@ scp -r "$source_path/database/sc_variant/table/trs_big" "root@bio.liclab.net:$ta
 scp -r "$source_path/variant/homer" "root@bio.liclab.net:$target_path/data/data/"
 
 # MAGMA
-scp -r "$source_path/variant/magma" "root@bio.liclab.net:$target_path/data/data/"
+scp -r "$source_path/variant/magma/magma_output" "root@bio.liclab.net:$target_path/data/data/magma/"
+
+# GENE
+scp -r "$source_path/gene/liftOver/result" "root@bio.liclab.net:$target_path/mysql/mysqlfile/gene/"
 
 ```
 
