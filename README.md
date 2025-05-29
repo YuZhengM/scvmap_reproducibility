@@ -323,12 +323,35 @@ scp -r "$source_path/database/sc_variant/table/trs_big" "root@bio.liclab.net:$ta
 
 # HOMER
 scp -r "$source_path/variant/homer" "root@bio.liclab.net:$target_path/data/data/"
+scp -r "$source_path/variant/homer.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/magma_homer/"
 
 # MAGMA
-scp -r "$source_path/variant/magma/magma_output" "root@bio.liclab.net:$target_path/data/data/magma/"
+scp -r $source_path/variant/magma/magma_output/hg19_anno/*.genes.annot root@bio.liclab.net:"$target_path/data/data/magma/magma_output/hg19_anno/"
+scp -r $source_path/variant/magma/magma_output/hg19_gene/*.genes.out root@bio.liclab.net:"$target_path/data/data/magma/magma_output/hg19_gene/"
+scp -r $source_path/variant/magma/magma_output/hg38_anno/*.genes.annot root@bio.liclab.net:"$target_path/data/data/magma/magma_output/hg38_anno/"
+scp -r $source_path/variant/magma/magma_output/hg38_gene/*.genes.out root@bio.liclab.net:"$target_path/data/data/magma/magma_output/hg38_gene/"
+scp -r "$source_path/variant/magma/magma_output.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/magma_homer/"
+scp -r "$source_path/variant/magma/magma_output.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/magma_homer/"
 
 # GENE
-scp -r "$source_path/gene/liftOver/result" "root@bio.liclab.net:$target_path/mysql/mysqlfile/gene/"
+scp -r $source_path/gene/liftOver/result/hg19/t_*.bed root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/hg19/"
+scp -r $source_path/gene/liftOver/result/hg38/t_*.bed root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/hg38/"
+scp -r $source_path/gene/liftOver/result/hg19/t_*.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/liftOver/result/hg38/t_*.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
+
+# Difference Gene/TF
+scp -r "$source_path/database/sc_variant/table/scatac/difference_gene_data.txt" "root@bio.liclab.net:$target_path/data/data/download/difference/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_tf_data.txt" "root@bio.liclab.net:$target_path/data/data/download/difference/"
+scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table_data.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
+
+# variant
+scp -r "$source_path/variant/finish/fine_mapping_hg19.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/trait/"
+scp -r "$source_path/variant/finish/fine_mapping_hg38.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/trait/"
+scp -r "$source_path/variant/finish/fine_mapping_trait.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/trait/"
+
+# Trait gene enrichment
+scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_enrichment_trait_hg19.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
+scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_enrichment_trait_hg38.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
 
 ```
 
