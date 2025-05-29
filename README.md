@@ -342,7 +342,15 @@ scp -r $source_path/gene/liftOver/result/hg38/t_*.tar.gz root@bio.liclab.net:"$t
 # Difference Gene/TF
 scp -r "$source_path/database/sc_variant/table/scatac/difference_gene_data.txt" "root@bio.liclab.net:$target_path/data/data/download/difference/"
 scp -r "$source_path/database/sc_variant/table/scatac/difference_tf_data.txt" "root@bio.liclab.net:$target_path/data/data/download/difference/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "root@bio.liclab.net:$target_path/data/data/download/difference/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_tf" "root@bio.liclab.net:$target_path/data/data/download/difference/"
+scp -r $source_path/scATAC/**/**/**/*_difference_gene.h5ad root@bio.liclab.net:"$target_path/data/data/download/difference/difference_gene_h5ad/"
+scp -r $source_path/scATAC/**/**/**/*_tf_activity_data.h5ad root@bio.liclab.net:"$target_path/data/data/download/difference/difference_tf_h5ad/"
+
+# Difference gene enrichment
 scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table_data.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
+scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
+scp -r $source_path/scATAC/**/**/**/*_gene_enrichment.txt root@bio.liclab.net:"$target_path/data/data/download/enrichment/scatac/complete/"
 
 # variant
 scp -r "$source_path/variant/finish/fine_mapping_hg19.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/trait/"
@@ -352,6 +360,9 @@ scp -r "$source_path/variant/finish/fine_mapping_trait.tar.gz" "root@bio.liclab.
 # Trait gene enrichment
 scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_enrichment_trait_hg19.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
 scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_enrichment_trait_hg38.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
+
+scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg19" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
+
 
 ```
 

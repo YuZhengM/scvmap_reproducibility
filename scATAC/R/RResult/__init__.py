@@ -266,20 +266,20 @@ def form_enriched_sample_file():
     scavenge_data = sciv.fl.read_h5ad(scavenge_enrich_file)
     scavenge_content = sciv.pp.adata_map_df(scavenge_data)
     scavenge_content["f_trait_index"] = scavenge_content["f_trait_id"].str.split("_", expand=True)[2]
-    scavenge_content = scavenge_content[["f_trait_id", "f_sample_id", 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_label', 'f_tissue_type', 'f_trait_index', 'f_index_y', "value"]]
+    scavenge_content = scavenge_content[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_label', 'f_tissue_type', 'f_trait_index', 'f_index_y', "value"]]
     scavenge_content_have = scavenge_content[scavenge_content["value"] == 1]
-    scavenge_content_have = scavenge_content_have[["f_trait_id", "f_sample_id", 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_index_y']]
-    scavenge_content_have.columns = ["f_trait_id", "f_sample_id", 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_sample_index']
+    scavenge_content_have = scavenge_content_have[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_index_y']]
+    scavenge_content_have.columns = ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_sample_index']
     scavenge_content_have.to_csv(f"{database_path}/sc_variant/table/trait_variant_overlap/scavenge_sample_enrichment.txt", sep="\t", header=False, index=False, lineterminator="\n", encoding="utf-8")
 
     gchromvar_enrich_file = f"{database_path}/sc_variant/table/trait_variant_overlap/trs_overlap_gchromvar.h5ad"
     gchromvar_data = sciv.fl.read_h5ad(gchromvar_enrich_file)
     gchromvar_content = sciv.pp.adata_map_df(gchromvar_data)
     gchromvar_content["f_trait_index"] = gchromvar_content["f_trait_id"].str.split("_", expand=True)[2]
-    gchromvar_content = gchromvar_content[["f_trait_id", "f_sample_id", 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_label', 'f_tissue_type', 'f_trait_index', 'f_index_y', "value"]]
+    gchromvar_content = gchromvar_content[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_label', 'f_tissue_type', 'f_trait_index', 'f_index_y', "value"]]
     gchromvar_content_have = gchromvar_content[gchromvar_content["value"] == 1]
-    gchromvar_content_have = gchromvar_content_have[["f_trait_id", "f_sample_id", 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_index_y']]
-    gchromvar_content_have.columns = ["f_trait_id", "f_sample_id", 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_sample_index']
+    gchromvar_content_have = gchromvar_content_have[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_index_y']]
+    gchromvar_content_have.columns = ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_sample_index']
     gchromvar_content_have.to_csv(f"{database_path}/sc_variant/table/trait_variant_overlap/gchromvar_sample_enrichment.txt", sep="\t", header=False, index=False, lineterminator="\n", encoding="utf-8")
 
 
