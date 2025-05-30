@@ -113,7 +113,7 @@ def form_sample_table():
         cell_type_anno = cell_anno.copy()
         del cell_anno
 
-        cell_type_count = cell_type_anno[["f_sample_id", "f_cell_type", "f_umap_x"]].groupby(["f_sample_id", "f_cell_type"], as_index=False).count()
+        cell_type_count = cell_type_anno[["f_sample_id", "f_cell_type"]].groupby(["f_sample_id", "f_cell_type"], as_index=False).size()
         cell_type_count.columns = ["f_sample_id", "f_cell_type", "f_cell_count"]
         cell_type_count["f_gse_id"] = gse
         cell_type_count["f_genome"] = genome

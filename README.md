@@ -182,7 +182,7 @@ chr11	307696	307696	rs7480524	0.131486	baso
           - 📄`{scATAC-seq}_fragments.tsv.gz`: 单细胞样本的 fragments 文件
           - 📄`{scATAC-seq}_sc_atac_snapATAC2.h5ad`: 预处理后的单细胞样本文件
           - 📄`{scATAC-seq}_cell_anno.txt`: 单细胞预处理后细胞注释的文件
-          - 📄`{scATAC-seq}_cell_anno_stdn.txt`: 单细胞预处理后细胞注释的统一规范文件
+          - 📄`{scATAC-seq}_cell_anno_stdn.txt`: 单细胞预处理后细胞注释的统一规范文件 (最终)
           - 📄`{scATAC-seq}_cell_type_stdn.txt`: 单细胞预处理后细胞类型注释的统一规范文件
           - 📄`{scATAC-seq}_gene_expression_data.h5ad`: 单细胞样本的基因表达数据
           - 📄`{scATAC-seq}_difference_gene.h5ad`: 单细胞样本的差异基因数据
@@ -361,7 +361,8 @@ scp -r "$source_path/variant/finish/fine_mapping_trait.tar.gz" "root@bio.liclab.
 scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_enrichment_trait_hg19.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
 scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_enrichment_trait_hg38.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
 
-scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg19" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
+scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg19" "root@bio.liclab.net:$target_path/data/data/download/enrichment/trait/"
+scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg38" "root@bio.liclab.net:$target_path/data/data/download/enrichment/trait/"
 
 
 ```
