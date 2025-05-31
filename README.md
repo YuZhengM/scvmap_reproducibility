@@ -80,7 +80,10 @@ chr11	307696	307696	rs7480524	0.131486	baso
             - 📄`t_homer_{group}`.txt:  与数据库中 `t_homer_hg19_{group}` 表对应
           - 📁hg38: 存储参考基因组为 hg38 的性状或疾病感兴趣的转录因子数据
             - 📄`t_homer_{group}`.txt:  与数据库中 `t_homer_hg38_{group}` 表对应
-          - 📄t_homer_trait_tf.txt: 存储在不同参考基因组下性状或疾病样本与转录因子的映射关系, 与数据库中 `t_trait_tf` 表对应
+          - 📄t_homer_tf_trait_count.txt: 存储在不同参考基因组下 TF 在性状或疾病样本与转录因子的数量, 与数据库中 `t_tf_trait_count` 表对应
+          - 📄t_homer_trait_tf.txt: 存储在不同参考基因组下性状或疾病样本与转录因子的映射关系
+          - 📄t_homer_trait_tf_hg19.txt: 存储 hg19 性状或疾病样本与转录因子的映射关系, 与数据库中 `t_trait_tf_hg19` 表对应
+          - 📄t_homer_trait_tf_hg38.txt: 存储 hg38 性状或疾病样本与转录因子的映射关系, 与数据库中 `t_trait_tf_hg38` 表对应
           - 📄trait_tf_hg19.txt: 这个文件是对 `hg19` 文件数据放在了一起 (没有用到, 保留)
           - 📄trait_tf_hg38.txt: 这个文件是对 `hg38` 文件数据放在了一起 (没有用到, 保留)
         - 📁magma: 存储 MAGMA 跑出来的性状或疾病感兴趣的基因数据
@@ -100,7 +103,10 @@ chr11	307696	307696	rs7480524	0.131486	baso
             - 📄`t_magma_{group}.txt`: 与数据库中 `t_magma_hg38_{group}` 表对应
           - 📁hg38_anno: 存储参考基因组为 hg38 的性状或疾病感兴趣的基因数据 (带有突变和基因映射)
             - 📄`t_magma_{group}.txt`: 与数据库中 `t_magma_anno_hg38_{group}` 表对应
-          - 📄t_magma.txt: 存储在不同参考基因组下性状或疾病样本与基因的映射关系, 与数据库中 `t_trait_gene` 表对应
+          - 📄t_magma_gene_trait_count.txt: 存储在不同参考基因组下 Gene 在性状或疾病样本与转录因子的数量, 与数据库中 `t_gene_trait_count` 表对应
+          - 📄t_magma.txt: 存储在不同参考基因组下性状或疾病样本与基因的映射关系
+          - 📄t_magma_hg19.txt: 存储 hg19 性状或疾病样本与基因的映射关系, 与数据库中 `t_trait_gene_hg19` 表对应
+          - 📄t_magma_hg38.txt: 存储 hg38 性状或疾病样本与基因的映射关系, 与数据库中 `t_trait_gene_hg38` 表对应
         - 📁scatac: 存储与 scATAC-seq 数据相关的数据库内容
           - 📁difference_gene: 单细胞样本的差异基因富集
             - `{scATAC-seq}_difference_gene_data.txt`: 某个单细胞样本的差异基因富集 (没有用到, 保留)
@@ -290,7 +296,9 @@ scp -r "$source_path/database/sc_variant/table/download/scatac" "root@bio.liclab
 # HOMER
 scp -r "$source_path/database/sc_variant/table/homer/hg19" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
 scp -r "$source_path/database/sc_variant/table/homer/hg38" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
-scp -r "$source_path/database/sc_variant/table/homer/t_homer_trait_tf.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/t_homer_trait_tf_hg19.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/t_homer_trait_tf_hg38.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/t_homer_tf_trait_count.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
 
 # MAGMA
 scp -r "$source_path/database/sc_variant/table/magma/hg19" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
@@ -298,7 +306,9 @@ scp -r "$source_path/database/sc_variant/table/magma/hg19_anno" "root@bio.liclab
 scp -r "$source_path/database/sc_variant/table/magma/hg38" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
 scp -r "$source_path/database/sc_variant/table/magma/hg38_anno" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
 scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait_table" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
-scp -r "$source_path/database/sc_variant/table/magma/t_magma.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/t_magma_hg19.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/t_magma_hg38.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/t_magma_gene_trait_count.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
 
 # scATAC-seq
 scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
@@ -363,7 +373,6 @@ scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_
 
 scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg19" "root@bio.liclab.net:$target_path/data/data/download/enrichment/trait/"
 scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg38" "root@bio.liclab.net:$target_path/data/data/download/enrichment/trait/"
-
 
 ```
 

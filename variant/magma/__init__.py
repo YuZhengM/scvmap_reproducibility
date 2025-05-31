@@ -16,7 +16,6 @@ from yzm_util import Util
 
 
 def get_gene_anno():
-
     file.makedirs(f"{output_path}/gene")
 
     for genome in genomes:
@@ -28,7 +27,6 @@ def get_gene_anno():
 
 
 def get_variant_anno():
-
     def handle_data(_trait_code_: str):
 
         _result_data_all_ = f"{output_path}/magma_input/{genome}/{_trait_code_}.txt"
@@ -82,7 +80,6 @@ def get_variant_anno():
 
 
 def exec_magma_anno():
-
     is_pass = True
 
     exec_str_list: list = []
@@ -109,7 +106,6 @@ def exec_magma_anno():
 
 
 def exec_magma_gene():
-
     is_pass = True
 
     exec_str_list: list = []
@@ -154,7 +150,6 @@ def exec_magma_gene():
 
 
 def form_magma_variant_result_file(group_count: int = 100):
-
     for genome in genomes:
 
         genome_result_path: str = f"{result_path}/{genome}_anno"
@@ -197,7 +192,6 @@ def form_magma_variant_result_file(group_count: int = 100):
 
 
 def form_magma_result_file(group_count: int = 100):
-
     all_f = open(f"{result_path}/t_magma.txt", "w", encoding="utf-8", newline="\n")
 
     for genome in genomes:
@@ -239,7 +233,6 @@ def form_magma_result_file(group_count: int = 100):
 
 
 def gene_enrichment_analysis(group_count: int = 100, top: int = 50):
-
     file.makedirs(f"{result_path}/gene_enrichment_trait")
 
     def _core_(param: Tuple):
@@ -318,17 +311,18 @@ def gene_enrichment_analysis(group_count: int = 100, top: int = 50):
 
 
 def gene_enrichment_file(group_count: int = 100):
-
     file.makedirs(f"{result_path}/gene_enrichment_trait_table")
 
     gene_enrichment_dict: dict = {}
 
     for i in range(group_count):
         gene_enrichment_dict.update(
-            {i: {
-                "hg19": [],
-                "hg38": []
-            }}
+            {
+                i: {
+                    "hg19": [],
+                    "hg38": []
+                }
+            }
         )
 
     for genome in genomes:
@@ -350,8 +344,10 @@ def gene_enrichment_file(group_count: int = 100):
             gene_enrich.columns = ["f_trait_id", "f_gene_set", "f_term", "f_overlap", "f_p_value", "f_adjusted_p_value", "f_p_value_old", "f_adjusted_p_value_old", "f_odds_ratio", "f_combined_score", "f_gene"]
             gene_enrich["f_count"] = gene_enrich["f_overlap"].str.split("/", expand=True)[0]
             gene_enrich["f_overlap"] = gene_enrich["f_count"].astype(float) / gene_enrich["f_overlap"].str.split("/", expand=True)[1].astype(float)
-            gene_enrich = gene_enrich[["f_trait_id", "f_gene_set", "f_term", "f_overlap", "f_p_value", "f_adjusted_p_value",
-                                       "f_odds_ratio", "f_combined_score", "f_gene", "f_count"]]
+            gene_enrich = gene_enrich[[
+                "f_trait_id", "f_gene_set", "f_term", "f_overlap", "f_p_value", "f_adjusted_p_value",
+                "f_odds_ratio", "f_combined_score", "f_gene", "f_count"
+            ]]
             gene_enrichment_dict[int(trait_id.split("_")[-1]) % group_count][genome].append(gene_enrich)
 
     for i in tqdm(range(group_count)):
@@ -422,6 +418,25 @@ def form_sql_file(group_count: int = 100):
                 f.write(sql_str)
 
 
+def form_gene_count_file():
+    trait_gene_data = pd.read_table(f"{result_path}/t_magma.txt", header=None, names=["f_trait_id", "f_gene", "f_genome"])
+    genome_gene_trait_count_list = []
+
+    for genome in genomes:
+        print(f"Gene count {genome}...")
+        genome_trait_gene = trait_gene_data[trait_gene_data["f_genome"] == genome]
+        genome_trait_gene = genome_trait_gene[["f_trait_id", "f_gene"]]
+        genome_trait_gene.to_csv(f"{result_path}/t_magma_{genome}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+
+        genome_gene_trait_count = genome_trait_gene.groupby("f_gene").size().reset_index()
+        genome_gene_trait_count.columns = ["f_gene", "f_count"]
+        genome_gene_trait_count["f_genome"] = genome
+        genome_gene_trait_count_list.append(genome_gene_trait_count)
+
+    genome_gene_trait_count_data = pd.concat(genome_gene_trait_count_list, axis=0)
+    genome_gene_trait_count_data.to_csv(f"{result_path}/t_magma_gene_trait_count.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+
+
 if __name__ == '__main__':
     print("run...")
 
@@ -429,14 +444,17 @@ if __name__ == '__main__':
     util = Util('MAGMA')
 
     genomes: list = ["hg19", "hg38"]
-    gene_path: str = "/mnt/m/keti/gene/result"
-    base_path: str = "/mnt/m/keti/variant"
+    gene_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/gene/result"
+    # gene_path: str = "/mnt/m/keti/gene/result"
+    base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant"
+    # base_path: str = "/mnt/m/keti/variant"
     output_path: str = f"{base_path}/magma"
     file.makedirs(output_path)
 
     magma_file: str = "/mnt/h/software/magma/magma_v1.10/magma"
 
-    result_path: str = "/mnt/m/keti/database/sc_variant/table/magma"
+    result_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/magma"
+    # result_path: str = "/mnt/m/keti/database/sc_variant/table/magma"
 
     trait_info = pd.read_excel("../result/trait_info.xlsx")
     trait_info = trait_info[trait_info["f_filter"] == 1]
@@ -449,4 +467,5 @@ if __name__ == '__main__':
     # form_magma_result_file()
     # gene_enrichment_analysis()
     # gene_enrichment_file()
-    form_sql_file()
+    # form_sql_file()
+    form_gene_count_file()

@@ -4,13 +4,13 @@ import os
 from multiprocessing.dummy import Pool
 
 import pandas as pd
+from pandas import DataFrame
 from tqdm import tqdm
 from yzm_file import StaticMethod
 from yzm_util import Util
 
 
 def exec_homer(expand_size: int = 1000):
-
     is_pass = True
 
     cpu_count = int(os.cpu_count() / 2)
@@ -39,8 +39,7 @@ def exec_homer(expand_size: int = 1000):
     pool.join()
 
 
-def form_magma_result_file(group_count: int = 100, p_value: float = 0.5, q_value: float = 0.5):
-
+def form_magma_result_file(group_count: int = 100, p_value: float = 0.05, q_value: float = 0.05):
     trait_label_id_map: dict = dict(zip(trait_info["f_trait_code"], trait_info["f_trait_id"]))
 
     need_columns = ["f_trait_id", 'f_motif_name', "f_tf", "f_consensus", 'f_p_value', 'f_q_value']
@@ -77,7 +76,9 @@ def form_magma_result_file(group_count: int = 100, p_value: float = 0.5, q_value
 
         trait_tf_genome_data["f_symbol_id"] = trait_tf_genome_data["f_trait_id"].str.split("_", expand=True)[2].astype(int) % group_count
 
-        trait_tf_genome = trait_tf_genome_data[["f_trait_id", "f_tf"]]
+        trait_tf_genome: DataFrame = trait_tf_genome_data[["f_trait_id", "f_tf"]]
+        trait_tf_genome.drop_duplicates(inplace=True)
+        trait_tf_genome.to_csv(f"{result_path}/t_homer_trait_tf_{genome}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
         trait_tf_genome["f_genome"] = genome
 
         trait_tf_data_list.append(trait_tf_genome)
@@ -87,7 +88,6 @@ def form_magma_result_file(group_count: int = 100, p_value: float = 0.5, q_value
             symbol_file.to_csv(f"{result_path}/{genome}/t_homer_{i}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
     trait_tf_data = pd.concat(trait_tf_data_list, axis=0)
-    trait_tf_data.drop_duplicates(inplace=True)
     trait_tf_data.to_csv(f"{result_path}/t_homer_trait_tf.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
 
 
@@ -110,6 +110,24 @@ def form_sql_file(group_count: int = 100):
                           f"LOAD DATA LOCAL INFILE \"/root/magma_homer/homer/{genome}/t_homer_{i}.txt\" INTO TABLE `scvdb`.`t_homer_{genome}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
                 f.write(sql_str)
+
+
+def form_tf_count_file():
+    trait_tf_data = pd.read_table(f"{result_path}/t_homer_trait_tf.txt")
+
+    genome_tf_trait_count_list = []
+
+    for genome in genomes:
+        print(f"TF count {genome}...")
+        genome_trait_tf = trait_tf_data[trait_tf_data["f_genome"] == genome]
+        genome_trait_tf = genome_trait_tf[["f_trait_id", "f_tf"]]
+        genome_tf_trait_count = genome_trait_tf.groupby("f_tf").size().reset_index()
+        genome_tf_trait_count.columns = ["f_tf", "f_count"]
+        genome_tf_trait_count["f_genome"] = genome
+        genome_tf_trait_count_list.append(genome_tf_trait_count)
+
+    genome_tf_trait_count_data = pd.concat(genome_tf_trait_count_list, axis=0)
+    genome_tf_trait_count_data.to_csv(f"{result_path}/t_homer_tf_trait_count.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
 
 
 if __name__ == '__main__':
@@ -135,4 +153,5 @@ if __name__ == '__main__':
 
     # exec_homer()
     form_magma_result_file()
-    form_sql_file()
+    # form_sql_file()
+    form_tf_count_file()
