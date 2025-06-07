@@ -33,7 +33,7 @@ class ScVariantSave:
 
     def get_trs(self) -> AnnData:
         """
-        得到关于某个 scATAC 数据多个性状的 TRS 矩阵
+        The TRS results obtained by integrating scATAC-seq data with all traits or diseases.
         """
 
         files_dict: dict = self.file.entry_contents_dict(self.input_path, 1, ".txt")
@@ -62,7 +62,7 @@ class ScVariantSave:
 
         _column_: str = "barcodes"
 
-        # 添加信息内容
+        # Add a trait/disease result content
         self.log.info(f"Start process variant file")
         for filename in tqdm(filenames):
             filename: str
@@ -76,13 +76,13 @@ class ScVariantSave:
 
             trait_content = trait_content[trait_content[_column_].isin(anno_id_dict)]
             label_index = label_dict[trait_label]
-            # 获取索引
+            # obtain barcode indexes
             barcodes = trait_content[_column_]
             index_list = []
             for barcode in barcodes:
                 index_list.append(anno_id_dict[barcode])
 
-            # 这一步可以将 SCAVENGE 方法中筛选到细胞补全
+            # Add TRS
             trs_matrix[index_list, label_index] = trait_content["TRS"]
             z_score_matrix[index_list, label_index] = trait_content["z_score"]
 
@@ -99,8 +99,10 @@ class ScVariantSave:
 
 
 def process_sc_variant_save():
+    """
+    Process the results data obtained from integrating all single-cell samples with trait or disease data.
+    """
 
-    # 处理每个 scATAC-seq 与所有突变富集的结果信息
     for label in identifier_list:
         label_data = sample_info[sample_info["f_label"] == label]
         gse_id = list(label_data["f_gse_id"])[0]
@@ -214,6 +216,11 @@ def process_sc_variant_data(group_count: int = 100):
 
 
 def process_enriched_sample_trait():
+    """
+    To determine whether traits or diseases show enrichment capability in single-cell samples, we set it up as follows:
+        A single-cell sample (row) and a trait or disease (col) are considered 1 if their integrated TRS results are not all zero.
+    We define pairs of traits/diseases and single-cell samples with a value of 1 as valid pairs.
+    """
 
     sample_info.index = sample_info["f_sample_id"].astype(str)
 

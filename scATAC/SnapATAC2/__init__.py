@@ -25,7 +25,11 @@ class SnapATAC2Handler:
         self.label_info: DataFrame = pd.read_table(sample_file)
         self.cluster = "cell_type"
         self.max_features = 500000
-        self.min_tsse = 0
+        # Customized on a case-by-case basis
+        # self.min_tsse = 0
+        # self.min_tsse = 0.25
+        # self.min_tsse = 1
+        self.min_tsse = 5
         self.is_exist_skip = True
 
     @property
