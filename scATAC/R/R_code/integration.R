@@ -1,17 +1,17 @@
 ###################################################################
-# path: scATAC 输入路径
+# path: scATAC-seq input path
 #    {path}/{identifier}_ATAC.rds
-# base_path: 整合的基本路径
+# base_path: the basic path of integrating data
 #    {base_path}/scATAC
 #    {base_path}/variant
 #    {base_path}/result
 ###################################################################
 ###################################################################
-# path: scATAC 输入路径
-# base_path: 整合的基本路径
-# identifier: 数据的标识符
-# genome: scATAC 的参考基因组
-# layer: RDS 文件中是 counts 数据的层
+# path: scATAC-seq input path
+# base_path: the basic path of integrating data
+# identifier: the unique code of single cell sample
+# genome: the reference genome of the scATAC-seq sample
+# layer: the layer of that stores counts data in the RDS file
 ###################################################################
 core_process <- function(path, base_path, identifier, genome, layer) {
 
