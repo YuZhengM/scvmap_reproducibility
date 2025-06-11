@@ -151,7 +151,6 @@ def save_cell_type_group(label_adata: AnnData, label: str, method: str, path: st
 
 
 def process_sc_variant_data(group_count: int = 100):
-
     for label in identifier_list:
 
         trs_big_path = f"{database_path}/sc_variant/table/trs_big/{label}"
@@ -268,26 +267,60 @@ def process_enriched_sample_trait():
 
 
 def form_enriched_sample_file():
+    for _method_ in ["gchromvar", "scavenge"]:
+        method_enrich_file = f"{database_path}/sc_variant/table/trait_variant_overlap/trs_overlap_{_method_}.h5ad"
+        method_data = sciv.fl.read_h5ad(method_enrich_file)
+        method_content = sciv.pp.adata_map_df(method_data)
+        method_content["f_trait_index"] = method_content["f_trait_id"].str.split("_", expand=True)[2]
+        method_content = method_content[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_label', 'f_tissue_type', 'f_trait_index', 'f_index_y', "value"]]
+        method_content_have = method_content[method_content["value"] == 1]
+        method_content_have = method_content_have[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_index_y']]
+        method_content_have.columns = ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_sample_index']
+        method_content_have.to_csv(f"{database_path}/sc_variant/table/trait_variant_overlap/{_method_}_sample_enrichment.txt", sep="\t", header=False, index=False, lineterminator="\n", encoding="utf-8")
 
-    scavenge_enrich_file = f"{database_path}/sc_variant/table/trait_variant_overlap/trs_overlap_scavenge.h5ad"
-    scavenge_data = sciv.fl.read_h5ad(scavenge_enrich_file)
-    scavenge_content = sciv.pp.adata_map_df(scavenge_data)
-    scavenge_content["f_trait_index"] = scavenge_content["f_trait_id"].str.split("_", expand=True)[2]
-    scavenge_content = scavenge_content[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_label', 'f_tissue_type', 'f_trait_index', 'f_index_y', "value"]]
-    scavenge_content_have = scavenge_content[scavenge_content["value"] == 1]
-    scavenge_content_have = scavenge_content_have[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_index_y']]
-    scavenge_content_have.columns = ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_sample_index']
-    scavenge_content_have.to_csv(f"{database_path}/sc_variant/table/trait_variant_overlap/scavenge_sample_enrichment.txt", sep="\t", header=False, index=False, lineterminator="\n", encoding="utf-8")
 
-    gchromvar_enrich_file = f"{database_path}/sc_variant/table/trait_variant_overlap/trs_overlap_gchromvar.h5ad"
-    gchromvar_data = sciv.fl.read_h5ad(gchromvar_enrich_file)
-    gchromvar_content = sciv.pp.adata_map_df(gchromvar_data)
-    gchromvar_content["f_trait_index"] = gchromvar_content["f_trait_id"].str.split("_", expand=True)[2]
-    gchromvar_content = gchromvar_content[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_label', 'f_tissue_type', 'f_trait_index', 'f_index_y', "value"]]
-    gchromvar_content_have = gchromvar_content[gchromvar_content["value"] == 1]
-    gchromvar_content_have = gchromvar_content_have[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_index_y']]
-    gchromvar_content_have.columns = ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_sample_index']
-    gchromvar_content_have.to_csv(f"{database_path}/sc_variant/table/trait_variant_overlap/gchromvar_sample_enrichment.txt", sep="\t", header=False, index=False, lineterminator="\n", encoding="utf-8")
+def get_statistics_count():
+
+    columns = ["method", "item", "count"]
+
+    data_dict: list[dict] = []
+
+    for _method_ in ["gchromvar", "scavenge"]:
+        print(f"Start {_method_}...")
+        method_enrich_file = f"{database_path}/sc_variant/table/trait_variant_overlap/trs_overlap_{_method_}.h5ad"
+        method_data = sciv.fl.read_h5ad(method_enrich_file)
+        method_enrich_count = method_data.X[method_data.X > 0].size
+        data_dict.append({
+            "method": _method_,
+            "item": "sample_enrich",
+            "count": method_enrich_count
+        })
+
+        cell_count: int = 0
+        cell_type_count: int = 0
+
+        for _label_ in tqdm(identifier_list):
+            label_method_data = sciv.fl.read_h5ad(f"{database_path}/sc_variant/table/trs_big/{_label_}/{_label_}_trs_{_method_}.h5ad")
+            cell_count += label_method_data.X[label_method_data.X > 0].size
+
+            label_cell_type_method_data = sciv.pp.adata_group(label_method_data, "f_cell_type", axis=1)
+            cell_type_count += label_cell_type_method_data.layers["sum"][label_cell_type_method_data.layers["sum"] > 0].size
+
+        data_dict.append({
+            "method": _method_,
+            "item": "cell_enrich",
+            "count": cell_count
+        })
+        data_dict.append({
+            "method": _method_,
+            "item": "cell_type_enrich",
+            "count": cell_type_count
+        })
+
+    print(data_dict)
+    enrich_data = pd.DataFrame(data_dict, columns=columns)
+    enrich_data.to_csv(f"{database_path}/sc_variant/table/statistics_count.txt", sep="\t", header=True, index=False, lineterminator="\n", encoding="utf-8")
+
 
 
 if __name__ == '__main__':
@@ -295,13 +328,13 @@ if __name__ == '__main__':
 
     util = StaticMethod("simulate")
 
-    # cd /public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_handler/scATAC/R/RResult
+    # cd /public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_reproducibility/R/RResult
     database_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database"
     scatac_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC"
 
-    trait_info_file: str = "../../../variant/result/trait_info.txt"
+    trait_info_file: str = "../../variant/result/trait_info.txt"
 
-    sample_info = pd.read_table("../../data/sample_info.txt")
+    sample_info = pd.read_table("../../scATAC/data/sample_info.txt")
 
     identifier_list: list = list(sample_info["f_label"])
 
@@ -315,3 +348,4 @@ if __name__ == '__main__':
     process_enriched_sample_trait()
 
     form_enriched_sample_file()
+    get_statistics_count()
