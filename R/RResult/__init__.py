@@ -268,6 +268,7 @@ def process_enriched_sample_trait():
 
 def form_enriched_sample_file():
     for _method_ in ["gchromvar", "scavenge"]:
+        print(f"Start {_method_}...")
         method_enrich_file = f"{database_path}/sc_variant/table/trait_variant_overlap/trs_overlap_{_method_}.h5ad"
         method_data = sciv.fl.read_h5ad(method_enrich_file)
         method_content = sciv.pp.adata_map_df(method_data)
@@ -289,7 +290,7 @@ def get_statistics_count():
         print(f"Start {_method_}...")
         method_enrich_file = f"{database_path}/sc_variant/table/trait_variant_overlap/trs_overlap_{_method_}.h5ad"
         method_data = sciv.fl.read_h5ad(method_enrich_file)
-        method_enrich_count = method_data.X[method_data.X > 0].size
+        method_enrich_count = method_data.X[method_data.X != 0].size
         data_dict.append({
             "method": _method_,
             "item": "sample_enrich",
@@ -300,11 +301,11 @@ def get_statistics_count():
         cell_type_count: int = 0
 
         for _label_ in tqdm(identifier_list):
-            label_method_data = sciv.fl.read_h5ad(f"{database_path}/sc_variant/table/trs_big/{_label_}/{_label_}_trs_{_method_}.h5ad")
-            cell_count += label_method_data.X[label_method_data.X > 0].size
+            label_method_data = sciv.fl.read_h5ad(f"{database_path}/sc_variant/table/trs_big/{_label_}/{_label_}_trs_{_method_}.h5ad", is_verbose=False)
+            cell_count += label_method_data.X[label_method_data.X != 0].size
 
             label_cell_type_method_data = sciv.pp.adata_group(label_method_data, "f_cell_type", axis=1)
-            cell_type_count += label_cell_type_method_data.layers["sum"][label_cell_type_method_data.layers["sum"] > 0].size
+            cell_type_count += label_cell_type_method_data.layers["sum"][label_cell_type_method_data.layers["sum"] != 0].size
 
         data_dict.append({
             "method": _method_,
@@ -348,4 +349,6 @@ if __name__ == '__main__':
     process_enriched_sample_trait()
 
     form_enriched_sample_file()
+
+    # Statistics count
     get_statistics_count()
