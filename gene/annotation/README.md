@@ -19,14 +19,20 @@ gunzip dbsnp_b151_common_snp_hg38.vcf.gz
 
 ```shell
 cd /public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation/GTEx
-wget https://storage.googleapis.com/adult-gtex/bulk-qtl/v10/single-tissue-cis-qtl/GTEx_Analysis_v10_eQTL.tar -O gtex_v10_eqtl.tar
-tar -xvf gtex_v10_eqtl.tar
+wget https://storage.googleapis.com/adult-gtex/bulk-qtl/v10/single-tissue-cis-qtl/GTEx_Analysis_v10_eQTL.tar -O gtex_v10_eqtl_hg38.tar
+tar -xvf gtex_v10_eqtl_hg38.tar
 cd GTEx_Analysis_v10_eQTL_updated
 gunzip *.gz
 ```
 
-## 
+## Risk SNP
+
+### 
+
+> Source link: https://atlas.ctglab.nl/
+> hg19
 
 ```shell
-
+cd /public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation/gwasATLAS
+gunzip gwasATLAS_v20191115_riskloci.txt.gz
 ```
