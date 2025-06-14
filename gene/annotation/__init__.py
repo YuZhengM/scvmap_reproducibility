@@ -28,15 +28,16 @@ class ProcessAnnotation:
         self.space_sub_str = "##########"
         self.split_str = "$$$$$$$$"
 
-        self.common_snp_path = os.path.join(self.path, "dbSNP")
-        self.gtex_path = os.path.join(self.path, "GTEx")
-        self.risk_snp_path = os.path.join(self.path, "gwasATLAS")
+        self.dbsnp_common_snp_path = os.path.join(self.path, "dbSNP")
+        self.gtex_eqtl_path = os.path.join(self.path, "GTEx")
+        self.gwasatlas_risk_snp_path = os.path.join(self.path, "gwasATLAS")
+        self.sea_super_enhancer_path = os.path.join(self.path, "SEA")
 
     def dbsnp_common_snp(self, is_qf: bool = False, is_info: bool = False, is_header: bool = False):
 
         for genome in self.genomes:
-            filename = os.path.join(self.common_snp_path, f"dbsnp_common_snp_{genome}.vcf")
-            output_filename = os.path.join(self.common_snp_path, f"dbsnp_common_snp_{genome}.txt")
+            filename = os.path.join(self.dbsnp_common_snp_path, f"dbsnp_common_snp_{genome}.vcf")
+            output_filename = os.path.join(self.dbsnp_common_snp_path, f"dbsnp_common_snp_{genome}.txt")
             self.log.info(f"processing {filename}")
 
             # Read file
@@ -75,10 +76,10 @@ class ProcessAnnotation:
 
     def dbsnp_common_snp_chunk(self, is_header: bool = False):
 
-        output_path: str = os.path.join(self.common_snp_path, "common_snp_chunk")
+        output_path: str = os.path.join(self.dbsnp_common_snp_path, "common_snp_chunk")
 
         for genome in self.genomes:
-            input_filename = os.path.join(self.common_snp_path, f"dbsnp_common_snp_{genome}.txt")
+            input_filename = os.path.join(self.dbsnp_common_snp_path, f"dbsnp_common_snp_{genome}.txt")
             self.log.info(f"processing {input_filename}")
             genome_output_path = os.path.join(output_path, genome)
 
@@ -97,7 +98,7 @@ class ProcessAnnotation:
 
     def gtex_eqtl(self):
 
-        files_path: str = os.path.join(self.gtex_path, "GTEx_Analysis_v10_eQTL_updated")
+        files_path: str = os.path.join(self.gtex_eqtl_path, "GTEx_Analysis_v10_eQTL_updated")
         eqtl_files = self.file.entry_contents_dict(files_path, 1, "parquet")
 
         self.log.info("processing eQTL files")
@@ -129,7 +130,7 @@ class ProcessAnnotation:
 
         self.log.info("Merge the results")
         eqtl_data = pd.concat(eqtl_file_list, axis=0)
-        eqtl_data.to_csv(os.path.join(self.gtex_path, "gtex_v10_eqtl_hg38.txt"), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+        eqtl_data.to_csv(os.path.join(self.gtex_eqtl_path, "gtex_v10_eqtl_hg38.txt"), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
 
     def exec_str(self, path: str, filename: str, genome: str) -> str:
         file_name = "hg38ToHg19.over.chain.gz" if genome == "hg38" else "hg19ToHg38.over.chain.gz"
@@ -141,8 +142,8 @@ class ProcessAnnotation:
         return f"{self.lift_over}/liftOver {os.path.join(input_, filename)} {self.lift_over}/{file_name} {os.path.join(output, filename)} {os.path.join(unmap, filename)}"
 
     def gtex_eqtl_lift_over(self):
-        input_ = os.path.join(self.gtex_path, "liftOver", "input")
-        output = os.path.join(self.gtex_path, "liftOver", "output")
+        input_ = os.path.join(self.gtex_eqtl_path, "liftOver", "input")
+        output = os.path.join(self.gtex_eqtl_path, "liftOver", "output")
         self.file.makedirs(input_)
         self.file.makedirs(output)
 
@@ -162,21 +163,21 @@ class ProcessAnnotation:
             return return_line
 
         self.log.info(f"processing {input_}")
-        self.file.read_write_line(os.path.join(self.gtex_path, "gtex_v10_eqtl_hg38.txt"), os.path.join(input_, "gtex_v10_eqtl.bed"), process_input_line)
-        self.util.exec_command(self.exec_str(self.gtex_path, "gtex_v10_eqtl.bed", "hg38"))
+        self.file.read_write_line(os.path.join(self.gtex_eqtl_path, "gtex_v10_eqtl_hg38.txt"), os.path.join(input_, "gtex_v10_eqtl.bed"), process_input_line)
+        self.util.exec_command(self.exec_str(self.gtex_eqtl_path, "gtex_v10_eqtl.bed", "hg38"))
         self.file.read_write_line(
             os.path.join(output, "gtex_v10_eqtl.bed"),
-            os.path.join(self.gtex_path, "gtex_v10_eqtl_hg19.txt"),
+            os.path.join(self.gtex_eqtl_path, "gtex_v10_eqtl_hg19.txt"),
             process_output_line,
             column=["chr", "position", "ref", "alt", "gene_name", "tss_distance", "af", "pval_nominal", "tissue_type"]
         )
 
     def gtex_eqtl_chunk(self):
 
-        output_path: str = os.path.join(self.gtex_path, "eqtl_chunk")
+        output_path: str = os.path.join(self.gtex_eqtl_path, "eqtl_chunk")
 
         for genome in self.genomes:
-            input_filename = os.path.join(self.gtex_path, f"gtex_v10_eqtl_{genome}.txt")
+            input_filename = os.path.join(self.gtex_eqtl_path, f"gtex_v10_eqtl_{genome}.txt")
             self.log.info(f"processing {input_filename}")
             genome_output_path = os.path.join(output_path, genome)
 
@@ -192,11 +193,11 @@ class ProcessAnnotation:
                 data_chr.to_csv(f"{genome_output_path}/gtex_v10_eqtl_{genome}_{_chr_}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
     def gwasatlas_risk_snp(self):
-        overview_file = os.path.join(self.risk_snp_path, "gwasATLAS_v20191115.txt")
+        overview_file = os.path.join(self.gwasatlas_risk_snp_path, "gwasATLAS_v20191115.txt")
         overview = pd.read_table(overview_file)
         overview = overview[["id", "PMID", "Trait", "Population"]]
 
-        file = os.path.join(self.risk_snp_path, "gwasATLAS_v20191115_riskloci.txt")
+        file = os.path.join(self.gwasatlas_risk_snp_path, "gwasATLAS_v20191115_riskloci.txt")
         data = pd.read_table(file)
 
         data["chr"] = "chr" + data["chr"].astype(str)
@@ -206,11 +207,11 @@ class ProcessAnnotation:
 
         data = data.merge(overview, on="id", how="left")
         data = data[["chr", "pos", "rsID", "ref", "alt", "p", "Trait", "Population", "PMID"]]
-        data.to_csv(os.path.join(self.risk_snp_path, "gwasatlas_v20191115_risk_snp_hg19.txt"), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+        data.to_csv(os.path.join(self.gwasatlas_risk_snp_path, "gwasatlas_v20191115_risk_snp_hg19.txt"), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
 
     def gwasatlas_risk_snp_lift_over(self):
-        input_ = os.path.join(self.risk_snp_path, "liftOver", "input")
-        output = os.path.join(self.risk_snp_path, "liftOver", "output")
+        input_ = os.path.join(self.gwasatlas_risk_snp_path, "liftOver", "input")
+        output = os.path.join(self.gwasatlas_risk_snp_path, "liftOver", "output")
         self.file.makedirs(input_)
         self.file.makedirs(output)
 
@@ -237,14 +238,67 @@ class ProcessAnnotation:
             return [split[0], split[1], other_cols[0], other_cols[1], other_cols[2], other_cols[3], tmp6, tmp7, tmp8]
 
         self.log.info(f"processing {input_}")
-        self.file.read_write_line(os.path.join(self.risk_snp_path, "gwasatlas_v20191115_risk_snp_hg19.txt"), os.path.join(input_, "gwasatlas_v20191115_risk_snp.bed"), process_input_line)
-        self.util.exec_command(self.exec_str(self.risk_snp_path, "gwasatlas_v20191115_risk_snp.bed", "hg19"))
+        self.file.read_write_line(os.path.join(self.gwasatlas_risk_snp_path, "gwasatlas_v20191115_risk_snp_hg19.txt"), os.path.join(input_, "gwasatlas_v20191115_risk_snp.bed"), process_input_line)
+        self.util.exec_command(self.exec_str(self.gwasatlas_risk_snp_path, "gwasatlas_v20191115_risk_snp.bed", "hg19"))
         self.file.read_write_line(
             os.path.join(output, "gwasatlas_v20191115_risk_snp.bed"),
-            os.path.join(self.risk_snp_path, "gwasatlas_v20191115_risk_snp_hg38.txt"),
+            os.path.join(self.gwasatlas_risk_snp_path, "gwasatlas_v20191115_risk_snp_hg38.txt"),
             process_output_line,
             column=["chr", "pos", "rsID", "ref", "alt", "p", "Trait", "Population", "PMID"]
         )
+
+    def sea_super_enhancer(self):
+        file = os.path.join(self.sea_super_enhancer_path, "sea_v3_super_enhancer_hg38.bed")
+        data = pd.read_table(file, header=None)
+        data.columns = ["se_id", "chr", "start", "end", "se_name", "length", "cell_tissue_type", "mean", "median", "reference1", "_1", "_2", "_3", "_4", "reference2", "associated_gene", "strategy", "recognition_factor", "mark", "sequence_region"]
+        data = data[["chr", "start", "end", "associated_gene", "cell_tissue_type", "recognition_factor", "mark", "sequence_region", "se_id"]]
+        data["source"] = "SEA"
+
+        se_data = data[data["mark"] == "SE"]
+        e_data = data[data["mark"] == "E"]
+        se_data = se_data.drop('mark', axis=1)
+        e_data = e_data.drop('mark', axis=1)
+        se_data.to_csv(os.path.join(self.sea_super_enhancer_path, "sea_v3_super_enhancer_hg38.txt"), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+        e_data.to_csv(os.path.join(self.sea_super_enhancer_path, "sea_v3_enhancer_hg38.txt"), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+
+    def sea_super_enhancer_lift_over(self):
+        input_ = os.path.join(self.sea_super_enhancer_path, "liftOver", "input")
+        output = os.path.join(self.sea_super_enhancer_path, "liftOver", "output")
+        self.file.makedirs(input_)
+        self.file.makedirs(output)
+
+        def process_input_line(line: str) -> list:
+            split: list = line.split("\t")
+
+            # chr     pos     rsID    ref     alt     p       Trait   Population      PMID
+            if split[0] == "chr":
+                return []
+
+            tmp3 = re.sub(" ", self.space_sub_str, split[3])
+            tmp4 = re.sub(" ", self.space_sub_str, split[4])
+            tmp5 = re.sub(" ", self.space_sub_str, split[5])
+
+            return [split[0], split[1], split[2], self.split_str.join([tmp3, tmp4, tmp5, split[6], split[7], split[8]])]
+
+        def process_output_line(line: str) -> list:
+            split: list = line.split("\t")
+            other_cols: list = str(split[3]).split(self.split_str)
+
+            tmp3 = re.sub(self.space_sub_str, " ", other_cols[0])
+            tmp4 = re.sub(self.space_sub_str, " ", other_cols[1])
+            tmp5 = re.sub(self.space_sub_str, " ", other_cols[2])
+            return [split[0], split[1], split[2], tmp3, tmp4, tmp5, other_cols[3], other_cols[4], other_cols[5]]
+
+        for _mark_ in ["super_enhancer", "enhancer"]:
+            self.log.info(f"processing {input_}")
+            self.file.read_write_line(os.path.join(self.sea_super_enhancer_path, f"sea_v3_{_mark_}_hg38.txt"), os.path.join(input_, f"sea_v3_{_mark_}.bed"), process_input_line)
+            self.util.exec_command(self.exec_str(self.sea_super_enhancer_path, f"sea_v3_{_mark_}.bed", "hg38"))
+            self.file.read_write_line(
+                os.path.join(output, f"sea_v3_{_mark_}.bed"),
+                os.path.join(self.sea_super_enhancer_path, f"sea_v3_{_mark_}_hg19.txt"),
+                process_output_line,
+                column=["chr", "start", "end", "associated_gene", "cell_tissue_type", "recognition_factor", "sequence_region", "se_id", "source"]
+            )
 
 
 if __name__ == '__main__':
@@ -259,4 +313,6 @@ if __name__ == '__main__':
     # annotation.gtex_eqtl_chunk()
     # annotation.gwasatlas_risk_snp()
     # annotation.gwasatlas_risk_snp_lift_over()
-    annotation.gtex_eqtl_chunk()
+    # annotation.sea_super_enhancer()
+    # annotation.sea_super_enhancer_lift_over()
+    annotation.sea_super_enhancer()

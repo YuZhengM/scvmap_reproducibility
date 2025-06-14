@@ -56,4 +56,5 @@ wget http://218.8.241.248:8080/SEA3/download/SEA00101.bed -O sea_v3_super_enhanc
 ```shell
 cd /public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation/dbSUPER
 wget https://asntech.org/dbsuper/data/bed/hg19/all_hg19_bed.zip -O dbsuper_super_enhancer_hg19.zip
+unzip all_hg19_bed.zip
 ```
