@@ -27,8 +27,6 @@ gunzip *.gz
 
 ## Risk SNP
 
-### 
-
 > Source link: https://atlas.ctglab.nl/
 > hg19
 
@@ -36,4 +34,26 @@ gunzip *.gz
 cd /public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation/gwasATLAS
 gunzip gwasATLAS_v20191115.txt.gz
 gunzip gwasATLAS_v20191115_riskloci.txt.gz
+```
+
+## Super Enhancer
+
+### SEA
+
+> Source link: http://sea.edbc.org/
+> hg38
+
+```shell
+cd /public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation/SEA
+wget http://218.8.241.248:8080/SEA3/download/SEA00101.bed -O sea_v3_super_enhancer_hg38.bed
+```
+
+### dbSUPER
+
+> Source link: http://sea.edbc.org/
+> hg19
+
+```shell
+cd /public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation/dbSUPER
+wget https://asntech.org/dbsuper/data/bed/hg19/all_hg19_bed.zip -O dbsuper_super_enhancer_hg19.zip
 ```

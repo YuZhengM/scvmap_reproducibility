@@ -32,7 +32,7 @@ class ProcessAnnotation:
         self.gtex_path = os.path.join(self.path, "GTEx")
         self.risk_snp_path = os.path.join(self.path, "gwasATLAS")
 
-    def common_snp(self, is_qf: bool = False, is_info: bool = False, is_header: bool = False):
+    def dbsnp_common_snp(self, is_qf: bool = False, is_info: bool = False, is_header: bool = False):
 
         for genome in self.genomes:
             filename = os.path.join(self.common_snp_path, f"dbsnp_common_snp_{genome}.vcf")
@@ -73,7 +73,7 @@ class ProcessAnnotation:
 
                     w.write(line)
 
-    def common_snp_chunk(self, is_header: bool = False):
+    def dbsnp_common_snp_chunk(self, is_header: bool = False):
 
         output_path: str = os.path.join(self.common_snp_path, "common_snp_chunk")
 
@@ -95,7 +95,7 @@ class ProcessAnnotation:
                 data_chr = data[data[column] == _chr_]
                 data_chr.to_csv(f"{genome_output_path}/dbsnp_common_snp_{genome}_{_chr_}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
-    def eqtl(self):
+    def gtex_eqtl(self):
 
         files_path: str = os.path.join(self.gtex_path, "GTEx_Analysis_v10_eQTL_updated")
         eqtl_files = self.file.entry_contents_dict(files_path, 1, "parquet")
@@ -140,7 +140,7 @@ class ProcessAnnotation:
         self.file.makedirs(unmap)
         return f"{self.lift_over}/liftOver {os.path.join(input_, filename)} {self.lift_over}/{file_name} {os.path.join(output, filename)} {os.path.join(unmap, filename)}"
 
-    def eqtl_lift_over(self):
+    def gtex_eqtl_lift_over(self):
         input_ = os.path.join(self.gtex_path, "liftOver", "input")
         output = os.path.join(self.gtex_path, "liftOver", "output")
         self.file.makedirs(input_)
@@ -171,7 +171,7 @@ class ProcessAnnotation:
             column=["chr", "position", "ref", "alt", "gene_name", "tss_distance", "af", "pval_nominal", "tissue_type"]
         )
 
-    def eqtl_chunk(self):
+    def gtex_eqtl_chunk(self):
 
         output_path: str = os.path.join(self.gtex_path, "eqtl_chunk")
 
@@ -191,7 +191,7 @@ class ProcessAnnotation:
                 data_chr = data[data["chr"] == _chr_]
                 data_chr.to_csv(f"{genome_output_path}/gtex_v10_eqtl_{genome}_{_chr_}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
-    def risk_snp(self):
+    def gwasatlas_risk_snp(self):
         overview_file = os.path.join(self.risk_snp_path, "gwasATLAS_v20191115.txt")
         overview = pd.read_table(overview_file)
         overview = overview[["id", "PMID", "Trait", "Population"]]
@@ -208,7 +208,7 @@ class ProcessAnnotation:
         data = data[["chr", "pos", "rsID", "ref", "alt", "p", "Trait", "Population", "PMID"]]
         data.to_csv(os.path.join(self.risk_snp_path, "gwasatlas_v20191115_risk_snp_hg19.txt"), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
 
-    def risk_snp_lift_over(self):
+    def gwasatlas_risk_snp_lift_over(self):
         input_ = os.path.join(self.risk_snp_path, "liftOver", "input")
         output = os.path.join(self.risk_snp_path, "liftOver", "output")
         self.file.makedirs(input_)
@@ -252,10 +252,11 @@ if __name__ == '__main__':
 
     base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation"
     annotation = ProcessAnnotation(base_path, lift_over="/public/home/lcq/rgzn/yuzhengmin/software/liftOver")
-    # annotation.common_snp()
-    # annotation.common_snp_chunk()
-    # annotation.eqtl()
-    # annotation.eqtl_lift_over()
-    # annotation.eqtl_chunk()
-    # annotation.risk_snp()
-    annotation.risk_snp_lift_over()
+    # annotation.dbsnp_common_snp()
+    # annotation.dbsnp_common_snp_chunk()
+    # annotation.gtex_eqtl()
+    # annotation.gtex_eqtl_lift_over()
+    # annotation.gtex_eqtl_chunk()
+    # annotation.gwasatlas_risk_snp()
+    # annotation.gwasatlas_risk_snp_lift_over()
+    annotation.gtex_eqtl_chunk()
