@@ -2,6 +2,8 @@
 # -*- coding: UTF-8 -*-
 
 import os
+import re
+
 import cyvcf2
 import pyarrow.parquet as pq
 import pandas as pd
@@ -28,6 +30,7 @@ class ProcessAnnotation:
 
         self.common_snp_path = os.path.join(self.path, "dbSNP")
         self.gtex_path = os.path.join(self.path, "GTEx")
+        self.risk_snp_path = os.path.join(self.path, "gwasATLAS")
 
     def common_snp(self, is_qf: bool = False, is_info: bool = False, is_header: bool = False):
 
@@ -162,10 +165,85 @@ class ProcessAnnotation:
         self.file.read_write_line(os.path.join(self.gtex_path, "gtex_v10_eqtl_hg38.txt"), os.path.join(input_, "gtex_v10_eqtl.bed"), process_input_line)
         self.util.exec_command(self.exec_str(self.gtex_path, "gtex_v10_eqtl.bed", "hg38"))
         self.file.read_write_line(
-            os.path.join(output, "gtex_v10_eqtl_hg38.txt"),
+            os.path.join(output, "gtex_v10_eqtl.bed"),
             os.path.join(self.gtex_path, "gtex_v10_eqtl_hg19.txt"),
             process_output_line,
             column=["chr", "position", "ref", "alt", "gene_name", "tss_distance", "af", "pval_nominal", "tissue_type"]
+        )
+
+    def eqtl_chunk(self):
+
+        output_path: str = os.path.join(self.gtex_path, "eqtl_chunk")
+
+        for genome in self.genomes:
+            input_filename = os.path.join(self.gtex_path, f"gtex_v10_eqtl_{genome}.txt")
+            self.log.info(f"processing {input_filename}")
+            genome_output_path = os.path.join(output_path, genome)
+
+            self.file.makedirs(genome_output_path)
+
+            # Read file
+            data = pd.read_table(input_filename, low_memory=False)
+
+            chr_list = data["chr"].unique().tolist()
+
+            for _chr_ in tqdm(chr_list):
+                data_chr = data[data["chr"] == _chr_]
+                data_chr.to_csv(f"{genome_output_path}/gtex_v10_eqtl_{genome}_{_chr_}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+
+    def risk_snp(self):
+        overview_file = os.path.join(self.risk_snp_path, "gwasATLAS_v20191115.txt")
+        overview = pd.read_table(overview_file)
+        overview = overview[["id", "PMID", "Trait", "Population"]]
+
+        file = os.path.join(self.risk_snp_path, "gwasATLAS_v20191115_riskloci.txt")
+        data = pd.read_table(file)
+
+        data["chr"] = "chr" + data["chr"].astype(str)
+        variant_id__str_split = data["uniqID"].str.split(":", expand=True)
+        data["ref"] = variant_id__str_split[2]
+        data["alt"] = variant_id__str_split[3]
+
+        data = data.merge(overview, on="id", how="left")
+        data = data[["chr", "pos", "rsID", "ref", "alt", "p", "Trait", "Population", "PMID"]]
+        data.to_csv(os.path.join(self.risk_snp_path, "gwasatlas_v20191115_risk_snp_hg19.txt"), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+
+    def risk_snp_lift_over(self):
+        input_ = os.path.join(self.risk_snp_path, "liftOver", "input")
+        output = os.path.join(self.risk_snp_path, "liftOver", "output")
+        self.file.makedirs(input_)
+        self.file.makedirs(output)
+
+        def process_input_line(line: str) -> list:
+            split: list = line.split("\t")
+
+            # chr     pos     rsID    ref     alt     p       Trait   Population      PMID
+            if split[0] == "chr":
+                return []
+
+            tmp6 = re.sub(" ", self.space_sub_str, split[6])
+            tmp7 = re.sub(" ", self.space_sub_str, split[7])
+            tmp8 = re.sub(" ", self.space_sub_str, split[8])
+
+            return [split[0], split[1], str(int(split[1]) + 1), self.split_str.join([split[2], split[3], split[4], split[5], tmp6, tmp7, tmp8])]
+
+        def process_output_line(line: str) -> list:
+            split: list = line.split("\t")
+            other_cols: list = str(split[3]).split(self.split_str)
+
+            tmp6 = re.sub(self.space_sub_str, " ", other_cols[4])
+            tmp7 = re.sub(self.space_sub_str, " ", other_cols[5])
+            tmp8 = re.sub(self.space_sub_str, " ", other_cols[6])
+            return [split[0], split[1], other_cols[0], other_cols[1], other_cols[2], other_cols[3], tmp6, tmp7, tmp8]
+
+        self.log.info(f"processing {input_}")
+        self.file.read_write_line(os.path.join(self.risk_snp_path, "gwasatlas_v20191115_risk_snp_hg19.txt"), os.path.join(input_, "gwasatlas_v20191115_risk_snp.bed"), process_input_line)
+        self.util.exec_command(self.exec_str(self.risk_snp_path, "gwasatlas_v20191115_risk_snp.bed", "hg19"))
+        self.file.read_write_line(
+            os.path.join(output, "gwasatlas_v20191115_risk_snp.bed"),
+            os.path.join(self.risk_snp_path, "gwasatlas_v20191115_risk_snp_hg38.txt"),
+            process_output_line,
+            column=["chr", "pos", "rsID", "ref", "alt", "p", "Trait", "Population", "PMID"]
         )
 
 
@@ -177,4 +255,7 @@ if __name__ == '__main__':
     # annotation.common_snp()
     # annotation.common_snp_chunk()
     # annotation.eqtl()
-    annotation.eqtl_lift_over()
+    # annotation.eqtl_lift_over()
+    # annotation.eqtl_chunk()
+    # annotation.risk_snp()
+    annotation.risk_snp_lift_over()

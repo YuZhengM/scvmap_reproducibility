@@ -34,5 +34,6 @@ gunzip *.gz
 
 ```shell
 cd /public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation/gwasATLAS
+gunzip gwasATLAS_v20191115.txt.gz
 gunzip gwasATLAS_v20191115_riskloci.txt.gz
 ```
