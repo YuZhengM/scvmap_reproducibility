@@ -5,7 +5,7 @@
 > 2. hg19: [gencode.v41lift37.annotation.gtf.gz](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_41/GRCh37_mapping/gencode.v41lift37.annotation.gtf.gz)
 
 
-> `gtfparse`
+> `gtfparse`: 此包与其他环境不兼容，需要另起环境执行代码
 
 
 ```shell
