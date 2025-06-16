@@ -218,16 +218,6 @@ CREATE TABLE `scvdb`.`t_common_snp_hg19_chr22` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 LOAD DATA LOCAL INFILE "/root/gene/annotation/dbSNP/common_snp_chunk/hg19/dbsnp_common_snp_hg19_chr22.txt" INTO TABLE `scvdb`.`t_common_snp_hg19_chr22` fields terminated by '\t' optionally enclosed by '"' lines terminated by '\n';
 
-DROP TABLE IF EXISTS `scvdb`.`t_common_snp_hg19_chrx`; 
-CREATE TABLE `scvdb`.`t_common_snp_hg19_chrx` (
-  `f_position` int NOT NULL,
-  `f_rs_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `f_ref` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `f_alt` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  KEY `t_common_snp__hg19_chrx_position` (`f_position`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
-LOAD DATA LOCAL INFILE "/root/gene/annotation/dbSNP/common_snp_chunk/hg19/dbsnp_common_snp_hg19_chrx.txt" INTO TABLE `scvdb`.`t_common_snp_hg19_chrx` fields terminated by '\t' optionally enclosed by '"' lines terminated by '\n';
-
 DROP TABLE IF EXISTS `scvdb`.`t_common_snp_hg19_chrX`; 
 CREATE TABLE `scvdb`.`t_common_snp_hg19_chrX` (
   `f_position` int NOT NULL,
@@ -237,16 +227,6 @@ CREATE TABLE `scvdb`.`t_common_snp_hg19_chrX` (
   KEY `t_common_snp__hg19_chrX_position` (`f_position`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 LOAD DATA LOCAL INFILE "/root/gene/annotation/dbSNP/common_snp_chunk/hg19/dbsnp_common_snp_hg19_chrX.txt" INTO TABLE `scvdb`.`t_common_snp_hg19_chrX` fields terminated by '\t' optionally enclosed by '"' lines terminated by '\n';
-
-DROP TABLE IF EXISTS `scvdb`.`t_common_snp_hg19_chry`; 
-CREATE TABLE `scvdb`.`t_common_snp_hg19_chry` (
-  `f_position` int NOT NULL,
-  `f_rs_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `f_ref` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `f_alt` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  KEY `t_common_snp__hg19_chry_position` (`f_position`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
-LOAD DATA LOCAL INFILE "/root/gene/annotation/dbSNP/common_snp_chunk/hg19/dbsnp_common_snp_hg19_chry.txt" INTO TABLE `scvdb`.`t_common_snp_hg19_chry` fields terminated by '\t' optionally enclosed by '"' lines terminated by '\n';
 
 DROP TABLE IF EXISTS `scvdb`.`t_common_snp_hg19_chrY`; 
 CREATE TABLE `scvdb`.`t_common_snp_hg19_chrY` (
@@ -478,16 +458,6 @@ CREATE TABLE `scvdb`.`t_common_snp_hg38_chr22` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 LOAD DATA LOCAL INFILE "/root/gene/annotation/dbSNP/common_snp_chunk/hg38/dbsnp_common_snp_hg38_chr22.txt" INTO TABLE `scvdb`.`t_common_snp_hg38_chr22` fields terminated by '\t' optionally enclosed by '"' lines terminated by '\n';
 
-DROP TABLE IF EXISTS `scvdb`.`t_common_snp_hg38_chrx`; 
-CREATE TABLE `scvdb`.`t_common_snp_hg38_chrx` (
-  `f_position` int NOT NULL,
-  `f_rs_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `f_ref` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `f_alt` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  KEY `t_common_snp__hg38_chrx_position` (`f_position`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
-LOAD DATA LOCAL INFILE "/root/gene/annotation/dbSNP/common_snp_chunk/hg38/dbsnp_common_snp_hg38_chrx.txt" INTO TABLE `scvdb`.`t_common_snp_hg38_chrx` fields terminated by '\t' optionally enclosed by '"' lines terminated by '\n';
-
 DROP TABLE IF EXISTS `scvdb`.`t_common_snp_hg38_chrX`; 
 CREATE TABLE `scvdb`.`t_common_snp_hg38_chrX` (
   `f_position` int NOT NULL,
@@ -497,16 +467,6 @@ CREATE TABLE `scvdb`.`t_common_snp_hg38_chrX` (
   KEY `t_common_snp__hg38_chrX_position` (`f_position`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 LOAD DATA LOCAL INFILE "/root/gene/annotation/dbSNP/common_snp_chunk/hg38/dbsnp_common_snp_hg38_chrX.txt" INTO TABLE `scvdb`.`t_common_snp_hg38_chrX` fields terminated by '\t' optionally enclosed by '"' lines terminated by '\n';
-
-DROP TABLE IF EXISTS `scvdb`.`t_common_snp_hg38_chry`; 
-CREATE TABLE `scvdb`.`t_common_snp_hg38_chry` (
-  `f_position` int NOT NULL,
-  `f_rs_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `f_ref` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `f_alt` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  KEY `t_common_snp__hg38_chry_position` (`f_position`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
-LOAD DATA LOCAL INFILE "/root/gene/annotation/dbSNP/common_snp_chunk/hg38/dbsnp_common_snp_hg38_chry.txt" INTO TABLE `scvdb`.`t_common_snp_hg38_chry` fields terminated by '\t' optionally enclosed by '"' lines terminated by '\n';
 
 DROP TABLE IF EXISTS `scvdb`.`t_common_snp_hg38_chrY`; 
 CREATE TABLE `scvdb`.`t_common_snp_hg38_chrY` (

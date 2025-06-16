@@ -4,8 +4,8 @@
 import os
 import re
 
-import cyvcf2
-import pyarrow.parquet as pq
+# import cyvcf2
+# import pyarrow.parquet as pq
 import pandas as pd
 from pandas import DataFrame
 from tqdm import tqdm
