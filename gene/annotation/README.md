@@ -3,6 +3,7 @@
 ## Common SNP
 
 > Source link: https://ftp.ncbi.nih.gov/snp/organisms/
+> hg19 and hg38
 
 ```shell
 cd /public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation/dbSNP
@@ -50,11 +51,21 @@ wget http://218.8.241.248:8080/SEA3/download/SEA00101.bed -O sea_v3_super_enhanc
 
 ### dbSUPER
 
-> Source link: http://sea.edbc.org/
+> Source link: https://asntech.org/dbsuper/download.php
 > hg19
 
 ```shell
 cd /public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation/dbSUPER
 wget https://asntech.org/dbsuper/data/bed/hg19/all_hg19_bed.zip -O dbsuper_super_enhancer_hg19.zip
 unzip all_hg19_bed.zip
+```
+
+### SEdb
+
+> Source link: https://bio.liclab.net/sedb/download.php
+> hg38
+
+```shell
+cd /public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation/SEdb
+# download `SEdb_2.0_sample_information.txt` and `SE_package_hg38.bed` file
 ```
