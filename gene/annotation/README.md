@@ -69,3 +69,9 @@ unzip all_hg19_bed.zip
 cd /public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation/SEdb
 # download `SEdb_2.0_sample_information.txt` and `SE_package_hg38.bed` file
 ```
+
+# Database
+
+```shell
+
+```

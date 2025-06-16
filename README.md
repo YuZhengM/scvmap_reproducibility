@@ -157,21 +157,67 @@ chr11	307696	307696	rs7480524	0.131486	baso
       - 📄gene_data.txt: 形成输入数据库中的数据, 与数据库中 `t_gene` 表对应
       - 📄gene_hg19_data.txt: 从 gene_data.txt 表抽取 hg19 数据
       - 📄gene_hg38_data.txt: 从 gene_data.txt 表抽取 hg38 数据
-    - 📁regulation: 带有基因注释的相关文件
-      - 📄`human_{annotation}.bed`
-    - 📁liftOver: 对基因注释文件进行 liftOver 转化
-      - 📁input: 转成 hg19 的输入文件
-        - 📁hg19
-          - 📄`t_{annotation}.bed`
-      - 📁output: 转成 hg19 的输出文件
-        - 📁hg19
-          - 📄`t_{annotation}.bed`
-      - 📁result: 最终不同参考基因组的基因注释文件
-        - 📁hg19: 参考基因组为 hg19 的基因注释文件
-          - 📄`t_{annotation}_hg19.bed`: 与数据库中 `t_{annotation}_hg19` 表对应
-        - 📁hg38: 参考基因组为 hg38 的基因注释文件
-          - 📄`t_{annotation}_hg38.bed`: 与数据库中 `t_{annotation}_hg38` 表对应
-      - 📁unmap: 转化参考基因组未映射到的数据
+    - 📁annotation: 带有基因注释的相关文件
+      - 📁dbSNP: 在 dbSNP 下载的文件
+        - 📁common_snp_chunk:
+          - 📁hg19:
+          - 📁hg38:
+        - 📄dbsnp_common_snp_hg19.txt:
+        - 📄dbsnp_common_snp_hg19.cvf:
+        - 📄dbsnp_common_snp_hg38.txt:
+        - 📄dbsnp_common_snp_hg38.cvf:
+      - 📁dbSUPER: 在 dbSUPER 下载的文件
+        - 📁all_hg19_bed:
+        - 📁liftOver:
+        - 📄all_hg19_bed.zip:
+        - 📄dbsuper_super_enhancer_hg19.txt:
+        - 📄dbsuper_super_enhancer_hg38.txt:
+      - 📁GTEx: 在 GTEx 下载的文件
+        - 📁eqtl_chunk:
+          - 📁hg19:
+          - 📁hg38:
+        - 📁GTEx_Analysis_v10_eQTL_updated:
+        - 📁liftOver:
+          - 📁input: 转成对应参考基因组的输入文件
+          - 📁output: 转成对应参考基因组的输出文件
+          - 📁result: 最终对应参考基因组的基因注释文件
+        - 📄gtex_v10_eqtl_hg19.txt:
+        - 📄gtex_v10_eqtl_hg38.txt:
+        - 📄gtex_v10_eqtl_hg38.tar:
+      - 📁gwasATLAS: 在 gwasATLAS 下载的文件
+        - 📁liftOver:
+          - 📁input: 转成对应参考基因组的输入文件
+          - 📁output: 转成对应参考基因组的输出文件
+          - 📁result: 最终对应参考基因组的基因注释文件
+        - 📄gwasATLAS_v20191115.txt:
+        - 📄gwasATLAS_v20191115_riskloci.txt:
+        - 📄gwasatlas_v20191115_risk_snp_hg19.txt:
+        - 📄gwasatlas_v20191115_risk_snp_hg38.txt:
+      - 📁SEA: 在 SEA 下载的文件
+        - 📁liftOver:
+          - 📁input: 转成对应参考基因组的输入文件
+          - 📁output: 转成对应参考基因组的输出文件
+          - 📁result: 最终对应参考基因组的基因注释文件
+        - 📄sea_v3_enhancer_hg19.txt:
+        - 📄sea_v3_enhancer_hg38.txt:
+        - 📄sea_v3_super_enhancer_hg19.txt:
+        - 📄sea_v3_super_enhancer_hg38.txt:
+        - 📄sea_v3_super_enhancer_hg38.bed:
+      - 📁SEdb: 在 SEdb 下载的文件
+        - 📁enhancer_chunk:
+        - 📁liftOver:
+          - 📁input: 转成对应参考基因组的输入文件
+          - 📁output: 转成对应参考基因组的输出文件
+          - 📁result: 最终对应参考基因组的基因注释文件
+        - 📄SEdb_2.0_sample_information.txt:
+        - 📄sedb_v2_enhancer_hg19.txt:
+        - 📄sedb_v2_enhancer_hg38.txt:
+        - 📄sedb_v2_enhancer_hg38_middle.txt:
+        - 📄sedb_v2_super_enhancer_hg19.txt:
+        - 📄sedb_v2_super_enhancer_hg38.txt:
+        - 📄sedb_v2_super_enhancer_hg38_middle.txt:
+        - 📄SE_package_hg38.bed:
+        - 📄TE_package_hg38.bed:
   - 📁project_code: 存储代码
     - 📁scvdb_reproducibility: 此文件夹表示本项目的根路径
   - 📁scATAC: 
@@ -343,12 +389,6 @@ scp -r $source_path/variant/magma/magma_output/hg38_gene/*.genes.out root@bio.li
 scp -r "$source_path/variant/magma/magma_output.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/magma_homer/"
 scp -r "$source_path/variant/magma/magma_output.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/magma_homer/"
 
-# GENE
-scp -r $source_path/gene/liftOver/result/hg19/t_*.bed root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/hg19/"
-scp -r $source_path/gene/liftOver/result/hg38/t_*.bed root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/hg38/"
-scp -r $source_path/gene/liftOver/result/hg19/t_*.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
-scp -r $source_path/gene/liftOver/result/hg38/t_*.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
-
 # Difference Gene/TF
 scp -r "$source_path/database/sc_variant/table/scatac/difference_gene_data.txt" "root@bio.liclab.net:$target_path/data/data/download/difference/"
 scp -r "$source_path/database/sc_variant/table/scatac/difference_tf_data.txt" "root@bio.liclab.net:$target_path/data/data/download/difference/"
@@ -374,5 +414,14 @@ scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_
 scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg19" "root@bio.liclab.net:$target_path/data/data/download/enrichment/trait/"
 scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg38" "root@bio.liclab.net:$target_path/data/data/download/enrichment/trait/"
 
-```
+# GENE
+scp -r $source_path/gene/annotation/dbSNP/common_snp_chunk/* root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/dbSNP/common_snp_chunk/"
+scp -r $source_path/gene/annotation/dbSUPER/*.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/dbSUPER/"
+scp -r $source_path/gene/annotation/GTEx/eqtl_chunk/* root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/GTEx/eqtl_chunk/"
+scp -r $source_path/gene/annotation/gwasATLAS/gwasatlas_v20191115_risk_snp_*.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/gwasATLAS/"
+scp -r $source_path/gene/annotation/SEA/sea_v3_*.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEA/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg19.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg38.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
+scp -r $source_path/gene/annotation/SEdb/enhancer_chunk/* root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
 
+```
