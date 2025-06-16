@@ -12,6 +12,7 @@ from tqdm import tqdm
 from yzm_log import Logger
 from yzm_file import StaticMethod
 from yzm_util import Util
+import sciv
 
 
 class ProcessAnnotation:
@@ -20,6 +21,7 @@ class ProcessAnnotation:
         self.path = path
         self.lift_over = lift_over
         self.genomes = ["hg19", "hg38"]
+        self.chr_list = sciv.ul.chrtype.categories.to_list()
         self.log = Logger()
         self.file = StaticMethod()
         self.util = Util()
@@ -35,7 +37,7 @@ class ProcessAnnotation:
         self.dbsuper_super_enhancer_path = os.path.join(self.path, "dbSUPER")
         self.sedb_super_enhancer_path = os.path.join(self.path, "SEdb")
 
-    def dbsnp_common_snp(self, is_qf: bool = False, is_info: bool = False, is_header: bool = False):
+    def dbsnp_common_snp(self):
 
         for genome in self.genomes:
             filename = os.path.join(self.dbsnp_common_snp_path, f"dbsnp_common_snp_{genome}.vcf")
@@ -47,36 +49,15 @@ class ProcessAnnotation:
 
             # Open output TXT file
             with open(output_filename, 'w', encoding="utf-8", newline="\n") as w:
-                if is_header:
-                    # Write header information such as chromosome, location ID、 Reference base, variant base, etc
-                    w.write("chr\tposition\trsId\tref\talt")
-
-                    if is_qf:
-                        w.write("\tqual\tfilter")
-
-                    if is_info:
-                        w.write("\tINFO")
-
-                    w.write("\n")
+                # Write header information such as chromosome, location ID、 Reference base, variant base, etc
+                w.write("chr\tposition\trsId\tref\talt\n")
 
                 # Traverse every variant record in the VCF file
                 for variant in tqdm(vcf):
-
-                    line = f"{variant.CHROM}\t{variant.POS}\t{variant.ID}\t{variant.REF}\t{','.join(variant.ALT)}"
-
-                    if is_qf:
-                        qual = variant.QUAL if variant.QUAL else ""
-                        filter_ = variant.FILTER if variant.FILTER else ""
-                        w.write(f"\t{qual}\t{filter_}")
-
-                    if is_info:
-                        line += f"\t{variant.INFO}"
-
-                    line += "\n"
-
+                    line = f"chr{variant.CHROM}\t{variant.POS}\t{variant.ID}\t{variant.REF}\t{','.join(variant.ALT)}\n"
                     w.write(line)
 
-    def dbsnp_common_snp_chunk(self, is_header: bool = False):
+    def dbsnp_common_snp_chunk(self):
 
         output_path: str = os.path.join(self.dbsnp_common_snp_path, "common_snp_chunk")
 
@@ -88,15 +69,32 @@ class ProcessAnnotation:
             self.file.makedirs(genome_output_path)
 
             # Read file
-            data = pd.read_table(input_filename, header=0 if is_header else None, sep="\t", low_memory=False)
+            data = pd.read_table(input_filename, header=0, sep="\t", low_memory=False)
 
-            column = "chr" if is_header else 0
-            data[column] = "chr" + data[column].astype(str)
-            chr_list = data[column].unique().tolist()
+            chr_list = data["chr"].unique().tolist()
 
             for _chr_ in tqdm(chr_list):
-                data_chr = data[data[column] == _chr_]
+                data_chr = data[data["chr"] == _chr_]
+                data_chr = data_chr.drop(columns="chr", axis=0)
                 data_chr.to_csv(f"{genome_output_path}/dbsnp_common_snp_{genome}_{_chr_}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+
+    def dbsnp_common_snp_sql(self):
+
+        with open("./result/dbsnp_common_snp.sql", "w", encoding="utf-8", newline="\n") as f:
+            for genome in self.genomes:
+                for _chr_ in self.chr_list:
+                    # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+                    sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_common_snp_{genome}_{_chr_}`; \n" + \
+                              f"CREATE TABLE `scvdb`.`t_common_snp_{genome}_{_chr_}` (\n" + \
+                              f"  `f_position` int NOT NULL,\n" + \
+                              f"  `f_rs_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_ref` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_alt` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  KEY `t_common_snp__{genome}_{_chr_}_position` (`f_position`) USING BTREE\n" + \
+                              f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;\n" + \
+                              f"LOAD DATA LOCAL INFILE \"/root/gene/annotation/dbSNP/common_snp_chunk/{genome}/dbsnp_common_snp_{genome}_{_chr_}.txt\" INTO TABLE `scvdb`.`t_common_snp_{genome}_{_chr_}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+                    f.write(sql_str)
 
     def gtex_eqtl(self):
 
@@ -110,7 +108,7 @@ class ProcessAnnotation:
             tissue_type = filename.split(".")[0]
 
             # read eQTL
-            data = pq.read_table(eqtl_files[filename], dtype="str")
+            data = pq.read_table(eqtl_files[filename])
             df: DataFrame = data.to_pandas()
             df = df[["gene_id", "variant_id", "tss_distance", "af", "pval_nominal"]]
             df["tissue_type"] = tissue_type
@@ -192,6 +190,7 @@ class ProcessAnnotation:
 
             for _chr_ in tqdm(chr_list):
                 data_chr = data[data["chr"] == _chr_]
+                data_chr = data_chr.drop(columns="chr", axis=0)
                 data_chr.to_csv(f"{genome_output_path}/gtex_v10_eqtl_{genome}_{_chr_}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
     def gwasatlas_risk_snp(self):
@@ -256,8 +255,8 @@ class ProcessAnnotation:
 
         se_data = data[data["mark"] == "SE"]
         e_data = data[data["mark"] == "E"]
-        se_data = se_data.drop('mark', axis=1)
-        e_data = e_data.drop('mark', axis=1)
+        se_data.drop(columns='mark', axis=1, inplace=True)
+        e_data.drop(columns='mark', axis=1, inplace=True)
         se_data.to_csv(os.path.join(self.sea_super_enhancer_path, "sea_v3_super_enhancer_hg38.txt"), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
         e_data.to_csv(os.path.join(self.sea_super_enhancer_path, "sea_v3_enhancer_hg38.txt"), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
 
@@ -456,6 +455,7 @@ class ProcessAnnotation:
 
             for _chr_ in tqdm(chr_list):
                 data_chr = data[data["chr"] == _chr_]
+                data_chr.drop(columns="chr", axis=0, inplace=True)
                 data_chr.to_csv(f"{genome_output_path}/sedb_v2_enhancer_{genome}_{_chr_}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
 
@@ -466,6 +466,7 @@ if __name__ == '__main__':
     annotation = ProcessAnnotation(base_path, lift_over="/public/home/lcq/rgzn/yuzhengmin/software/liftOver")
     # annotation.dbsnp_common_snp()
     # annotation.dbsnp_common_snp_chunk()
+    annotation.dbsnp_common_snp_sql()
     # annotation.gtex_eqtl()
     # annotation.gtex_eqtl_lift_over()
     # annotation.gtex_eqtl_chunk()
@@ -477,4 +478,4 @@ if __name__ == '__main__':
     # annotation.dbsuper_super_enhancer_lift_over()
     # annotation.sedb_super_enhancer()
     # annotation.sedb_super_enhancer_lift_over()
-    annotation.sedb_super_enhancer_chunk()
+    # annotation.sedb_super_enhancer_chunk()
