@@ -487,6 +487,29 @@ class ProcessAnnotation:
                 data_chr = data_chr.drop(columns="chr", axis=0)
                 data_chr.to_csv(f"{genome_output_path}/sedb_v2_enhancer_{genome}_{_chr_}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
+    def sedb_super_enhancer_sql(self):
+
+        with open("./result/sedb_enhancer_sql.sql", "w", encoding="utf-8", newline="\n") as f:
+            for genome in self.genomes:
+
+                for _chr_ in self.chr_list:
+                    # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+                    sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_enhancer_sedb_{genome}_{_chr_}`; \n" + \
+                              f"CREATE TABLE `scvdb`.`t_enhancer_sedb_{genome}_{_chr_}` (\n" + \
+                              f"  `f_start` int NOT NULL,\n" + \
+                              f"  `f_end` int NOT NULL,\n" + \
+                              f"  `f_sample_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_se_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_cell_source` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_cell_type` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_tissue_type` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_cell_state` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  KEY `t_enhancer_sedb_{genome}_{_chr_}_start_end_index` (`f_start`, `f_end`) USING BTREE\n" + \
+                              f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;\n" + \
+                              f"LOAD DATA LOCAL INFILE \"/root/gene/annotation/SEdb/enhancer_chunk/{genome}/sedb_v2_enhancer_{genome}_{_chr_}.txt\" INTO TABLE `scvdb`.`t_enhancer_sedb_{genome}_{_chr_}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+                    f.write(sql_str)
+
 
 if __name__ == '__main__':
     print("run...")
@@ -499,7 +522,7 @@ if __name__ == '__main__':
     # annotation.gtex_eqtl()
     # annotation.gtex_eqtl_lift_over()
     # annotation.gtex_eqtl_chunk()
-    annotation.gtex_eqtl_sql()
+    # annotation.gtex_eqtl_sql()
     # annotation.gwasatlas_risk_snp()
     # annotation.gwasatlas_risk_snp_lift_over()
     # annotation.sea_super_enhancer()
@@ -509,3 +532,4 @@ if __name__ == '__main__':
     # annotation.sedb_super_enhancer()
     # annotation.sedb_super_enhancer_lift_over()
     # annotation.sedb_super_enhancer_chunk()
+    annotation.sedb_super_enhancer_sql()
