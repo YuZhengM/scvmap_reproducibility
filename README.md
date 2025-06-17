@@ -422,6 +422,6 @@ scp -r $source_path/gene/annotation/gwasATLAS/gwasatlas_v20191115_risk_snp_*.txt
 scp -r $source_path/gene/annotation/SEA/sea_v3_*.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEA/"
 scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg19.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
 scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg38.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
-scp -r $source_path/gene/annotation/SEdb/enhancer_chunk/* root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
+scp -r $source_path/gene/annotation/SEdb/enhancer_chunk/* root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/enhancer_chunk/"
 
 ```

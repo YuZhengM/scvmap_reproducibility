@@ -172,7 +172,11 @@ class ProcessAnnotation:
             column=["chr", "position", "ref", "alt", "gene_name", "tss_distance", "af", "pval_nominal", "tissue_type"]
         )
 
-    def gtex_eqtl_chunk(self):
+    @staticmethod
+    def word_to_number(word: str) -> int:
+        return sum(ord(char) for char in word)
+
+    def gtex_eqtl_chunk(self, group_count: int = 100):
 
         output_path: str = os.path.join(self.gtex_eqtl_path, "eqtl_chunk")
 
@@ -185,13 +189,38 @@ class ProcessAnnotation:
 
             # Read file
             data = pd.read_table(input_filename, low_memory=False)
+            data["group"] = data["gene_name"].apply(self.word_to_number) % group_count
+            group_list = data["group"].unique().tolist()
 
-            chr_list = data["chr"].unique().tolist()
+            for group in tqdm(group_list):
+                data_chr = data[data["group"] == group]
+                data_chr = data_chr.drop(columns="group", axis=0)
+                data_chr.to_csv(f"{genome_output_path}/gtex_v10_eqtl_{genome}_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
-            for _chr_ in tqdm(chr_list):
-                data_chr = data[data["chr"] == _chr_]
-                data_chr = data_chr.drop(columns="chr", axis=0)
-                data_chr.to_csv(f"{genome_output_path}/gtex_v10_eqtl_{genome}_{_chr_}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+    def gtex_eqtl_sql(self, group_count: int = 100):
+
+        with open("./result/gtex_eqtl_sql.sql", "w", encoding="utf-8", newline="\n") as f:
+            for genome in self.genomes:
+
+                for group in range(group_count):
+                    # chr position        ref     alt     gene_name       tss_distance    af      pval_nominal    tissue_type
+                    # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+                    sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_eqtl_{genome}_{group}`; \n" + \
+                              f"CREATE TABLE `scvdb`.`t_eqtl_{genome}_{group}` (\n" + \
+                              f"  `f_chr` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_position` int NOT NULL,\n" + \
+                              f"  `f_ref` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_alt` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_gene_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_tss_distance` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_af` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_p_value_nominal` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  `f_tissue_type` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                              f"  KEY `t_eqtl_{genome}_{group}_gene_name` (`f_gene_name`) USING BTREE\n" + \
+                              f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;\n" + \
+                              f"LOAD DATA LOCAL INFILE \"/root/gene/annotation/GTEx/eqtl_chunk/{genome}/gtex_v10_eqtl_{genome}_{group}.txt\" INTO TABLE `scvdb`.`t_eqtl_{genome}_{group}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+                    f.write(sql_str)
 
     def gwasatlas_risk_snp(self):
         overview_file = os.path.join(self.gwasatlas_risk_snp_path, "gwasATLAS_v20191115.txt")
@@ -455,7 +484,7 @@ class ProcessAnnotation:
 
             for _chr_ in tqdm(chr_list):
                 data_chr = data[data["chr"] == _chr_]
-                data_chr.drop(columns="chr", axis=0, inplace=True)
+                data_chr = data_chr.drop(columns="chr", axis=0)
                 data_chr.to_csv(f"{genome_output_path}/sedb_v2_enhancer_{genome}_{_chr_}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
 
@@ -466,10 +495,11 @@ if __name__ == '__main__':
     annotation = ProcessAnnotation(base_path, lift_over="/public/home/lcq/rgzn/yuzhengmin/software/liftOver")
     # annotation.dbsnp_common_snp()
     # annotation.dbsnp_common_snp_chunk()
-    annotation.dbsnp_common_snp_sql()
+    # annotation.dbsnp_common_snp_sql()
     # annotation.gtex_eqtl()
     # annotation.gtex_eqtl_lift_over()
     # annotation.gtex_eqtl_chunk()
+    annotation.gtex_eqtl_sql()
     # annotation.gwasatlas_risk_snp()
     # annotation.gwasatlas_risk_snp_lift_over()
     # annotation.sea_super_enhancer()
