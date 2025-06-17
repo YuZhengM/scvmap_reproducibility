@@ -355,6 +355,9 @@ scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait_table
 scp -r "$source_path/database/sc_variant/table/magma/t_magma_hg19.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
 scp -r "$source_path/database/sc_variant/table/magma/t_magma_hg38.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
 scp -r "$source_path/database/sc_variant/table/magma/t_magma_gene_trait_count.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/trait_gene" "root@bio.liclab.net:$target_path/mysql/mysqlfile/"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/sample" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample/"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/trait" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample"
 
 # scATAC-seq
 scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"

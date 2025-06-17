@@ -281,7 +281,6 @@ def form_enriched_sample_file():
 
 
 def get_statistics_count():
-
     columns = ["method", "item", "count"]
 
     data_dict: list[dict] = []
@@ -293,8 +292,8 @@ def get_statistics_count():
         method_enrich_count = method_data.X[method_data.X != 0].size
         data_dict.append({
             "method": _method_,
-            "item": "sample_enrich",
-            "count": method_enrich_count
+            "item":   "sample_enrich",
+            "count":  method_enrich_count
         })
 
         cell_count: int = 0
@@ -309,19 +308,80 @@ def get_statistics_count():
 
         data_dict.append({
             "method": _method_,
-            "item": "cell_enrich",
-            "count": cell_count
+            "item":   "cell_enrich",
+            "count":  cell_count
         })
         data_dict.append({
             "method": _method_,
-            "item": "cell_type_enrich",
-            "count": cell_type_count
+            "item":   "cell_type_enrich",
+            "count":  cell_type_count
         })
 
     print(data_dict)
     enrich_data = pd.DataFrame(data_dict, columns=columns)
     enrich_data.to_csv(f"{database_path}/sc_variant/table/statistics_count.txt", sep="\t", header=True, index=False, lineterminator="\n", encoding="utf-8")
 
+
+def enriched_data_chunk(group_count: int = 100):
+    for _method_ in ["gchromvar", "scavenge"]:
+        print(f"Start {_method_}...")
+        file = f"{database_path}/sc_variant/table/trait_variant_overlap/{_method_}_sample_enrichment.txt"
+        data = pd.read_table(file, header=None)
+        data.columns = ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_sample_index']
+
+        sample_path: str = f"{database_path}/sc_variant/table/trait_variant_overlap/sample/{_method_}"
+        trait_path: str = f"{database_path}/sc_variant/table/trait_variant_overlap/trait/{_method_}"
+        util.makedirs(sample_path)
+        util.makedirs(trait_path)
+
+        print("Sample path:", sample_path)
+        for _label_ in tqdm(identifier_list):
+            label_data = data[data["f_label"] == _label_]
+            sample_id_ = label_data['f_sample_id'].tolist()[0]
+            label_data = label_data[["f_trait_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_trait_index']]
+            label_data.to_csv(os.path.join(sample_path, f"{sample_id_}_enrich.txt"), sep="\t", header=False, index=False, lineterminator="\n", encoding="utf-8")
+
+        print("Trait path:", trait_path)
+        data["group"] = data["f_trait_index"] % group_count
+
+        for _group_ in tqdm(range(group_count)):
+            group_data = data[data["group"] == _group_]
+            group_data = group_data[["f_trait_id", "f_sample_id", 'f_tissue_type', 'f_label', 'f_sample_index']]
+            group_data.to_csv(os.path.join(trait_path, f"trait_{_group_}_enrich.txt"), sep="\t", header=False, index=False, lineterminator="\n", encoding="utf-8")
+
+
+def create_enrich_sql(group_count: int = 100):
+
+    with open("./result/create_sample_enrich.sql", "w", encoding="utf-8", newline="\n") as f:
+        for _method_ in ["gchromvar", "scavenge"]:
+            for sample_id in sample_info["f_sample_id"]:
+                sql_str = f"CREATE TABLE `scvdb`.`t_sample_enrich_{_method_}_{sample_id}` (\n" + \
+                          f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
+                          f"  `f_trait_code` varchar(128) NOT NULL,\n" + \
+                          f"  `f_trait_abbr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                          f"  `f_trait` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                          f"  `f_source_name` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                          f"  `f_trait_index` int NOT NULL,\n" + \
+                          f"  KEY `t_sample_enrich_{_method_}_{sample_id}_trait_index` (`f_trait_index`) USING BTREE\n" + \
+                          f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                          f"LOAD DATA LOCAL INFILE \"/root/trait_sample/sample/{_method_}/{sample_id}_enrich.txt\" INTO TABLE `scvdb`.`t_sample_enrich_{_method_}_{sample_id}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+                f.write(sql_str)
+
+    with open("./result/create_trait_enrich.sql", "w", encoding="utf-8", newline="\n") as f:
+        for _method_ in ["gchromvar", "scavenge"]:
+            for i in range(group_count):
+                sql_str = f"CREATE TABLE `scvdb`.`t_trait_enrich_{_method_}_{i}` (\n" + \
+                          f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
+                          f"  `f_sample_id` varchar(32) NOT NULL,\n" + \
+                          f"  `f_tissue_type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                          f"  `f_label` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                          f"  `f_sample_index` int NOT NULL,\n" + \
+                          f"  KEY `t_trait_sample_trait_id` (`f_trait_id`) USING BTREE\n" + \
+                          f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                          f"LOAD DATA LOCAL INFILE \"/root/trait_sample/trait/{_method_}/trait_{i}_enrich.txt\" INTO TABLE `scvdb`.`t_trait_enrich_{_method_}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+                f.write(sql_str)
 
 
 if __name__ == '__main__':
@@ -339,16 +399,10 @@ if __name__ == '__main__':
 
     identifier_list: list = list(sample_info["f_label"])
 
-    # Process the result information of each scATAC seq and all mutation enrichment
-    process_sc_variant_save()
-
-    # Separate result data
-    process_sc_variant_data()
-
-    # Obtain the quantity of scATAC seq data enriched in mutations
-    process_enriched_sample_trait()
-
-    form_enriched_sample_file()
-
-    # Statistics count
-    get_statistics_count()
+    # process_sc_variant_save()
+    # process_sc_variant_data()
+    # process_enriched_sample_trait()
+    # form_enriched_sample_file()
+    # get_statistics_count()
+    # enriched_data_chunk()
+    create_enrich_sql()

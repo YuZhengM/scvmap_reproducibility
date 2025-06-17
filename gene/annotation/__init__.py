@@ -4,8 +4,8 @@
 import os
 import re
 
-# import cyvcf2
-# import pyarrow.parquet as pq
+import cyvcf2
+import pyarrow.parquet as pq
 import pandas as pd
 from pandas import DataFrame
 from tqdm import tqdm
@@ -516,20 +516,20 @@ if __name__ == '__main__':
 
     base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation"
     annotation = ProcessAnnotation(base_path, lift_over="/public/home/lcq/rgzn/yuzhengmin/software/liftOver")
-    # annotation.dbsnp_common_snp()
-    # annotation.dbsnp_common_snp_chunk()
-    # annotation.dbsnp_common_snp_sql()
-    # annotation.gtex_eqtl()
-    # annotation.gtex_eqtl_lift_over()
-    # annotation.gtex_eqtl_chunk()
-    # annotation.gtex_eqtl_sql()
-    # annotation.gwasatlas_risk_snp()
-    # annotation.gwasatlas_risk_snp_lift_over()
-    # annotation.sea_super_enhancer()
-    # annotation.sea_super_enhancer_lift_over()
-    # annotation.dbsuper_super_enhancer()
-    # annotation.dbsuper_super_enhancer_lift_over()
-    # annotation.sedb_super_enhancer()
-    # annotation.sedb_super_enhancer_lift_over()
-    # annotation.sedb_super_enhancer_chunk()
+    annotation.dbsnp_common_snp()
+    annotation.dbsnp_common_snp_chunk()
+    annotation.dbsnp_common_snp_sql()
+    annotation.gtex_eqtl()
+    annotation.gtex_eqtl_lift_over()
+    annotation.gtex_eqtl_chunk()
+    annotation.gtex_eqtl_sql()
+    annotation.gwasatlas_risk_snp()
+    annotation.gwasatlas_risk_snp_lift_over()
+    annotation.sea_super_enhancer()
+    annotation.sea_super_enhancer_lift_over()
+    annotation.dbsuper_super_enhancer()
+    annotation.dbsuper_super_enhancer_lift_over()
+    annotation.sedb_super_enhancer()
+    annotation.sedb_super_enhancer_lift_over()
+    annotation.sedb_super_enhancer_chunk()
     annotation.sedb_super_enhancer_sql()
