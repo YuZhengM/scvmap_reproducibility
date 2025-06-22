@@ -231,7 +231,7 @@ class SnapATAC2Handler:
 
 if __name__ == '__main__':
     path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC"
-    sample_info_file: str = "/public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_handler/scATAC/data/sample_info.txt"
+    sample_info_file: str = "/public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_reproducibility/scATAC/data/sample_info.txt"
     handler = SnapATAC2Handler(base_path=path, sample_file=sample_info_file)
     # handler.process_cell_anno()
     handler.form_h5ad_and_fragments_file()

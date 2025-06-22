@@ -345,6 +345,7 @@ scp -r "$source_path/database/sc_variant/table/homer/hg38" "root@bio.liclab.net:
 scp -r "$source_path/database/sc_variant/table/homer/t_homer_trait_tf_hg19.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
 scp -r "$source_path/database/sc_variant/table/homer/t_homer_trait_tf_hg38.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
 scp -r "$source_path/database/sc_variant/table/homer/t_homer_tf_trait_count.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/trait_tf" "root@bio.liclab.net:$target_path/mysql/mysqlfile/"
 
 # MAGMA
 scp -r "$source_path/database/sc_variant/table/magma/hg19" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"

@@ -13,8 +13,7 @@ from tqdm import tqdm
 from yzm_file import StaticMethod
 
 
-def form_difference_gene_file(top: int = 1000):
-
+def form_difference_gene_file():
     difference_gene_files = []
     file.makedirs(f"{output_path}/difference_gene")
 
@@ -49,22 +48,16 @@ def form_difference_gene_file(top: int = 1000):
         df_tmp: DataFrame = sciv.pp.adata_map_df(adata, column="p_value", layer="p_value")
         df["f_p_value"] = df_tmp["p_value"]
 
-        df = df[df["f_adjusted_p_value"] < adjusted_p_value_value]
-        df = df[(df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value)]
-        df = df[df["f_p_value"] < p_value_value]
-
-        df_index_list = []
-
-        for cell_type in df["f_cell_type"].unique():
-            cell_type_df = df[df["f_cell_type"] == cell_type]
-            cell_type_df.sort_values(by="f_score", ascending=False, inplace=True)
-            cell_type_df_top = cell_type_df[:top]
-            df_index_list.extend(cell_type_df_top.index.tolist())
+        df = df[((df["f_adjusted_p_value"] < adjusted_p_value_value) |
+                ((df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value)) |
+                (df["f_p_value"] < p_value_value)) |
+                (df["f_score"] > 0)]
 
         df.sort_values(by="f_score", ascending=False, inplace=True)
-        df_top = df[df.index.isin(df_index_list)]
-        difference_gene_files.append(df_top)
-        df_top.to_csv(f"{output_path}/difference_gene/{sample_id}_difference_gene_data.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+
+        difference_gene_files.append(df)
+        df.to_csv(f"{output_path}/difference_gene/{sample_id}_difference_gene_data.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+
 
     difference_gene_data = pd.concat(difference_gene_files, axis=0)
     difference_gene_data.to_csv(f"{output_path}/difference_gene_data.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
@@ -75,7 +68,6 @@ def form_difference_gene_file(top: int = 1000):
 
 
 def form_difference_tf_file():
-
     difference_tf_files = []
     file.makedirs(f"{output_path}/difference_tf")
 
@@ -105,8 +97,9 @@ def form_difference_tf_file():
         df_tmp: DataFrame = sciv.pp.adata_map_df(adata, column="log2_fold_change", layer="log2_fold_change")
         df["f_log2_fold_change"] = df_tmp["log2_fold_change"]
 
-        df = df[df["f_adjusted_p_value"] < adjusted_p_value_value]
-        df = df[(df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value)]
+        df = df[(df["f_adjusted_p_value"] < adjusted_p_value_value) |
+                ((df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value))]
+
         df["f_tf"] = df["f_tf_all"].str.split("+", expand=True)[0]
         df["f_tf_id"] = df["f_tf_all"].str.split("+", expand=True)[1]
         df = df[["f_sample_id", "f_cell_type", "f_tf", "f_tf_id", "f_score", "f_adjusted_p_value", "f_log2_fold_change"]]
@@ -118,7 +111,6 @@ def form_difference_tf_file():
 
 
 def gene_enrichment_analysis():
-
     file.makedirs(f"{output_path}/gene_enrichment")
 
     for sample_id, gse_id, sample_label in zip(sample_info["f_sample_id"], sample_info["f_gse_id"], sample_info["f_label"]):
@@ -182,8 +174,10 @@ def gene_enrichment_file():
         difference_gene = pd.read_table(difference_gene_file, encoding="utf-8")
         difference_gene["f_count"] = difference_gene["f_overlap"].str.split("/", expand=True)[0]
         difference_gene["f_overlap"] = difference_gene["f_count"].astype(float) / difference_gene["f_overlap"].str.split("/", expand=True)[1].astype(float)
-        difference_gene = difference_gene[["f_sample_id", "f_gene_set", "f_term", "f_overlap", "f_p_value", "f_adjusted_p_value",
-                                           "f_odds_ratio", "f_combined_score", "f_gene", "f_count", "f_cell_type"]]
+        difference_gene = difference_gene[[
+            "f_sample_id", "f_gene_set", "f_term", "f_overlap", "f_p_value", "f_adjusted_p_value",
+            "f_odds_ratio", "f_combined_score", "f_gene", "f_count", "f_cell_type"
+        ]]
         gene_enrichment_files.append(difference_gene)
         difference_gene.to_csv(f"{output_path}/gene_enrichment_table/{sample_id}_gene_enrichment_data.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
@@ -254,6 +248,6 @@ if __name__ == '__main__':
 
     form_difference_gene_file()
     form_difference_tf_file()
-    gene_enrichment_analysis()
-    gene_enrichment_file()
-    create_table_sql()
+    # gene_enrichment_analysis()
+    # gene_enrichment_file()
+    # create_table_sql()
