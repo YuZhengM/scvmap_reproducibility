@@ -397,7 +397,11 @@ scp -r "$source_path/variant/magma/magma_output.tar.gz" "root@bio.liclab.net:$ta
 scp -r "$source_path/database/sc_variant/table/scatac/difference_gene_data.txt" "root@bio.liclab.net:$target_path/data/data/download/difference/"
 scp -r "$source_path/database/sc_variant/table/scatac/difference_tf_data.txt" "root@bio.liclab.net:$target_path/data/data/download/difference/"
 scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "root@bio.liclab.net:$target_path/data/data/download/difference/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
 scp -r "$source_path/database/sc_variant/table/scatac/difference_tf" "root@bio.liclab.net:$target_path/data/data/download/difference/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_tf" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/sample_gene" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/sample_tf" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
 scp -r $source_path/scATAC/**/**/**/*_difference_gene.h5ad root@bio.liclab.net:"$target_path/data/data/download/difference/difference_gene_h5ad/"
 scp -r $source_path/scATAC/**/**/**/*_tf_activity_data.h5ad root@bio.liclab.net:"$target_path/data/data/download/difference/difference_tf_h5ad/"
 

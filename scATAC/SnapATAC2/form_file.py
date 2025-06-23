@@ -49,8 +49,8 @@ def form_difference_gene_file():
         df["f_p_value"] = df_tmp["p_value"]
 
         df = df[((df["f_adjusted_p_value"] < adjusted_p_value_value) |
-                ((df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value)) |
-                (df["f_p_value"] < p_value_value)) |
+                 ((df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value)) |
+                 (df["f_p_value"] < p_value_value)) |
                 (df["f_score"] > 0)]
 
         df.sort_values(by="f_score", ascending=False, inplace=True)
@@ -59,7 +59,6 @@ def form_difference_gene_file():
 
         df = df.drop(columns=["f_sample_id"], axis=0)
         df.to_csv(f"{output_path}/difference_gene/{sample_id}_difference_gene_data.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
-
 
     difference_gene_data = pd.concat(difference_gene_files, axis=0)
     difference_gene_data.to_csv(f"{output_path}/difference_gene_data.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
@@ -100,7 +99,8 @@ def form_difference_tf_file():
         df["f_log2_fold_change"] = df_tmp["log2_fold_change"]
 
         df = df[(df["f_adjusted_p_value"] < adjusted_p_value_value) |
-                ((df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value))]
+                ((df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value)) |
+                (df["f_score"] > 0)]
 
         df["f_tf"] = df["f_tf_all"].str.split("+", expand=True)[0]
         df["f_tf_id"] = df["f_tf_all"].str.split("+", expand=True)[1]
@@ -113,6 +113,10 @@ def form_difference_tf_file():
 
     difference_tf_data = pd.concat(difference_tf_files, axis=0)
     difference_tf_data.to_csv(f"{output_path}/difference_tf_data.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+
+    sample_gene = difference_tf_data[["f_sample_id", "f_tf"]]
+    sample_gene.drop_duplicates(inplace=True)
+    sample_gene.to_csv(f"{output_path}/sample_tf_data.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
 
 
 def gene_enrichment_analysis():
@@ -192,7 +196,27 @@ def gene_enrichment_file():
     gene_enrichment_data.to_csv(f"{output_path}/gene_enrichment_table_data.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
 
 
-def create_table_sql():
+def word_to_number(word: str) -> int:
+    return sum(ord(char) for char in word)
+
+
+def form_sample_gene_tf_chunk(group_count: int = 100):
+    for _elem_ in ["gene", "tf"]:
+        sample_gene_file = f"{output_path}/sample_{_elem_}_data.txt"
+        data = pd.read_table(sample_gene_file, header=0)
+
+        data["group"] = data[f"f_{_elem_}"].apply(word_to_number) % group_count
+
+        path = f"{output_path}/sample_{_elem_}"
+        file.makedirs(path)
+
+        for _group_ in tqdm(range(group_count)):
+            group_data = data[data["group"] == _group_]
+            group_data = group_data.drop(columns=["group"], axis=0)
+            group_data.to_csv(os.path.join(path, f"t_sample_{_elem_}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
+
+
+def create_table_sql(group_count: int = 100):
     file.makedirs("./result")
     # f_sample_id	f_cell_type	f_gene	f_score	f_adjusted_p_value	f_log2_fold_change	f_p_value
     with open("./result/create_difference_gene.sql", "w", encoding="utf-8", newline="\n") as f:
@@ -211,7 +235,7 @@ def create_table_sql():
                       f"  KEY `t_difference_gene_{sample_id}_log2_fold_change_index` (`f_log2_fold_change`),\n" + \
                       f"  KEY `t_difference_gene_{sample_id}_p_value_index` (`f_p_value`)\n" + \
                       f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                      f"LOAD DATA LOCAL INFILE \"/root/scatac/difference_gene/{sample_id}_difference_gene_data.txt\" INTO TABLE `scvdb`.`t_difference_gene_{sample_id}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                      f"LOAD DATA LOCAL INFILE \"/root/scatac/difference_gene/{sample_id}_difference_gene_data.txt\" INTO TABLE `scvdb`.`t_difference_gene_{sample_id}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n' IGNORE 1 LINES;\n\n"
 
             f.write(sql_str)
 
@@ -230,7 +254,7 @@ def create_table_sql():
                       f"  KEY `t_difference_gene_{sample_id}_adjusted_p_value_index` (`f_adjusted_p_value`),\n" + \
                       f"  KEY `t_difference_gene_{sample_id}_log2_fold_change_index` (`f_log2_fold_change`)\n" + \
                       f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                      f"LOAD DATA LOCAL INFILE \"/root/scatac/difference_gene/{sample_id}_difference_tf_data.txt\" INTO TABLE `scvdb`.`t_difference_tf_{sample_id}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                      f"LOAD DATA LOCAL INFILE \"/root/scatac/difference_tf/{sample_id}_difference_tf_data.txt\" INTO TABLE `scvdb`.`t_difference_tf_{sample_id}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n' IGNORE 1 LINES;\n\n"
 
             f.write(sql_str)
 
@@ -257,6 +281,32 @@ def create_table_sql():
 
             f.write(sql_str)
 
+    with open("./result/create_sample_gene.sql", "w", encoding="utf-8", newline="\n") as f:
+        for i in range(group_count):
+            # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_sample_gene_{i}`; \n" + \
+                      f"CREATE TABLE `scvdb`.`t_sample_gene_{i}` (\n" + \
+                      f"  `f_sample_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                      f"  `f_gene` varchar(128) NOT NULL,\n" + \
+                      f"  KEY `t_sample_gene_{i}_gene_index` (`f_gene`) USING BTREE\n" + \
+                      f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                      f"LOAD DATA LOCAL INFILE \"/root/scatac/sample_gene/t_sample_gene_{i}.txt\" INTO TABLE `scvdb`.`t_sample_gene_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+            f.write(sql_str)
+
+    with open("./result/create_sample_tf.sql", "w", encoding="utf-8", newline="\n") as f:
+        for i in range(group_count):
+            # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_sample_tf_{i}`; \n" + \
+                      f"CREATE TABLE `scvdb`.`t_sample_tf_{i}` (\n" + \
+                      f"  `f_sample_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                      f"  `f_tf` varchar(128) NOT NULL,\n" + \
+                      f"  KEY `t_sample_tf_{i}_tf_index` (`f_tf`) USING BTREE\n" + \
+                      f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                      f"LOAD DATA LOCAL INFILE \"/root/scatac/sample_tf/t_sample_tf_{i}.txt\" INTO TABLE `scvdb`.`t_sample_tf_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+            f.write(sql_str)
+
 
 if __name__ == '__main__':
     print("run...")
@@ -273,8 +323,9 @@ if __name__ == '__main__':
 
     sample_info = pd.read_table(sample_info_file)
 
-    form_difference_gene_file()
-    form_difference_tf_file()
+    # form_difference_gene_file()
+    # form_difference_tf_file()
     # gene_enrichment_analysis()
     # gene_enrichment_file()
+    # form_sample_gene_tf_chunk()
     create_table_sql()
