@@ -357,6 +357,7 @@ scp -r "$source_path/database/sc_variant/table/magma/t_magma_hg19.txt" "root@bio
 scp -r "$source_path/database/sc_variant/table/magma/t_magma_hg38.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
 scp -r "$source_path/database/sc_variant/table/magma/t_magma_gene_trait_count.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
 scp -r "$source_path/database/sc_variant/table/magma/trait_gene" "root@bio.liclab.net:$target_path/mysql/mysqlfile/"
+
 scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/sample" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample/"
 scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/trait" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample"
 
@@ -431,5 +432,22 @@ scp -r $source_path/gene/annotation/SEA/sea_v3_*.txt root@bio.liclab.net:"$targe
 scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg19.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
 scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg38.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
 scp -r $source_path/gene/annotation/SEdb/enhancer_chunk/* root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/enhancer_chunk/"
+
+scp -r $source_path/gene/annotation/dbSNP/dbsnp_common_snp_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/dbSNP/dbsnp_common_snp_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/dbSUPER/dbsuper_super_enhancer_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/dbSUPER/dbsuper_super_enhancer_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/GTEx/gtex_v10_eqtl_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/GTEx/gtex_v10_eqtl_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/gwasATLAS/gwasatlas_v20191115_risk_snp_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/gwasATLAS/gwasatlas_v20191115_risk_snp_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/SEA/sea_v3_enhancer_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/SEA/sea_v3_enhancer_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/SEA/sea_v3_super_enhancer_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/SEA/sea_v3_super_enhancer_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_enhancer_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_enhancer_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
 
 ```

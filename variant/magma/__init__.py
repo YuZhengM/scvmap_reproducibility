@@ -108,8 +108,6 @@ def exec_magma_anno():
 def exec_magma_gene():
     is_pass = True
 
-    exec_str_list: list = []
-
     def _ref_data_(_popu_: str):
         _ref_pop_ = 'eur' if _popu_.lower() == 'ukb' else _popu_.lower()
         return f"{output_path}/magma_input/g1000_{_ref_pop_}/g1000_{_ref_pop_}"
@@ -127,6 +125,7 @@ def exec_magma_gene():
                 sample_size = 200
 
             if os.path.exists(f"{output_file}.genes.out") and is_pass:
+                print(f"{output_file}.genes.out is exist")
                 continue
 
             bfile: str = _ref_data_(popu)
@@ -135,18 +134,12 @@ def exec_magma_gene():
             gene_file: str = f"{output_path}/magma_input/{genome}/{trait_code}.txt"
 
             if not os.path.exists(gene_anno_file):
+                print(f"{gene_anno_file} is not exist")
                 continue
 
             exec_str: str = f"{magma_file} --bfile {bfile} --gene-annot {gene_anno_file} --pval {gene_file} use=1,2 N={int(sample_size)} --out {output_file}"
-            exec_str_list.append(exec_str)
-
-    print("Start exec")
-
-    # pool = Pool(os.cpu_count())
-    pool = Pool(7)
-    pool.map(util.exec_command, exec_str_list)
-    pool.close()
-    pool.join()
+            print(f"Exec `{exec_str}` command")
+            util.exec_command(exec_str)
 
 
 def form_magma_variant_result_file(group_count: int = 100):
@@ -236,6 +229,7 @@ def gene_enrichment_analysis(group_count: int = 100, top: int = 50):
     file.makedirs(f"{result_path}/gene_enrichment_trait")
 
     def _core_(param: Tuple):
+        print(param)
         _trait_id_ = param[0]
         _trait_code_ = param[1]
         _genome_ = param[2]
@@ -248,23 +242,15 @@ def gene_enrichment_analysis(group_count: int = 100, top: int = 50):
         except Exception as e:
             print(f"Error {param}")
             print(e)
+            try:
+                enrichr_data = sciv.pp.gsea_enrichr(gene_list=_gene_list_, is_verbose=False)
+                enrichr_data.insert(0, "trait_id", _trait_id_)
+                enrichr_data.to_csv(f"{result_path}/gene_enrichment_trait/{_genome_}/{_trait_code_}_gene_enrichment_trait_data.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+            except Exception as e:
+                print(f"Error {param}")
+                print(e)
 
-            is_exec: bool = False
-            for _gene_ in _gene_list_:
-                if _gene_.startswith("ENSG"):
-                    is_exec = True
-                    _gene_list_.remove(_gene_)
-
-            if is_exec and len(_gene_list_) > 0:
-                try:
-                    enrichr_data = sciv.pp.gsea_enrichr(gene_list=_gene_list_, is_verbose=False)
-                    enrichr_data.insert(0, "trait_id", _trait_id_)
-                    enrichr_data.to_csv(f"{result_path}/gene_enrichment_trait/{_genome_}/{_trait_code_}_gene_enrichment_trait_data.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
-                except Exception as e:
-                    print(f"Error {param}")
-                    print(e)
-
-    params = []
+        del _trait_id_, _trait_code_, _genome_, _gene_list_, enrichr_data
 
     gene_enrichment_dict: dict = {}
 
@@ -278,12 +264,17 @@ def gene_enrichment_analysis(group_count: int = 100, top: int = 50):
             magma_gene_genome_info.columns = ["trait_id", "gene_id", "gene", "chr", "start", "end", "n_snps", "z_score", "p_value"]
             gene_enrichment_dict[genome].update({i: magma_gene_genome_info})
 
+            del i, magma_gene_genome_info
+
+        del genome
+
     for genome in genomes:
         file.makedirs(f"{result_path}/gene_enrichment_trait/{genome}")
 
         for trait_id, trait_code in zip(trait_info["f_trait_id"], trait_info["f_trait_code"]):
 
             if os.path.exists(f"{result_path}/gene_enrichment_trait/{genome}/{trait_code}_gene_enrichment_trait_data.txt"):
+                print(f"The gene list for cluster {trait_id} is exist.")
                 continue
 
             magma_gene_genome_info: DataFrame = gene_enrichment_dict[genome][int(trait_id.split("_")[-1]) % group_count]
@@ -297,17 +288,16 @@ def gene_enrichment_analysis(group_count: int = 100, top: int = 50):
 
             gene_list = magma_gene_genome_info["gene"].tolist()
 
+            del magma_gene_genome_info
+
             if len(gene_list) > top:
                 gene_list = gene_list[:top]
 
-            params.append((trait_id, trait_code, genome, gene_list))
+            _core_((trait_id, trait_code, genome, gene_list))
 
-    print("Start exec")
+            del trait_id, trait_code, gene_list
 
-    pool = Pool(os.cpu_count() - 1)
-    pool.map(_core_, params)
-    pool.close()
-    pool.join()
+        del genome
 
 
 def gene_enrichment_file(group_count: int = 100):
@@ -479,29 +469,32 @@ if __name__ == '__main__':
     util = Util('MAGMA')
 
     genomes: list = ["hg19", "hg38"]
-    gene_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/gene/result"
-    # gene_path: str = "/mnt/m/keti/gene/result"
-    base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant"
-    # base_path: str = "/mnt/m/keti/variant"
+    # gene_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/gene/result"
+    gene_path: str = "/mnt/m/keti/gene/result"
+    # gene_path: str = "M:/keti/gene/result"
+    # base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant"
+    base_path: str = "/mnt/m/keti/variant"
+    # base_path: str = "M:/keti/variant"
     output_path: str = f"{base_path}/magma"
     file.makedirs(output_path)
 
     magma_file: str = "/mnt/h/software/magma/magma_v1.10/magma"
 
-    result_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/magma"
-    # result_path: str = "/mnt/m/keti/database/sc_variant/table/magma"
+    # result_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/magma"
+    result_path: str = "/mnt/m/keti/database/sc_variant/table/magma"
+    # result_path: str = "M:/keti/database/sc_variant/table/magma"
 
     trait_info = pd.read_excel("../result/trait_info.xlsx")
     trait_info = trait_info[trait_info["f_filter"] == 1]
 
-    get_gene_anno()
-    get_variant_anno()
-    exec_magma_anno()
-    exec_magma_gene()
-    form_magma_variant_result_file()
-    form_magma_result_file()
-    gene_enrichment_analysis()
+    # get_gene_anno()
+    # get_variant_anno()
+    # exec_magma_anno()
+    # exec_magma_gene()
+    # form_magma_variant_result_file()
+    # form_magma_result_file()
+    # gene_enrichment_analysis()
     gene_enrichment_file()
     form_gene_count_file()
     trait_gene_chunk()
-    form_sql_file()
+    # form_sql_file()
