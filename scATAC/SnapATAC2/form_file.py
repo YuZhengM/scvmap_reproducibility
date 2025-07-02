@@ -147,7 +147,10 @@ def gene_enrichment_analysis():
             # ["f_gene"].to_list()
             cluster_gene_info = difference_gene[difference_gene["f_cell_type"] == cluster]
             cluster_gene_info.sort_values(by="f_score", ascending=False)
-            cluster_gene = cluster_gene_info["f_gene"].to_list()[0:200]
+
+            cluster_gene_info["f_score"]
+
+            cluster_gene = cluster_gene_info["f_gene"].to_list()[0:300]
 
             if len(cluster_gene) == 0:
                 print(f"The gene list for cluster {cluster} is empty.")
@@ -325,7 +328,7 @@ if __name__ == '__main__':
 
     # form_difference_gene_file()
     # form_difference_tf_file()
-    # gene_enrichment_analysis()
+    gene_enrichment_analysis()
     # gene_enrichment_file()
     # form_sample_gene_tf_chunk()
-    create_table_sql()
+    # create_table_sql()

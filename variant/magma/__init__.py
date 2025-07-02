@@ -378,7 +378,8 @@ def form_sql_file(group_count: int = 100):
                           f"  `f_gene_id` varchar(128) NOT NULL,\n" + \
                           f"  `f_gene` varchar(128) NOT NULL,\n" + \
                           f"  `f_rs_id` varchar(128) NOT NULL,\n" + \
-                          f"  KEY `t_magma_anno_{genome}_{i}_trait_id_gene_index` (`f_trait_id`,`f_gene`) USING BTREE\n" + \
+                          f"  KEY `t_magma_anno_{genome}_{i}_trait_id_gene_index` (`f_trait_id`,`f_gene`) USING BTREE,\n" + \
+                          f"  KEY `t_magma_anno_{genome}_{i}_trait_id_rs_id_index` (`f_trait_id`,`f_rs_id`) USING BTREE\n" + \
                           f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
                           f"LOAD DATA LOCAL INFILE \"/root/magma_homer/magma/{genome}_anno/t_magma_{i}.txt\" INTO TABLE `scvdb`.`t_magma_anno_{genome}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
@@ -494,7 +495,7 @@ if __name__ == '__main__':
     # form_magma_variant_result_file()
     # form_magma_result_file()
     # gene_enrichment_analysis()
-    gene_enrichment_file()
-    form_gene_count_file()
-    trait_gene_chunk()
-    # form_sql_file()
+    # gene_enrichment_file()
+    # form_gene_count_file()
+    # trait_gene_chunk()
+    form_sql_file()

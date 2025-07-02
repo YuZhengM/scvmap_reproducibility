@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
     file.makedirs(f"{output_path}/trait")
 
-    # variant_id_summary()
+    variant_id_summary()
 
     is_mutil = True
     is_try = True

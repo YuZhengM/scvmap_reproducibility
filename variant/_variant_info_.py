@@ -79,6 +79,8 @@ def get_trait_info(group_count: int = 100):
     for f_trait_id, f_trait_code, f_source_id, f_filter in zip(trait_info["f_trait_id"], trait_info["f_trait_code"], trait_info["f_source_id"], trait_info["f_filter"]):
         params.append((f_filter, f_trait_code, f_trait_id, f_source_id, trait_info_dict, trait_chr_info_list, group_count))
 
+    log.info("Start getting trait info...")
+
     # thread
     pool = Pool(os.cpu_count())
     pool.map(get_variant_info, params)
@@ -101,31 +103,58 @@ def get_trait_info(group_count: int = 100):
                'f_pp', 'f_beta_posterior', 'f_sd_posterior',
                'f_trait_abbr', 'f_trait', 'f_trait_id', 'f_source_id']
 
-    need_columns = ['f_trait_id', 'f_source_id', 'f_chr', 'f_bp', 'f_index',
-                    'f_variant', 'f_rsId', 'f_allele1', 'f_allele2', 'f_maf', 'f_af',
-                    'f_beta', 'f_se', 'f_p_value', 'f_chisq', 'f_z_score',
-                    'f_pp', 'f_beta_posterior', 'f_sd_posterior']
-
     log.info("Save variant files")
     for i in tqdm(range(group_count)):
 
-        hg19: list = trait_info_dict[i]["hg19"]
-        hg19_i_info = pd.concat(hg19, axis=0)
-        hg19_i_info.columns = columns
-        hg19_i_info = hg19_i_info[need_columns]
-        hg19_i_info.to_csv(f"{output_path}/hg19/t_variant_{i}_hg19.txt", sep="\t", index=False, header=False, lineterminator="\n", encoding="utf-8")
+        for genome in genomes:
+            genome: str
 
-        hg38: list = trait_info_dict[i]["hg38"]
-        hg38_i_info = pd.concat(hg38, axis=0)
-        hg38_i_info.columns = columns
-        hg38_i_info = hg38_i_info[need_columns]
-        hg38_i_info.to_csv(f"{output_path}/hg38/t_variant_{i}_hg38.txt", sep="\t", index=False, header=False, lineterminator="\n", encoding="utf-8")
+            genome_trait: list = trait_info_dict[i][genome]
+            genome_i_info = pd.concat(genome_trait, axis=0)
+            genome_i_info.columns = columns
+            genome_i_info = genome_i_info[need_columns]
+            genome_i_info.to_csv(f"{output_path}/{genome}/t_variant_{i}_{genome}.txt", sep="\t", index=False, header=False, lineterminator="\n", encoding="utf-8")
+
+
+def word_to_number(word: str) -> int:
+    return sum(ord(char) for char in word)
+
+
+def get_trait_variant_map(group_count: int = 100):
+
+    for genome in genomes:
+        log.info("Processing genome {}".format(genome))
+        trait_variant_map_list: list = []
+
+        for i in tqdm(range(group_count)):
+
+            genome_i_info = pd.read_table(f"{output_path}/{genome}/t_variant_{i}_{genome}.txt", header=None, sep="\t", low_memory=False)
+            genome_i_info.columns = need_columns
+
+            genome_i_info = genome_i_info[["f_trait_id", "f_rsId", "f_pp"]]
+            trait_variant_map_list.append(genome_i_info)
+
+        trait_variant_map_data = pd.concat(trait_variant_map_list, axis=0)
+        trait_variant_map_data.drop_duplicates(inplace=True)
+
+        trait_variant_map_data["group"] = trait_variant_map_data["f_rsId"].apply(word_to_number) % group_count
+        group_list = trait_variant_map_data["group"].unique().tolist()
+
+        log.info("Save mapping files")
+
+        # save
+        file.makedirs(f"{output_path}/{genome}_mapping")
+
+        for group in tqdm(group_list):
+            data_rsId = trait_variant_map_data[trait_variant_map_data["group"] == group]
+            data_rsId = data_rsId.drop(columns="group", axis=0)
+            data_rsId.to_csv(f"{output_path}/{genome}_mapping/t_variant_trait_map_{genome}_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
 
 def create_table_sql(group_count: int = 100):
 
     with open("./result/create_variant_info.sql", "w", encoding="utf-8", newline="\n") as f:
-        for h in ["hg19", "hg38"]:
+        for h in genomes:
             for i in range(group_count):
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
                 sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_variant_{h}_{i}`; \n" + \
@@ -133,7 +162,7 @@ def create_table_sql(group_count: int = 100):
                           f"  `f_trait_id` varchar(16) NOT NULL,\n" + \
                           f"  `f_source_id` varchar(16) NOT NULL,\n" + \
                           f"  `f_chr` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
-                          f"  `f_bp` varchar(32) NOT NULL,\n" + \
+                          f"  `f_position` varchar(32) NOT NULL,\n" + \
                           f"  `f_index` int NOT NULL,\n" + \
                           f"  `f_variant` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,\n" + \
                           f"  `f_rs_id` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
@@ -143,7 +172,7 @@ def create_table_sql(group_count: int = 100):
                           f"  `f_maf` double(26,20) DEFAULT NULL,\n" + \
                           f"  `f_beta` double(26,20) DEFAULT NULL,\n" + \
                           f"  `f_se` double(26,20) DEFAULT NULL,\n" + \
-                          f"  `f_p_value` double(26,24) DEFAULT NULL,\n" + \
+                          f"  `f_p_value` varchar(128) DEFAULT NULL,\n" + \
                           f"  `f_chisq` double(26,20) DEFAULT NULL,\n" + \
                           f"  `f_z_score` double(26,20) DEFAULT NULL,\n" + \
                           f"  `f_pp` double(25,20) NOT NULL,\n" + \
@@ -152,6 +181,21 @@ def create_table_sql(group_count: int = 100):
                           f"  KEY `t_variant_{h}_{i}_trait_id_index` (`f_trait_id`)\n" + \
                           f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
                           f"LOAD DATA LOCAL INFILE \"/root/variant/{h}/t_variant_{i}_{h}.txt\" INTO TABLE `scvdb`.`t_variant_{h}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+                f.write(sql_str)
+
+    with open("./result/create_variant_trait_map.sql", "w", encoding="utf-8", newline="\n") as f:
+        for h in genomes:
+            for i in range(group_count):
+                # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_variant_trait_map_{h}_{i}`; \n" + \
+                          f"CREATE TABLE `scvdb`.`t_variant_trait_map_{h}_{i}` (\n" + \
+                          f"  `f_trait_id` varchar(16) NOT NULL,\n" + \
+                          f"  `f_rs_id` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
+                          f"  `f_pp` double(25,20) NOT NULL,\n" + \
+                          f"  KEY `t_variant_trait_map_{h}_{i}_rs_id_index` (`f_rs_id`)\n" + \
+                          f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                          f"LOAD DATA LOCAL INFILE \"/root/variant/{h}_mapping/t_variant_trait_map_{h}_{i}.txt\" INTO TABLE `scvdb`.`t_variant_trait_map_{h}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
                 f.write(sql_str)
 
@@ -166,8 +210,18 @@ if __name__ == '__main__':
     base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant/finish"
     output_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/variant"
 
+    genomes: list = ["hg19", "hg38"]
+
+    need_columns = ['f_trait_id', 'f_source_id', 'f_chr', 'f_bp', 'f_index',
+                    'f_variant', 'f_rsId', 'f_allele1', 'f_allele2', 'f_maf', 'f_af',
+                    'f_beta', 'f_se', 'f_p_value', 'f_chisq', 'f_z_score',
+                    'f_pp', 'f_beta_posterior', 'f_sd_posterior']
+
     file = StaticMethod()
     log = Logger()
 
-    get_trait_info(group_count=100)
+    # get_trait_info(group_count=100)
+
+    get_trait_variant_map(group_count=100)
+
     create_table_sql()
