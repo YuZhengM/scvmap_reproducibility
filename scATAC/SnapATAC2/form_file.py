@@ -120,7 +120,7 @@ def form_difference_tf_file():
 
 
 def gene_enrichment_analysis():
-    file.makedirs(f"{output_path}/gene_enrichment")
+    file.makedirs(f"{output_path}/gene_enrichment/tmp")
 
     for sample_id, gse_id, sample_label in zip(sample_info["f_sample_id"], sample_info["f_gse_id"], sample_info["f_label"]):
         # noinspection DuplicatedCode
@@ -144,24 +144,44 @@ def gene_enrichment_analysis():
 
         # Add data
         for cluster in tqdm(cluster_list):
-            # ["f_gene"].to_list()
-            cluster_gene_info = difference_gene[difference_gene["f_cell_type"] == cluster]
-            cluster_gene_info.sort_values(by="f_score", ascending=False)
 
-            cluster_gene_info["f_score"]
+            cluster: str
 
-            cluster_gene = cluster_gene_info["f_gene"].to_list()[0:300]
+            tmp_file = f"{output_path}/gene_enrichment/tmp/{sample_id}_{cluster.replace('/', '-')}.pkl"
 
-            if len(cluster_gene) == 0:
-                print(f"The gene list for cluster {cluster} is empty.")
-                continue
+            if os.path.exists(tmp_file):
+                enrichr_data = sciv.fl.read_pkl(tmp_file)
+            else:
+                cluster_gene_info: DataFrame = difference_gene[difference_gene["f_cell_type"] == cluster]
+                cluster_gene_info.insert(0, "new_score", np.abs(cluster_gene_info["f_score"]))
 
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                enrichr_data: DataFrame = sciv.pp.gsea_enrichr(gene_list=cluster_gene, is_verbose=False)
+                _cluster_gene_info_ = cluster_gene_info[cluster_gene_info["new_score"] >= 20]
 
-            enrichr_data["cluster"] = cluster
+                if _cluster_gene_info_.shape[0] == 0:
+                    _cluster_gene_info_: DataFrame = cluster_gene_info[cluster_gene_info["new_score"] > 0]
+
+                del cluster_gene_info
+
+                _cluster_gene_info_.sort_values(by="new_score", ascending=False)
+
+                cluster_gene_list: list = _cluster_gene_info_["f_gene"].to_list()
+                cluster_gene = cluster_gene_list[0:500] if len(cluster_gene_list) > 500 else cluster_gene_list
+
+                if len(cluster_gene) == 0:
+                    print(f"The gene list for cluster {cluster} is empty.")
+                    continue
+
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    enrichr_data: DataFrame = sciv.pp.gsea_enrichr(gene_list=cluster_gene, is_verbose=False)
+
+                enrichr_data["cluster"] = cluster
+                sciv.fl.save_pkl(enrichr_data, tmp_file)
+
+            del tmp_file
+
             enrichr_data_list.append(enrichr_data)
+            del enrichr_data
 
         data = pd.concat(enrichr_data_list, axis=0)
         data.columns = ["f_gene_set", "f_term", "f_overlap", "f_p_value", "f_adjusted_p_value", "f_p_value_old", "f_adjusted_p_value_old", "f_odds_ratio", "f_combined_score", "f_gene", "f_cell_type"]
@@ -278,9 +298,7 @@ def create_table_sql(group_count: int = 100):
                       f"  `f_cell_type` varchar(128) NOT NULL,\n" + \
                       f"  KEY `t_gene_enrichment_{sample_id}_gene_set_cell_type_index` (`f_gene_set`, `f_cell_type`)\n" + \
                       f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n"
-
-            if os.path.exists(f"{output_path}/gene_enrichment_table/{sample_id}_gene_enrichment_data.txt"):
-                sql_str += f"LOAD DATA LOCAL INFILE \"/root/scatac/gene_enrichment_table/{sample_id}_gene_enrichment_data.txt\" INTO TABLE `scvdb`.`t_gene_enrichment_{sample_id}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+            sql_str += f"LOAD DATA LOCAL INFILE \"/root/scatac/gene_enrichment_table/{sample_id}_gene_enrichment_data.txt\" INTO TABLE `scvdb`.`t_gene_enrichment_{sample_id}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
             f.write(sql_str)
 
@@ -328,7 +346,16 @@ if __name__ == '__main__':
 
     # form_difference_gene_file()
     # form_difference_tf_file()
-    gene_enrichment_analysis()
-    # gene_enrichment_file()
+    # gene_enrichment_analysis()
+
+    file.makedirs(f"{output_path}/gene_enrichment")
+    while len(os.listdir(f"{output_path}/gene_enrichment")) != 184:
+        try:
+            gene_enrichment_analysis()
+        except Exception as e:
+            print(e)
+            continue
+
+    gene_enrichment_file()
     # form_sample_gene_tf_chunk()
     # create_table_sql()

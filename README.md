@@ -408,8 +408,8 @@ scp -r $source_path/scATAC/**/**/**/*_tf_activity_data.h5ad root@bio.liclab.net:
 
 # Difference gene enrichment
 scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table_data.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
-scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
-scp -r $source_path/scATAC/**/**/**/*_gene_enrichment.txt root@bio.liclab.net:"$target_path/data/data/download/enrichment/scatac/complete/"
+scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table" "root@bio.liclab.net:$target_path/data/data/download/enrichment/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment" root@bio.liclab.net:"$target_path/data/data/download/enrichment/scatac/"
 
 # variant
 scp -r "$source_path/variant/finish/fine_mapping_hg19.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/trait/"

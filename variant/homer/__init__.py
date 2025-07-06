@@ -61,6 +61,16 @@ def form_magma_result_file(group_count: int = 100, p_value: float = 0.05, q_valu
             trait_homer_info.columns = ["f_motif_name", "f_consensus", "f_p_value", "f_log_p_value", "f_q_value", "f_tmp1", "f_tmp2", "f_tmp3", "f_tmp4"]
             trait_homer_info.insert(0, "f_trait_id", trait_label_id_map[trait_code])
             trait_homer_info["f_tf"] = trait_homer_info["f_motif_name"].map(motif_tf_map)
+
+            if trait_homer_info[pd.isna(trait_homer_info["f_tf"])].shape[0] > 0:
+                print(trait_homer_info[pd.isna(trait_homer_info["f_tf"])]["f_motif_name"].tolist())
+                print(f"Error {trait_code}...")
+                """
+                p53(p53)/Saos-p53-ChIP-Seq/Homer	P53
+                Unknown-ESC-element(?)/mES-Nanog-ChIP-Seq(GSE11724)/Homer	NANOG
+                """
+                raise ValueError(f"Error {trait_code}...")
+
             trait_homer_info = trait_homer_info[["f_trait_id", "f_motif_name", "f_tf", "f_consensus", "f_p_value", "f_q_value"]]
             # Remove those that have no significant meaning at all
             trait_homer_info = trait_homer_info[(trait_homer_info["f_p_value"] <= p_value) | (trait_homer_info["f_q_value"] <= q_value)]
@@ -184,10 +194,10 @@ if __name__ == '__main__':
     motif_tf = pd.read_table("./data/motif_tf_map.txt")
     motif_tf_map: dict = dict(zip(motif_tf["motif_name"], motif_tf["tf"]))
 
-    homer_path = "/public/home/lcq/rgzn/yuzhengmin/software/homor"
+    homer_path = "/public/home/lcq/rgzn/yuzhengmin/software/homer"
 
-    # exec_homer()
-    # form_magma_result_file()
-    # form_tf_count_file()
-    # trait_tf_chunk()
+    exec_homer()
+    form_magma_result_file()
+    form_tf_count_file()
+    trait_tf_chunk()
     form_sql_file()
