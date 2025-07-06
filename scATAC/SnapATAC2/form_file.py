@@ -152,19 +152,14 @@ def gene_enrichment_analysis():
             if os.path.exists(tmp_file):
                 enrichr_data = sciv.fl.read_pkl(tmp_file)
             else:
-                cluster_gene_info: DataFrame = difference_gene[difference_gene["f_cell_type"] == cluster]
-                cluster_gene_info.insert(0, "new_score", np.abs(cluster_gene_info["f_score"]))
+                cluster_gene_info: DataFrame = difference_gene[(difference_gene["f_cell_type"] == cluster) & (difference_gene["f_score"] > 20)]
 
-                _cluster_gene_info_ = cluster_gene_info[cluster_gene_info["new_score"] >= 20]
+                if cluster_gene_info.shape[0] == 0:
+                    cluster_gene_info: DataFrame = difference_gene[(difference_gene["f_cell_type"] == cluster) & (difference_gene["f_score"] > 0)]
 
-                if _cluster_gene_info_.shape[0] == 0:
-                    _cluster_gene_info_: DataFrame = cluster_gene_info[cluster_gene_info["new_score"] > 0]
+                cluster_gene_info.sort_values(by="f_score", ascending=False)
 
-                del cluster_gene_info
-
-                _cluster_gene_info_.sort_values(by="new_score", ascending=False)
-
-                cluster_gene_list: list = _cluster_gene_info_["f_gene"].to_list()
+                cluster_gene_list: list = cluster_gene_info["f_gene"].to_list()
                 cluster_gene = cluster_gene_list[0:500] if len(cluster_gene_list) > 500 else cluster_gene_list
 
                 if len(cluster_gene) == 0:
