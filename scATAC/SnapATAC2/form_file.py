@@ -84,10 +84,10 @@ def form_difference_tf_file():
         # noinspection DuplicatedCode
         sciv.fl.save_h5ad(adata, difference_gene_file)
 
-        # get score
-        df: DataFrame = sciv.pp.adata_map_df(adata, column="score")
-        df = df[["cell_type", "x_index", "score"]]
-        df.columns = ["f_cell_type", "f_tf_all", "f_score"]
+        # get p_value
+        df: DataFrame = sciv.pp.adata_map_df(adata, column="p_value")
+        df = df[["cell_type", "x_index", "p_value"]]
+        df.columns = ["f_cell_type", "f_tf_all", "f_p_value"]
         df.insert(0, "f_sample_id", sample_id)
 
         # add adjusted_p_value
@@ -100,11 +100,11 @@ def form_difference_tf_file():
 
         df = df[(df["f_adjusted_p_value"] < adjusted_p_value_value) |
                 ((df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value)) |
-                (df["f_score"] > 0)]
+                (df["f_p_value"] > 0)]
 
         df["f_tf"] = df["f_tf_all"].str.split("+", expand=True)[0]
         df["f_tf_id"] = df["f_tf_all"].str.split("+", expand=True)[1]
-        df = df[["f_sample_id", "f_cell_type", "f_tf", "f_tf_id", "f_score", "f_adjusted_p_value", "f_log2_fold_change"]]
+        df = df[["f_sample_id", "f_cell_type", "f_tf", "f_tf_id", "f_p_value", "f_adjusted_p_value", "f_log2_fold_change"]]
 
         difference_tf_files.append(df.copy())
 
@@ -265,10 +265,11 @@ def create_table_sql(group_count: int = 100):
                       f"  `f_cell_type` varchar(128) NOT NULL,\n" + \
                       f"  `f_tf` varchar(128) NOT NULL,\n" + \
                       f"  `f_tf_id` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
-                      f"  `f_score` double(26,20) DEFAULT NULL,\n" + \
+                      f"  `f_p_value` varchar(128) NOT NULL,\n" + \
                       f"  `f_adjusted_p_value` varchar(128) NOT NULL,\n" + \
                       f"  `f_log2_fold_change` double(26,20) DEFAULT NULL,\n" + \
                       f"  KEY `t_difference_tf_{sample_id}_cell_type_index` (`f_cell_type`),\n" + \
+                      f"  KEY `t_difference_gene_{sample_id}_p_value_index` (`f_p_value`),\n" + \
                       f"  KEY `t_difference_gene_{sample_id}_adjusted_p_value_index` (`f_adjusted_p_value`),\n" + \
                       f"  KEY `t_difference_gene_{sample_id}_log2_fold_change_index` (`f_log2_fold_change`)\n" + \
                       f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
@@ -343,14 +344,14 @@ if __name__ == '__main__':
     # form_difference_tf_file()
     # gene_enrichment_analysis()
 
-    file.makedirs(f"{output_path}/gene_enrichment")
-    while len(os.listdir(f"{output_path}/gene_enrichment")) != 184:
-        try:
-            gene_enrichment_analysis()
-        except Exception as e:
-            print(e)
-            continue
+    # file.makedirs(f"{output_path}/gene_enrichment")
+    # while len(os.listdir(f"{output_path}/gene_enrichment")) != 184:
+    #     try:
+    #         gene_enrichment_analysis()
+    #     except Exception as e:
+    #         print(e)
+    #         continue
 
-    gene_enrichment_file()
+    # gene_enrichment_file()
     # form_sample_gene_tf_chunk()
-    # create_table_sql()
+    create_table_sql()
