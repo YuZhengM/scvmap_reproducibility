@@ -101,6 +101,47 @@ def form_magma_result_file(group_count: int = 100, p_value: float = 0.05, q_valu
     trait_tf_data.to_csv(f"{result_path}/t_homer_trait_tf.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
 
 
+def form_tf_count_file():
+    trait_tf_data = pd.read_table(f"{result_path}/t_homer_trait_tf.txt")
+
+    genome_tf_trait_count_list = []
+
+    for genome in genomes:
+        print(f"TF count {genome}...")
+        genome_trait_tf = trait_tf_data[trait_tf_data["f_genome"] == genome]
+        genome_trait_tf = genome_trait_tf[["f_trait_id", "f_tf"]]
+        genome_tf_trait_count = genome_trait_tf.groupby("f_tf").size().reset_index()
+        genome_tf_trait_count.columns = ["f_tf", "f_count"]
+        genome_tf_trait_count["f_genome"] = genome
+        genome_tf_trait_count_list.append(genome_tf_trait_count)
+
+    genome_tf_trait_count_data = pd.concat(genome_tf_trait_count_list, axis=0)
+    genome_tf_trait_count_data.to_csv(f"{result_path}/t_homer_tf_trait_count.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+
+
+def word_to_number(word: str) -> int:
+    return sum(ord(char) for char in word)
+
+
+def trait_tf_chunk(group_count: int = 100):
+    for genome in genomes:
+        print(f"Working on {genome}...")
+        trait_tf_file = f"{result_path}/trait_tf_{genome}.txt"
+        data = pd.read_table(trait_tf_file, header=0)
+
+        tf_data = data[["f_trait_id", "f_tf", "f_p_value", "f_p_value"]].groupby(["f_trait_id", "f_tf"], as_index=False).min()
+
+        tf_data["group"] = tf_data["f_tf"].apply(word_to_number) % group_count
+
+        path = f"{result_path}/trait_tf/{genome}"
+        file.makedirs(path)
+
+        for _group_ in tqdm(range(group_count)):
+            group_data = tf_data[tf_data["group"] == _group_]
+            group_data = group_data.drop(columns=["group"], axis=0)
+            group_data.to_csv(os.path.join(path, f"t_trait_tf_{genome}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
+
+
 def form_sql_file(group_count: int = 100):
     file.makedirs("./result")
     with open("result/create_homer.sql", "w", encoding="utf-8", newline="\n") as f:
@@ -129,50 +170,15 @@ def form_sql_file(group_count: int = 100):
                           f"CREATE TABLE `scvdb`.`t_trait_tf_{genome}_{i}` (\n" + \
                           f"  `f_trait_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
                           f"  `f_tf` varchar(128) NOT NULL,\n" + \
-                          f"  KEY `t_trait_tf_{genome}_{i}_tf_index` (`f_tf`) USING BTREE\n" + \
+                          f"  `f_q_value` varchar(128) NOT NULL,\n" + \
+                          f"  `f_p_value` varchar(128) NOT NULL,\n" + \
+                          f"  KEY `t_trait_tf_{genome}_{i}_tf_index` (`f_tf`) USING BTREE,\n" + \
+                          f"  KEY `t_trait_tf_{genome}_{i}_q_value_index` (`f_q_value`) USING BTREE,\n" + \
+                          f"  KEY `t_trait_tf_{genome}_{i}_p_value_index` (`f_p_value`) USING BTREE\n" + \
                           f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
                           f"LOAD DATA LOCAL INFILE \"/root/trait_tf/{genome}/t_trait_tf_{genome}_{i}.txt\" INTO TABLE `scvdb`.`t_trait_tf_{genome}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
                 f.write(sql_str)
-
-
-def form_tf_count_file():
-    trait_tf_data = pd.read_table(f"{result_path}/t_homer_trait_tf.txt")
-
-    genome_tf_trait_count_list = []
-
-    for genome in genomes:
-        print(f"TF count {genome}...")
-        genome_trait_tf = trait_tf_data[trait_tf_data["f_genome"] == genome]
-        genome_trait_tf = genome_trait_tf[["f_trait_id", "f_tf"]]
-        genome_tf_trait_count = genome_trait_tf.groupby("f_tf").size().reset_index()
-        genome_tf_trait_count.columns = ["f_tf", "f_count"]
-        genome_tf_trait_count["f_genome"] = genome
-        genome_tf_trait_count_list.append(genome_tf_trait_count)
-
-    genome_tf_trait_count_data = pd.concat(genome_tf_trait_count_list, axis=0)
-    genome_tf_trait_count_data.to_csv(f"{result_path}/t_homer_tf_trait_count.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
-
-
-def word_to_number(word: str) -> int:
-    return sum(ord(char) for char in word)
-
-
-def trait_tf_chunk(group_count: int = 100):
-    for genome in genomes:
-        print(f"Working on {genome}...")
-        trait_tf_file = f"{result_path}/t_homer_trait_tf_{genome}.txt"
-        data = pd.read_table(trait_tf_file, header=None, names=["f_trait_id", "f_tf"])
-
-        data["group"] = data["f_tf"].apply(word_to_number) % group_count
-
-        path = f"{result_path}/trait_tf/{genome}"
-        file.makedirs(path)
-
-        for _group_ in tqdm(range(group_count)):
-            group_data = data[data["group"] == _group_]
-            group_data = group_data.drop(columns=["group"], axis=0)
-            group_data.to_csv(os.path.join(path, f"t_trait_tf_{genome}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
 
 
 if __name__ == '__main__':
@@ -196,8 +202,8 @@ if __name__ == '__main__':
 
     homer_path = "/public/home/lcq/rgzn/yuzhengmin/software/homer"
 
-    exec_homer()
-    form_magma_result_file()
-    form_tf_count_file()
-    trait_tf_chunk()
+    # exec_homer()
+    # form_magma_result_file()
+    # form_tf_count_file()
+    # trait_tf_chunk()
     form_sql_file()

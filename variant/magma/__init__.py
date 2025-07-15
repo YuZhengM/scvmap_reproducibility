@@ -346,6 +346,69 @@ def gene_enrichment_file(group_count: int = 100):
             gene_enrich_trait_file.to_csv(f"{result_path}/gene_enrichment_trait_table/{genome}/t_gene_enrichment_trait_{genome}_{i}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
 
+def form_gene_count_file():
+    trait_gene_data = pd.read_table(f"{result_path}/t_magma.txt", header=None, names=["f_trait_id", "f_gene", "f_genome"])
+    genome_gene_trait_count_list = []
+
+    for genome in genomes:
+        print(f"Gene count {genome}...")
+        genome_trait_gene = trait_gene_data[trait_gene_data["f_genome"] == genome]
+        genome_trait_gene = genome_trait_gene[["f_trait_id", "f_gene"]]
+        genome_trait_gene.to_csv(f"{result_path}/t_magma_{genome}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+
+        genome_gene_trait_count = genome_trait_gene.groupby("f_gene").size().reset_index()
+        genome_gene_trait_count.columns = ["f_gene", "f_count"]
+        genome_gene_trait_count["f_genome"] = genome
+        genome_gene_trait_count_list.append(genome_gene_trait_count)
+
+    genome_gene_trait_count_data = pd.concat(genome_gene_trait_count_list, axis=0)
+    genome_gene_trait_count_data.to_csv(f"{result_path}/t_magma_gene_trait_count.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+
+
+def word_to_number(word: str) -> int:
+    return sum(ord(char) for char in word)
+
+
+def merge_trait_gene(group_count: int = 100):
+    for genome in genomes:
+
+        print(f"Integrate data: {genome}...")
+        genome_data_list = []
+
+        for _group_ in tqdm(range(group_count)):
+            _group_data_ = pd.read_table(
+                f"{result_path}/{genome}/t_magma_{_group_}.txt", header=None, names=[
+                    "trait_id", "gene_id", "gene", "chr", "start", "end", "n_snps", "z_score", "p_value"
+                ]
+            )
+            genome_data_list.append(_group_data_)
+
+        genome_data = pd.concat(genome_data_list, axis=0)
+        genome_data.to_csv(f"{result_path}/magma_{genome}_data.txt", sep="\t", header=True, index=False, encoding="utf-8")
+
+
+def trait_gene_chunk(group_count: int = 100):
+    for genome in genomes:
+        print(f"Working on {genome}...")
+        trait_gene_file = f"{result_path}/magma_{genome}_data.txt"
+        data = pd.read_table(trait_gene_file, header=0)
+
+        gene_data = data[["trait_id", "gene", "p_value"]].groupby(["trait_id", "gene"], as_index=False).min()
+        gene_n_snps_data = data[["trait_id", "gene", "n_snps"]].groupby(["trait_id", "gene"], as_index=False).max()
+
+        gene_data.insert(gene_data.shape[1], "n_snps", gene_n_snps_data["n_snps"])
+
+        gene_data["group"] = gene_data["gene"].apply(word_to_number) % group_count
+
+        path = f"{result_path}/trait_gene/{genome}"
+        file.makedirs(path)
+
+        for _group_ in tqdm(range(group_count)):
+            group_data = gene_data[gene_data["group"] == _group_]
+            group_data = group_data.drop(columns=["group"], axis=0)
+            group_data.to_csv(os.path.join(path, f"t_trait_gene_{genome}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
+
+
 def form_sql_file(group_count: int = 100):
     with open("./result/create_magma.sql", "w", encoding="utf-8", newline="\n") as f:
         for genome in genomes:
@@ -416,51 +479,15 @@ def form_sql_file(group_count: int = 100):
                           f"CREATE TABLE `scvdb`.`t_trait_gene_{genome}_{i}` (\n" + \
                           f"  `f_trait_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
                           f"  `f_gene` varchar(128) NOT NULL,\n" + \
-                          f"  KEY `t_trait_gene_{genome}_{i}_gene_index` (`f_gene`) USING BTREE\n" + \
+                          f"  `f_p_value` varchar(128) NOT NULL,\n" + \
+                          f"  `f_n_snps` int NOT NULL,\n" + \
+                          f"  KEY `t_trait_gene_{genome}_{i}_gene_index` (`f_gene`) USING BTREE,\n" + \
+                          f"  KEY `t_trait_gene_{genome}_{i}_p_value_index` (`f_p_value`) USING BTREE,\n" + \
+                          f"  KEY `t_trait_gene_{genome}_{i}_n_snps_index` (`f_n_snps`) USING BTREE\n" + \
                           f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
                           f"LOAD DATA LOCAL INFILE \"/root/trait_gene/{genome}/t_trait_gene_{genome}_{i}.txt\" INTO TABLE `scvdb`.`t_trait_gene_{genome}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
                 f.write(sql_str)
-
-
-def form_gene_count_file():
-    trait_gene_data = pd.read_table(f"{result_path}/t_magma.txt", header=None, names=["f_trait_id", "f_gene", "f_genome"])
-    genome_gene_trait_count_list = []
-
-    for genome in genomes:
-        print(f"Gene count {genome}...")
-        genome_trait_gene = trait_gene_data[trait_gene_data["f_genome"] == genome]
-        genome_trait_gene = genome_trait_gene[["f_trait_id", "f_gene"]]
-        genome_trait_gene.to_csv(f"{result_path}/t_magma_{genome}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
-
-        genome_gene_trait_count = genome_trait_gene.groupby("f_gene").size().reset_index()
-        genome_gene_trait_count.columns = ["f_gene", "f_count"]
-        genome_gene_trait_count["f_genome"] = genome
-        genome_gene_trait_count_list.append(genome_gene_trait_count)
-
-    genome_gene_trait_count_data = pd.concat(genome_gene_trait_count_list, axis=0)
-    genome_gene_trait_count_data.to_csv(f"{result_path}/t_magma_gene_trait_count.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
-
-
-def word_to_number(word: str) -> int:
-    return sum(ord(char) for char in word)
-
-
-def trait_gene_chunk(group_count: int = 100):
-    for genome in genomes:
-        print(f"Working on {genome}...")
-        trait_gene_file = f"{result_path}/t_magma_{genome}.txt"
-        data = pd.read_table(trait_gene_file, header=None, names=["f_trait_id", "f_gene"])
-
-        data["group"] = data["f_gene"].apply(word_to_number) % group_count
-
-        path = f"{result_path}/trait_gene/{genome}"
-        file.makedirs(path)
-
-        for _group_ in tqdm(range(group_count)):
-            group_data = data[data["group"] == _group_]
-            group_data = group_data.drop(columns=["group"], axis=0)
-            group_data.to_csv(os.path.join(path, f"t_trait_gene_{genome}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
 
 
 if __name__ == '__main__':
@@ -470,19 +497,19 @@ if __name__ == '__main__':
     util = Util('MAGMA')
 
     genomes: list = ["hg19", "hg38"]
-    # gene_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/gene/result"
-    gene_path: str = "/mnt/m/keti/gene/result"
+    gene_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/gene/result"
+    # gene_path: str = "/mnt/m/keti/gene/result"
     # gene_path: str = "M:/keti/gene/result"
-    # base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant"
-    base_path: str = "/mnt/m/keti/variant"
+    base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant"
+    # base_path: str = "/mnt/m/keti/variant"
     # base_path: str = "M:/keti/variant"
     output_path: str = f"{base_path}/magma"
     file.makedirs(output_path)
 
     magma_file: str = "/mnt/h/software/magma/magma_v1.10/magma"
 
-    # result_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/magma"
-    result_path: str = "/mnt/m/keti/database/sc_variant/table/magma"
+    result_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/magma"
+    # result_path: str = "/mnt/m/keti/database/sc_variant/table/magma"
     # result_path: str = "M:/keti/database/sc_variant/table/magma"
 
     trait_info = pd.read_excel("../result/trait_info.xlsx")
@@ -497,5 +524,6 @@ if __name__ == '__main__':
     # gene_enrichment_analysis()
     # gene_enrichment_file()
     # form_gene_count_file()
+    # merge_trait_gene()
     # trait_gene_chunk()
     form_sql_file()

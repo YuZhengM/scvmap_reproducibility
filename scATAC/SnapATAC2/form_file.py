@@ -220,16 +220,18 @@ def word_to_number(word: str) -> int:
 
 def form_sample_gene_tf_chunk(group_count: int = 100):
     for _elem_ in ["gene", "tf"]:
-        sample_gene_file = f"{output_path}/sample_{_elem_}_data.txt"
-        data = pd.read_table(sample_gene_file, header=0)
+        sample_elem_file = f"{output_path}/difference_{_elem_}_data.txt"
+        data = pd.read_table(sample_elem_file, header=0)
 
-        data["group"] = data[f"f_{_elem_}"].apply(word_to_number) % group_count
+        elem_data = data[["f_sample_id", f"f_{_elem_}", "f_adjusted_p_value", "f_log2_fold_change", "f_p_value"]].groupby(["f_sample_id", f"f_{_elem_}"], as_index=False).min()
+
+        elem_data["group"] = elem_data[f"f_{_elem_}"].apply(word_to_number) % group_count
 
         path = f"{output_path}/sample_{_elem_}"
         file.makedirs(path)
 
         for _group_ in tqdm(range(group_count)):
-            group_data = data[data["group"] == _group_]
+            group_data = elem_data[elem_data["group"] == _group_]
             group_data = group_data.drop(columns=["group"], axis=0)
             group_data.to_csv(os.path.join(path, f"t_sample_{_elem_}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
 
@@ -305,7 +307,13 @@ def create_table_sql(group_count: int = 100):
                       f"CREATE TABLE `scvdb`.`t_sample_gene_{i}` (\n" + \
                       f"  `f_sample_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
                       f"  `f_gene` varchar(128) NOT NULL,\n" + \
-                      f"  KEY `t_sample_gene_{i}_gene_index` (`f_gene`) USING BTREE\n" + \
+                      f"  `f_adjusted_p_value` varchar(128) NOT NULL,\n" + \
+                      f"  `f_log2_fold_change` double(26,20) DEFAULT NULL,\n" + \
+                      f"  `f_p_value` varchar(128) NOT NULL,\n" + \
+                      f"  KEY `t_sample_gene_{i}_gene_index` (`f_gene`) USING BTREE,\n" + \
+                      f"  KEY `t_sample_gene_{i}_adjusted_p_value_index` (`f_adjusted_p_value`),\n" + \
+                      f"  KEY `t_sample_gene_{i}_log2_fold_change_index` (`f_log2_fold_change`),\n" + \
+                      f"  KEY `t_sample_gene_{i}_p_value_index` (`f_p_value`)\n" + \
                       f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
                       f"LOAD DATA LOCAL INFILE \"/root/scatac/sample_gene/t_sample_gene_{i}.txt\" INTO TABLE `scvdb`.`t_sample_gene_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
@@ -318,7 +326,13 @@ def create_table_sql(group_count: int = 100):
                       f"CREATE TABLE `scvdb`.`t_sample_tf_{i}` (\n" + \
                       f"  `f_sample_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
                       f"  `f_tf` varchar(128) NOT NULL,\n" + \
-                      f"  KEY `t_sample_tf_{i}_tf_index` (`f_tf`) USING BTREE\n" + \
+                      f"  `f_adjusted_p_value` varchar(128) NOT NULL,\n" + \
+                      f"  `f_log2_fold_change` double(26,20) DEFAULT NULL,\n" + \
+                      f"  `f_p_value` varchar(128) NOT NULL,\n" + \
+                      f"  KEY `t_sample_tf_{i}_tf_index` (`f_tf`) USING BTREE,\n" + \
+                      f"  KEY `t_sample_tf_{i}_adjusted_p_value_index` (`f_adjusted_p_value`),\n" + \
+                      f"  KEY `t_sample_tf_{i}_log2_fold_change_index` (`f_log2_fold_change`),\n" + \
+                      f"  KEY `t_sample_tf_{i}_p_value_index` (`f_p_value`)\n" + \
                       f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
                       f"LOAD DATA LOCAL INFILE \"/root/scatac/sample_tf/t_sample_tf_{i}.txt\" INTO TABLE `scvdb`.`t_sample_tf_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
