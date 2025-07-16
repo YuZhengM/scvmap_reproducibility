@@ -399,10 +399,10 @@ if __name__ == '__main__':
 
     identifier_list: list = list(sample_info["f_label"])
 
-    # process_sc_variant_save()
-    # process_sc_variant_data()
-    # process_enriched_sample_trait()
-    # form_enriched_sample_file()
-    # get_statistics_count()
-    # enriched_data_chunk()
+    process_sc_variant_save()
+    process_sc_variant_data()
+    process_enriched_sample_trait()
+    form_enriched_sample_file()
+    get_statistics_count()
+    enriched_data_chunk()
     create_enrich_sql()

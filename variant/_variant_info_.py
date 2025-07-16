@@ -166,18 +166,18 @@ def create_table_sql(group_count: int = 100):
                           f"  `f_index` int NOT NULL,\n" + \
                           f"  `f_variant` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,\n" + \
                           f"  `f_rs_id` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
-                          f"  `f_effective_allele` varchar(256) DEFAULT NULL,\n" + \
-                          f"  `f_non_effective_allele` varchar(256) DEFAULT NULL,\n" + \
-                          f"  `f_af` double(26,20) DEFAULT NULL,\n" + \
-                          f"  `f_maf` double(26,20) DEFAULT NULL,\n" + \
-                          f"  `f_beta` double(26,20) DEFAULT NULL,\n" + \
-                          f"  `f_se` double(26,20) DEFAULT NULL,\n" + \
+                          f"  `f_allele1` varchar(256) DEFAULT NULL,\n" + \
+                          f"  `f_allele2` varchar(256) DEFAULT NULL,\n" + \
+                          f"  `f_af` varchar(128) DEFAULT NULL,\n" + \
+                          f"  `f_maf` varchar(128) DEFAULT NULL,\n" + \
+                          f"  `f_beta` varchar(128) DEFAULT NULL,\n" + \
+                          f"  `f_se` varchar(128) DEFAULT NULL,\n" + \
                           f"  `f_p_value` varchar(128) DEFAULT NULL,\n" + \
-                          f"  `f_chisq` double(26,20) DEFAULT NULL,\n" + \
-                          f"  `f_z_score` double(26,20) DEFAULT NULL,\n" + \
+                          f"  `f_chisq` varchar(128) DEFAULT NULL,\n" + \
+                          f"  `f_z_score` varchar(128) DEFAULT NULL,\n" + \
                           f"  `f_pp` double(25,20) NOT NULL,\n" + \
-                          f"  `f_beta_posterior` double(26,20) DEFAULT NULL,\n" + \
-                          f"  `f_sd_posterior` double(26,20) DEFAULT NULL,\n" + \
+                          f"  `f_beta_posterior` varchar(128) DEFAULT NULL,\n" + \
+                          f"  `f_sd_posterior` varchar(128) DEFAULT NULL,\n" + \
                           f"  KEY `t_variant_{h}_{i}_trait_id_index` (`f_trait_id`)\n" + \
                           f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
                           f"LOAD DATA LOCAL INFILE \"/root/variant/{h}/t_variant_{i}_{h}.txt\" INTO TABLE `scvdb`.`t_variant_{h}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
@@ -222,6 +222,6 @@ if __name__ == '__main__':
 
     # get_trait_info(group_count=100)
 
-    get_trait_variant_map(group_count=100)
+    # get_trait_variant_map(group_count=100)
 
     create_table_sql()

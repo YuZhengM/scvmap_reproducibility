@@ -374,6 +374,7 @@ def merge_trait_gene(group_count: int = 100):
 
         print(f"Integrate data: {genome}...")
         genome_data_list = []
+        genome_anno_data_list = []
 
         for _group_ in tqdm(range(group_count)):
             _group_data_ = pd.read_table(
@@ -382,9 +383,15 @@ def merge_trait_gene(group_count: int = 100):
                 ]
             )
             genome_data_list.append(_group_data_)
+            # anno
+            _group_anno_data_ = pd.read_table(f"{result_path}/{genome}_anno/t_magma_{_group_}.txt", header=None, names=["trait_id", "gene_id", "gene", "rsId"])
+            genome_anno_data_list.append(_group_anno_data_)
 
         genome_data = pd.concat(genome_data_list, axis=0)
         genome_data.to_csv(f"{result_path}/magma_{genome}_data.txt", sep="\t", header=True, index=False, encoding="utf-8")
+
+        genome_anno_data = pd.concat(genome_anno_data_list, axis=0)
+        genome_anno_data.to_csv(f"{result_path}/magma_anno_{genome}_data.txt", sep="\t", header=True, index=False, encoding="utf-8")
 
 
 def trait_gene_chunk(group_count: int = 100):
