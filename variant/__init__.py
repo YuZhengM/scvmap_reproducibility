@@ -414,7 +414,7 @@ class HandlerVariant:
                 trait_f.write(
                     f"{trait_code}\t{split[0]}\t{split[1]}\t{split[3]}\t{split[4]}\t{split[5]}\t{split[6]}\t{split[13]}\t"
                     f"\t{split[14]}\t{split[15]}\t\t{split[16]}\t{str(float(split[14]) / float(split[15]))}\t"
-                    f"{split[17]}\t{split[20]}\t{split[21]}\t{trait_abbr}\t{trait}\t{str(variant_index_dict[trait_abbr])}\n"
+                    f"{split[17]}\t{split[19]}\t{split[20]}\t{trait_abbr}\t{trait}\t{str(variant_index_dict[trait_abbr])}\n"
                 )
                 variant_index_dict.update({trait_abbr: variant_index_dict[trait_abbr] + 1})
 
