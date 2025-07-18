@@ -3,6 +3,7 @@
 
 import os
 from multiprocessing.dummy import Pool
+from threading import Lock
 from typing import Tuple
 
 import pandas as pd
@@ -13,11 +14,14 @@ from yzm_log import Logger
 
 
 def get_variant_info(param: Tuple) -> None:
+    lock = Lock()
 
-    f_filter, f_trait_code, f_trait_id, f_source_id, trait_info_dict, trait_chr_info_list, group_count = param
+    f_filter, f_trait_code, f_trait_id, f_source_id, trait_info_dict, trait_chr_info_list, group_count, is_skip_chr_count = param
 
     if f_filter == 1:
-        # log.info("Read trait info for {}".format(f_trait_code))
+        lock.acquire()
+        log.info("Read trait info for {}".format(f_trait_code))
+        lock.release()
         trait_description = pd.read_table(f"{base_path}/trait/{f_trait_code}.txt")
         trait_hg19 = pd.read_table(f"{base_path}/hg19/{f_trait_code}.bed", header=None)
         trait_hg38 = pd.read_table(f"{base_path}/hg38/{f_trait_code}.bed", header=None)
@@ -39,20 +43,20 @@ def get_variant_info(param: Tuple) -> None:
         hg38_info.loc[:, "f_trait_id"] = f_trait_id
         hg38_info.loc[:, "f_source_id"] = f_source_id
 
-        hg19_info.groupby("f_trait_id")
+        if is_skip_chr_count:
+            trait_hg19_chr: DataFrame = trait_hg19.groupby("chr").size().reset_index()
+            trait_hg19_chr.columns = ["f_chr", "f_count"]
+            trait_hg19_chr.insert(0, "f_trait_id", f_trait_id)
+            trait_hg19_chr["f_genome"] = "hg19"
+            trait_hg38_chr = trait_hg38.groupby("chr").size().reset_index()
+            trait_hg38_chr.columns = ["f_chr", "f_count"]
+            trait_hg38_chr.insert(0, "f_trait_id", f_trait_id)
+            trait_hg38_chr["f_genome"] = "hg38"
 
-        trait_hg19_chr: DataFrame = trait_hg19.groupby("chr").size().reset_index()
-        trait_hg19_chr.columns = ["f_chr", "f_count"]
-        trait_hg19_chr.insert(0, "f_trait_id", f_trait_id)
-        trait_hg19_chr["f_genome"] = "hg19"
-        trait_hg38_chr = trait_hg38.groupby("chr").size().reset_index()
-        trait_hg38_chr.columns = ["f_chr", "f_count"]
-        trait_hg38_chr.insert(0, "f_trait_id", f_trait_id)
-        trait_hg38_chr["f_genome"] = "hg38"
+            # Add trait
+            trait_chr_info_list.append(trait_hg19_chr)
+            trait_chr_info_list.append(trait_hg38_chr)
 
-        # Add trait
-        trait_chr_info_list.append(trait_hg19_chr)
-        trait_chr_info_list.append(trait_hg38_chr)
         trait_info_dict[int(f_trait_id.split("_")[-1]) % group_count]["hg19"].append(hg19_info)
         trait_info_dict[int(f_trait_id.split("_")[-1]) % group_count]["hg38"].append(hg38_info)
     else:
@@ -61,6 +65,8 @@ def get_variant_info(param: Tuple) -> None:
 
 def get_trait_info(group_count: int = 100):
     trait_info = pd.read_table("./result/trait_info.txt")
+
+    is_skip_chr_count: bool = os.path.exists(f"{output_path}/t_trait_chr_count.txt")
 
     # The result of creating 100 groups (Distinguish based on `index` remainder)
     trait_info_dict: dict = {}
@@ -77,7 +83,7 @@ def get_trait_info(group_count: int = 100):
     params: list = []
 
     for f_trait_id, f_trait_code, f_source_id, f_filter in zip(trait_info["f_trait_id"], trait_info["f_trait_code"], trait_info["f_source_id"], trait_info["f_filter"]):
-        params.append((f_filter, f_trait_code, f_trait_id, f_source_id, trait_info_dict, trait_chr_info_list, group_count))
+        params.append((f_filter, f_trait_code, f_trait_id, f_source_id, trait_info_dict, trait_chr_info_list, group_count, is_skip_chr_count))
 
     log.info("Start getting trait info...")
 
@@ -88,8 +94,10 @@ def get_trait_info(group_count: int = 100):
     pool.join()
 
     file.makedirs(output_path)
-    trait_chr_info_data = pd.concat(trait_chr_info_list, axis=0)
-    trait_chr_info_data.to_csv(f"{output_path}/t_trait_chr_count.txt", sep="\t", index=False, header=False, lineterminator="\n", encoding="utf-8")
+
+    if not is_skip_chr_count:
+        trait_chr_info_data = pd.concat(trait_chr_info_list, axis=0)
+        trait_chr_info_data.to_csv(f"{output_path}/t_trait_chr_count.txt", sep="\t", index=False, header=False, lineterminator="\n", encoding="utf-8")
 
     # save
     file.makedirs(f"{output_path}/hg19")

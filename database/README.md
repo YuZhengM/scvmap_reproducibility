@@ -410,3 +410,11 @@ scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg19.tar.gz root
 scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
 
 ```
+
+```shell
+tar -xzvf /mnt/data3/workspace/SCVdb/data/data/download/trait/fine_mapping_hg19.tar.gz -C /mnt/data3/workspace/SCVdb/data/data/download/variant/
+tar -xzvf /mnt/data3/workspace/SCVdb/data/data/download/trait/fine_mapping_hg38.tar.gz -C /mnt/data3/workspace/SCVdb/data/data/download/variant/
+tar -xzvf /mnt/data3/workspace/SCVdb/data/data/download/trait/fine_mapping_trait.tar.gz -C /mnt/data3/workspace/SCVdb/data/data/download/variant/
+
+```
+
