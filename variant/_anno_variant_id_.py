@@ -15,28 +15,31 @@ from yzm_file import StaticMethod
 
 def get_rs_id_value(chromosome: str, position: int):
 
-    try:
+    if chromosome + str(position) in variant_id_dict:
         return variant_id_dict[chromosome + str(position)]
-    except Exception as _:
-        if chromosome.startswith('chr'):
-            chromosome = chromosome[3:]
 
-        # Create search query
-        query = f"{chromosome}:{position}-{position}"
+    if chromosome.startswith('chr'):
+        chromosome = chromosome[3:]
 
+    # Create search query
+    query = f"{chromosome}:{position}-{position}"
+
+    try:
         # Using `esearch` to search the dbSNP database
         handle = Entrez.esearch(db="snp", term=query, retmax=1)
         search_results = Entrez.read(handle)
         handle.close()
+    except Exception as e:
+        print(e.args)
+        return None
 
-        # Check if there is an rsId returned
-        if search_results["IdList"]:
-            rs_id = "rs" + str(search_results["IdList"][0])
-            f_tmp.write(f"chr{chromosome}\t{position}\t{rs_id}\n")
-            return rs_id
-        else:
-            return None
-
+    # Check if there is an rsId returned
+    if search_results["IdList"]:
+        rs_id = "rs" + str(search_results["IdList"][0])
+        f_tmp.write(f"chr{chromosome}\t{position}\t{rs_id}\n")
+        return rs_id
+    else:
+        return None
 
 def set_rs_id_value(trait_code: str):
 
@@ -122,7 +125,7 @@ def get_anno_variant_id():
 
     def _exec_():
         if is_mutil:
-            pool = Pool(os.cpu_count())
+            pool = Pool(os.cpu_count() - 1)
             pool.map(set_rs_id_value, need_trait_info["f_trait_code"].values)
             pool.close()
             pool.join()
@@ -163,7 +166,7 @@ if __name__ == '__main__':
 
     file.makedirs(f"{output_path}/trait")
 
-    variant_id_summary()
+    # variant_id_summary()
 
     is_mutil = True
     is_try = True
