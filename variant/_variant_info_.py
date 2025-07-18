@@ -82,7 +82,7 @@ def get_trait_info(group_count: int = 100):
     log.info("Start getting trait info...")
 
     # thread
-    pool = Pool(os.cpu_count())
+    pool = Pool(os.cpu_count() - 1)
     pool.map(get_variant_info, params)
     pool.close()
     pool.join()

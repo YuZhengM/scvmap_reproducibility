@@ -106,7 +106,7 @@ class LiftOver:
         code_list = [self.exec_str(input_file) for input_file in input_files if input_file not in finish_files]
 
         # Instantiating thread objects
-        pool = Pool(os.cpu_count())
+        pool = Pool(os.cpu_count() - 1)
         # Pass each command in the list to `exec_command` for processing
         pool.map(self.util.exec_command, code_list)
         # Close thread
@@ -151,7 +151,7 @@ class LiftOver:
             params.append((output_file, finish_files, output_dict))
 
         # Instantiating thread objects
-        pool = Pool(os.cpu_count())
+        pool = Pool(os.cpu_count() - 1)
         # Pass each command in the list to `exec_command` for processing
         pool.map(self.re_form_file_core, params)
         # Close thread

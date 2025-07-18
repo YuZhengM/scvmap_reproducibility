@@ -210,7 +210,7 @@ class HandlerVariant:
         # Prevent cyclic downloads due to download failures
         while need_download_count != 0 and number < 10:
             self.log.info(f"Download {download_info.shape[0] - len(files)}  files")
-            pool = Pool(os.cpu_count())
+            pool = Pool(os.cpu_count() - 1)
             for name, url in zip(download_info["name"], download_info["url"]):
                 filename = f"{name}{suffix}"
                 # Determine if the download has been completed
@@ -727,7 +727,7 @@ class HandlerVariant:
                 params.append((filename, trait_files_path, finemap_files_path, min_size))
 
             # thread
-            pool = Pool(os.cpu_count())
+            pool = Pool(os.cpu_count() - 1)
             pool.map(self.filter_data_core, params)
             pool.close()
             pool.join()

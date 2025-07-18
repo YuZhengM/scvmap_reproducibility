@@ -170,7 +170,7 @@ def form_trait_anno(
             params.append((read_no_header, input_files_dict, filename, filename_dict))
 
         # thread
-        pool = Pool(os.cpu_count())
+        pool = Pool(os.cpu_count() - 1)
         pool.map(get_trait_size_pp_sum, params)
         pool.close()
         pool.join()
@@ -204,7 +204,7 @@ def form_trait_anno(
         params2.append((filename, source_file, read, files_dict, trait_info_dict, min_number, trait_info_list, filenames, genomes, input_path, file, output_path))
 
     # thread
-    pool = Pool(os.cpu_count())
+    pool = Pool(os.cpu_count() - 1)
     pool.map(add_trait_info, params2)
     pool.close()
     pool.join()

@@ -73,7 +73,7 @@ def get_variant_anno():
             params.append(i)
 
         # thread
-        pool = Pool(os.cpu_count())
+        pool = Pool(os.cpu_count() - 1)
         pool.map(handle_data, params)
         pool.close()
         pool.join()
@@ -99,7 +99,7 @@ def exec_magma_anno():
             exec_str: str = f"{magma_file} --annotate --snp-loc {snp_file} --gene-loc {gene_file} --out {output_file}"
             exec_str_list.append(exec_str)
 
-    pool = Pool(os.cpu_count())
+    pool = Pool(os.cpu_count() - 1)
     pool.map(util.exec_command, exec_str_list)
     pool.close()
     pool.join()
