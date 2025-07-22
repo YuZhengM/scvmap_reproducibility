@@ -1,5 +1,5 @@
 
-# SCVDB
+# SCVdb
 
 Input scATAC-seq datas and fine-mapping results to obtain TRS through methods `g-chromVAR` and `SCAVENGE`
 
