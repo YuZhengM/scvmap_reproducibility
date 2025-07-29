@@ -1,5 +1,5 @@
 ###################################################################
-# I don't know why, it's easy to get stuck
+# I don't know why, it's easy to get stuck.
 ###################################################################
 # path: scATAC 输入路径
 #    {path}/{identifier}_ATAC.rds
