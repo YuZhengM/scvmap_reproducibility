@@ -354,9 +354,9 @@ if __name__ == '__main__':
 
     sample_info = pd.read_table(sample_info_file)
 
-    # form_difference_gene_file()
-    # form_difference_tf_file()
-    # gene_enrichment_analysis()
+    form_difference_gene_file()
+    form_difference_tf_file()
+    gene_enrichment_analysis()
 
     # file.makedirs(f"{output_path}/gene_enrichment")
     # while len(os.listdir(f"{output_path}/gene_enrichment")) != 184:
@@ -366,6 +366,6 @@ if __name__ == '__main__':
     #         print(e)
     #         continue
 
-    # gene_enrichment_file()
-    # form_sample_gene_tf_chunk()
+    gene_enrichment_file()
+    form_sample_gene_tf_chunk()
     create_table_sql()
