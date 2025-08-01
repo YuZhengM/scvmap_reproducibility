@@ -4,7 +4,7 @@
 
 > SCVdb tutorial: https://scvdb-tutorial.readthedocs.io/en/latest/index.html
 
-A comprehensive platform for human **integrating** `single-cell chromatin accessibility data` with `causal variant effects`.
+A comprehensive platform for human **integrating** `single-cell chromatin accessibility data` with `causal variants`.
 
 Investigating how genetic variations associated with complex phenotypes or diseases affect biological
 processes at the single-cell level is essential for understanding their underlying mechanisms.
