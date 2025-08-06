@@ -2,6 +2,7 @@
 
 import time
 
+import pandas as pd
 import requests
 from requests import Response
 
@@ -9,7 +10,7 @@ from requests import Response
 def get_result_data(resp: Response):
     json_data = resp.json()
 
-    if bool(json_data["status"]):
+    if json_data["status"]:
         return json_data["data"]
 
     raise ValueError(json_data["message"])
@@ -27,8 +28,9 @@ if __name__ == '__main__':
     print(get_result_data(response))
 
     time.sleep(3)
+    print("----------------------------------------------------------------------------------")
 
-    # Variant information
+    # Variant information https://bio.liclab.net/scvdb_service/swagger-ui/index.html#/Detail-API/listTraitInfoData
     response = requests.post(
         f"{base_url}/detail/trait_info/{trait_id}/{genome}",
         json={
@@ -42,24 +44,29 @@ if __name__ == '__main__':
             "symbol": 1
         }
     )
-    print(get_result_data(response))
-
-    time.sleep(3)
-
-    # Difference gene
+    total_size = get_result_data(response)["total"]
     response = requests.post(
-        f"{base_url}/detail/difference_gene/heatmap",
+        f"{base_url}/detail/trait_info/{trait_id}/{genome}",
         json={
-            "sampleId": "sample_id_1",
-            "topCount": 20,
-            "log2FoldChange": 1,
-            "names": "GLI1,RCC2"
+            "page": 1,
+            "size": total_size,
+            "field": "",
+            "order": 0,
+            "searchField": "",
+            "content": "",
+            "type": 1,
+            "symbol": 1
         }
     )
-    print(get_result_data(response))
+    variant_data = get_result_data(response)
+    variant_df = pd.DataFrame(variant_data["data"])
+    print(variant_df)
 
     time.sleep(3)
+    print("----------------------------------------------------------------------------------")
 
-    # MAGMA
+    # MAGMA https://bio.liclab.net/scvdb_service/swagger-ui/index.html#/Detail-API/listMagmaGeneByTraitId
     response = requests.get(f"{base_url}/detail/magma_gene/{trait_id}/{genome}")
-    print(get_result_data(response))
+    magma_data = get_result_data(response)
+    magma_df = pd.DataFrame(magma_data)
+    print(magma_df)
