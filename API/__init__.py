@@ -18,7 +18,7 @@ def get_result_data(resp: Response):
 
 if __name__ == '__main__':
 
-    base_url: str = "https://bio.liclab.net/scvdb_service/"
+    base_url: str = "https://bio.liclab.net/scvmap_service/"
     sample_id: str = "sample_id_1"
     trait_id: str = "trait_id_894"
     genome: str = "hg19"
