@@ -422,4 +422,3 @@ tar -xzvf /mnt/data3/workspace/SCVdb/data/data/download/trait/fine_mapping_hg38.
 tar -xzvf /mnt/data3/workspace/SCVdb/data/data/download/trait/fine_mapping_trait.tar.gz -C /mnt/data3/workspace/SCVdb/data/data/download/variant/
 
 ```
-
