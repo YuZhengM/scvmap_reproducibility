@@ -2,228 +2,233 @@
 
 ## 1. Path storage instructions
 
-> `path` 为根路径
+> `path` is the root path
 
 - 📁`{path}`
-  - 📁database: 存储 `SCVdb` 数据库数据
-    - 📁code: 存储跑数据库数据的代码
-      - 📁`{server}`: 代表不同的服务器, 存储执行 g-chromVAR 和 SCAVENGE 方法的代码
-        - 📄library.R: 引用的 R 包
-        - 📄static_function.R: 单细胞和整合代码的处理
-        - 📄integration.R: 将多个性状或疾病循环跑数据
-        - 📄run.R: 执行的总代码
-    - 📁sc_variant: 存储据库数据输出的根路径
-      - 📁result: 存储 g-chromVAR 和 SCAVENGE 方法结果
-        - 📁`{scATAC-seq}`: 代表不同的单细胞数据, 存储某个单细胞数据整合所有的性状或疾病的结果数据
-          - 📄`{scATAC-seq}__{genome}__{trait_label_file}__mat.txt`: 存储 TRS, 富集状态等信息文件
-          - 📄`{scATAC-seq}__{genome}__{trait_label_file}__mat_info.rda`: 存储了结果 txt 和 mutual-KNN 信息文件
-      - 📁scATAC: 存储了单细胞跑之前的处理文件以及跑之后结果文件
-        - 📁`{scATAC-seq}`: 代表不同的单细胞数据, 存储某个单细胞数据跑之前的处理文件以及跑之后结果文件
-          - 📄`{scATAC-seq}.txt`: 细胞注释文件
-          - 📄`{scATAC-seq}_all.rda`: 单细胞处理文件, 在与性状或者疾病进行整合读取的是这个文件
-          - 📄`{scATAC-seq}_SE_gvar_SE_gvar_bg.rda`: 单细胞处理的中间文件, 内容比 ${scATAC-seq}_all.rda 这个文件少
-          - 📄`{scATAC-seq}_trs_scavenge_data.h5ad`: 某个单细胞数据整合所有的性状或疾病的结果数据形成一个 h5ad 文件格式
-      - 📁table: 存储与数据库搭建相关的数据
-        - 📁download: 存储通过 SnapATAC2 处理后的 scATAC-seq 数据
-          - 📁scatac: 存储通过 SnapATAC2 处理后的 scATAC-seq 数据
-            - 📄`{scATAC-seq}_snapATAC2.h5ad`: 在网站上下载页下载的数据
-          - 📄cp.sh: 将通过 SnapATAC2 处理后的 scATAC-seq 数据都复制到通路径下的 scatac 中
-        - 📁homer: 存储 HOMER 跑出来的性状或疾病感兴趣的转录因子数据
-          - 📁hg19: 存储参考基因组为 hg19 的性状或疾病感兴趣的转录因子数据
-            - 📄`t_homer_{group}`.txt:  与数据库中 `t_homer_hg19_{group}` 表对应
-          - 📁hg38: 存储参考基因组为 hg38 的性状或疾病感兴趣的转录因子数据
-            - 📄`t_homer_{group}`.txt:  与数据库中 `t_homer_hg38_{group}` 表对应
-          - 📄t_homer_tf_trait_count.txt: 存储在不同参考基因组下 TF 在性状或疾病样本与转录因子的数量, 与数据库中 `t_tf_trait_count` 表对应
-          - 📄t_homer_trait_tf.txt: 存储在不同参考基因组下性状或疾病样本与转录因子的映射关系
-          - 📄t_homer_trait_tf_hg19.txt: 存储 hg19 性状或疾病样本与转录因子的映射关系, 与数据库中 `t_trait_tf_hg19` 表对应
-          - 📄t_homer_trait_tf_hg38.txt: 存储 hg38 性状或疾病样本与转录因子的映射关系, 与数据库中 `t_trait_tf_hg38` 表对应
-          - 📄trait_tf_hg19.txt: 这个文件是对 `hg19` 文件数据放在了一起 (没有用到, 保留)
-          - 📄trait_tf_hg38.txt: 这个文件是对 `hg38` 文件数据放在了一起 (没有用到, 保留)
-        - 📁magma: 存储 MAGMA 跑出来的性状或疾病感兴趣的基因数据
-          - 📁gene_enrichment_trait: 存储性状或疾病感兴趣的基因的 GO, KEGG 等基因富集功能
-            - 📁hg19: 存储参考基因组为 hg19 的性状或疾病感兴趣的基因的 GO, KEGG 等基因富集功能
-            - 📁hg38: 存储参考基因组为 hg38 的性状或疾病感兴趣的基因的 GO, KEGG 等基因富集功能
-          - 📁gene_enrichment_trait_table: 存储性状或疾病感兴趣的基因的 GO, KEGG 等基因富集功能
-            - 📁hg19: 存储参考基因组为 hg19 的性状或疾病感兴趣的基因 GO, KEGG 等基因富集功能
-              - 📄`t_gene_enrichment_trait_hg19_{group}.txt`: 与数据库中 `t_gene_enrichment_trait_hg19_{group}` 表对应
-            - 📁hg38: 存储参考基因组为 hg38 的性状或疾病感兴趣的基因 GO, KEGG 等基因富集功能
-              - 📄`t_gene_enrichment_trait_hg38_{group}.txt`: 与数据库中 `t_gene_enrichment_trait_hg38_{group}` 表对应
-          - 📁hg19: 存储参考基因组为 hg19 的性状或疾病感兴趣的基因数据 (带有富集的得分)
-            - 📄`t_magma_{group}.txt`: 与数据库中 `t_magma_hg19_{group}` 表对应
-          - 📁hg19_anno: 存储参考基因组为 hg19 的性状或疾病感兴趣的基因数据 (带有突变和基因映射)
-            - 📄`t_magma_{group}.txt`: 与数据库中 `t_magma_anno_hg19_{group}` 表对应
-          - 📁hg38: 存储参考基因组为 hg38 的性状或疾病感兴趣的基因数据 (带有富集的得分)
-            - 📄`t_magma_{group}.txt`: 与数据库中 `t_magma_hg38_{group}` 表对应
-          - 📁hg38_anno: 存储参考基因组为 hg38 的性状或疾病感兴趣的基因数据 (带有突变和基因映射)
-            - 📄`t_magma_{group}.txt`: 与数据库中 `t_magma_anno_hg38_{group}` 表对应
-          - 📄t_magma_gene_trait_count.txt: 存储在不同参考基因组下 Gene 在性状或疾病样本与转录因子的数量, 与数据库中 `t_gene_trait_count` 表对应
-          - 📄t_magma.txt: 存储在不同参考基因组下性状或疾病样本与基因的映射关系
-          - 📄t_magma_hg19.txt: 存储 hg19 性状或疾病样本与基因的映射关系, 与数据库中 `t_trait_gene_hg19` 表对应
-          - 📄t_magma_hg38.txt: 存储 hg38 性状或疾病样本与基因的映射关系, 与数据库中 `t_trait_gene_hg38` 表对应
-        - 📁scatac: 存储与 scATAC-seq 数据相关的数据库内容
-          - 📁difference_gene: 单细胞样本的差异基因富集
-            - `{scATAC-seq}_difference_gene_data.txt`: 某个单细胞样本的差异基因富集 (没有用到, 保留)
-          - 📁difference_tf: 单细胞样本的差异转录因子富集
-            - `{scATAC-seq}_difference_tf_data.txt`: 某个单细胞样本的差异转录因子富集 (没有用到, 保留)
-          - 📁gene_enrichment_table: 单细胞样本的差异基因 GO, KEGG 等通路富集
-            - `{scATAC-seq}_gene_enrichment_data.txt`: 某个单细胞样本的差异基因 GO, KEGG 等通路富集, 与数据库中 `t_gene_enrichment_{scATAC-seq}` 表对应
-          - 📄difference_gene_data.txt: 所有单细胞样本差异基因富集, 与数据库中 `t_difference_gene` 表对应
-          - 📄difference_tf_data.txt: 所有单细胞样本差异转录因子富集, 与数据库中 `t_difference_tf` 表对应
-          - 📄gene_enrichment_table_data.txt: 所有单细胞样本的差异基因 GO, KEGG 等通路富集 (没有用到, 保留)
-          - 📄sample_gene_data.txt: 存储单细胞样本与基因的映射关系文件, 与数据库中 `t_sample_gene` 表对应
-        - 📁trait_variant_overlap: 存储所有单细胞和所有性状或疾病是否存在 overlap 的情况 (是否 overlap: !是否 TRS 得分全为零)
-          - 📄gchromvar_sample_enrichment.txt: g-chromVAR 方法 overlap 情况以 txt 文件存储, 与数据库中 `t_difference_tf` 表对应
-          - 📄scavenge_sample_enrichment.txt: SCAVENGE 方法 overlap 情况以 txt 文件存储, 与数据库中 `t_difference_tf` 表对应
-          - 📄trs_overlap_gchromvar.h5ad: g-chromVAR 方法 overlap 情况以 h5ad 文件存储 (没有用到, 保留)
-          - 📄trs_overlap_scavenge.h5ad: SCAVENGE 方法 overlap 情况以 h5ad 文件存储 (没有用到, 保留)
-        - 📁trs: 存储网站读取文件展示可视化的数据内容 (这里对结果 h5ad 文件进行分文件 100 份)
-          - 📁`{scATAC-seq}`: 代表不同的单细胞数据, 存储某个单细胞数据与分组性状或者疾病的结果
-            - 📁cell_type: 以细胞类型为分辨率的 TRS 结果
-              - 📄`{scATAC-seq}_cell_type_trs_gchromvar.h5ad`: g-chromVAR 方法计算出来的 cell types-traits 矩阵
-              - 📄`{scATAC-seq}_cell_type_trs_scavenge.h5ad`: SCAVENGE 方法计算出来的 cell types-traits 矩阵
-            - 📁chunk: TRS 结果
-              - 📄`{scATAC-seq}_{group}_trs_gchromvar.h5ad`: g-chromVAR 方法计算出来的 cells-traits 矩阵
-              - 📄`{scATAC-seq}_{group}_trs_scavenge.h5ad`: SCAVENGE 方法计算出来的 cells-traits 矩阵
-        - 📁trs_big: 存储网站下载的文件 (这里存储结果 h5ad 文件, 未分表)
-          - 📁`{scATAC-seq}`: 代表不同的单细胞数据, 存储某个单细胞数据与所有性状或者疾病的结果
-              - 📄`{scATAC-seq}_trs_gchromvar.h5ad`: g-chromVAR 方法计算出来的 cells-traits 矩阵
-              - 📄`{scATAC-seq}_trs_scavenge.h5ad`: SCAVENGE 方法计算出来的 cells-traits 矩阵
-        - 📁variant: 存储网站突变信息数据库的数据
-          - 📁hg19: 存储参考基因组为 hg19 的 fine-mapping 结果的数据
-            - 📄`t_variant_{group}_hg19.txt`: 与数据库中 `t_variant_hg19_{group}` 表对应
-          - 📁hg38: 存储参考基因组为 hg38 的 fine-mapping 结果的数据
-            - 📄`t_variant_{group}_hg38.txt`: 与数据库中 `t_variant_hg38_{group}` 表对应
-          - 📄t_trait_chr_count.txt: 存储性状或者疾病中不同染色质的数量, 与数据库中 `t_trait_chr_count` 表对应
-      - 📁variant: 存储跑数据的输入 fine-mapping 结果的数据
-        - 📁hg19: 存储参考基因组为 hg19 的 fine-mapping 结果的数据
-        - 📁hg38: 存储参考基因组为 hg38 的 fine-mapping 结果的数据
-        - 📄fine_mapping_result.pkl: 用文件存储所有参考基因组的 fine-mapping 结果的数据
-        - 📄fine_mapping_result_hg19.pkl: 用文件存储参考基因组为 hg19 的 fine-mapping 结果的数据
-        - 📄fine_mapping_result_hg38.pkl: 用文件存储参考基因组为 hg19 的 fine-mapping 结果的数据
-  - 📁gene: 存储基因相关的数据
-    - 📁download: 现在与 SnapATAC2 一致的基因版本
-      - 📄gencode.v41.annotation.gtf.gz: 参考基因组为 hg38
-      - 📄gencode.v41lift37.annotation.gtf.gz: 参考基因组为 hg19
-    - 📁result: 通过 download 数据进行处理后的规范表格数据
-      - 📄gene_hg19_all.txt: 形成表格的数据, 含有所有列
-      - 📄gene_hg38_all.txt: 形成表格的数据, 含有所有列
-      - 📄gene_data.txt: 形成输入数据库中的数据, 与数据库中 `t_gene` 表对应
-      - 📄gene_hg19_data.txt: 从 gene_data.txt 表抽取 hg19 数据
-      - 📄gene_hg38_data.txt: 从 gene_data.txt 表抽取 hg38 数据
-    - 📁annotation: 带有基因注释的相关文件
-      - 📁dbSNP: 在 dbSNP 下载的文件
-        - 📁common_snp_chunk:
-          - 📁hg19:
-          - 📁hg38:
-        - 📄dbsnp_common_snp_hg19.txt:
-        - 📄dbsnp_common_snp_hg19.cvf:
-        - 📄dbsnp_common_snp_hg38.txt:
-        - 📄dbsnp_common_snp_hg38.cvf:
-      - 📁dbSUPER: 在 dbSUPER 下载的文件
-        - 📁all_hg19_bed:
+  - 📁database: Store `SCVdb` database data
+    - 📁code: Store the code for running database data
+      - 📁`{server}`: Represent different servers and store the code for executing g-chromVAR and SCAVENGE methods
+        - 📄library.R: Referenced R packages
+        - 📄static_function.R: Processing of single-cell and integration code
+        - 📄integration.R: Run data for multiple traits or diseases in a loop
+        - 📄run.R: The main execution code
+    - 📁sc_variant: Store the root path of database data output
+      - 📁result: Store the results of g-chromVAR and SCAVENGE methods
+        - 📁`{scATAC-seq}`: Represent different single-cell data and store the result data of integrating all traits or diseases for a certain single-cell data
+          - 📄`{scATAC-seq}__{genome}__{trait_label_file}__mat.txt`: Store information files such as TRS and enrichment status
+          - 📄`{scATAC-seq}__{genome}__{trait_label_file}__mat_info.rda`: Store the result txt and mutual-KNN information files
+      - 📁scATAC: Store the pre-processing files and post-processing result files of single-cell data
+        - 📁`{scATAC-seq}`: Represent different single-cell data and store the pre-processing files and post-processing result files of a certain single-cell data
+          - 📄`{scATAC-seq}.txt`: Cell annotation file
+          - 📄`{scATAC-seq}_all.rda`: Single-cell processing file, which is read when integrating with traits or diseases
+          - 📄`{scATAC-seq}_SE_gvar_SE_gvar_bg.rda`: Intermediate file for single-cell processing, with less content than `{scATAC-seq}_all.rda`
+          - 📄`{scATAC-seq}_trs_scavenge_data.h5ad`: The result data of integrating all traits or diseases for a certain single-cell data in h5ad file format
+      - 📁table: Store data related to database construction
+        - 📁download: Store scATAC-seq data processed by SnapATAC2
+          - 📁scatac: Store scATAC-seq data processed by SnapATAC2
+            - 📄`{scATAC-seq}_snapATAC2.h5ad`: Data downloaded from the download page on the website
+          - 📄cp.sh: Copy all scATAC-seq data processed by SnapATAC2 to the scatac directory in the same path
+        - 📁homer: Store the transcription factor data of traits or diseases of interest generated by HOMER
+          - 📁hg19: Store the transcription factor data of traits or diseases of interest with the reference genome hg19
+            - 📄`t_homer_{group}`.txt: Corresponds to the `t_homer_hg19_{group}` table in the database
+          - 📁hg38: Store the transcription factor data of traits or diseases of interest with the reference genome hg38
+            - 📄`t_homer_{group}`.txt: Corresponds to the `t_homer_hg38_{group}` table in the database
+          - 📄t_homer_tf_trait_count.txt: Store the number of TFs in trait or disease samples and transcription factors under different reference genomes, corresponding to the `t_tf_trait_count` table in the database
+          - 📄t_homer_trait_tf.txt: Store the mapping relationship between trait or disease samples and transcription factors under different reference genomes
+          - 📄t_homer_trait_tf_hg19.txt: Store the mapping relationship between hg19 trait or disease samples and transcription factors, corresponding to the `t_trait_tf_hg19` table in the database
+          - 📄t_homer_trait_tf_hg38.txt: Store the mapping relationship between hg38 trait or disease samples and transcription factors, corresponding to the `t_trait_tf_hg38` table in the database
+          - 📄trait_tf_hg19.txt: This file combines the data of `hg19` files (not used, kept)
+          - 📄trait_tf_hg38.txt: This file combines the data of `hg38` files (not used, kept)
+        - 📁magma: Store the gene data of traits or diseases of interest generated by MAGMA
+          - 📁gene_enrichment_trait: Store the GO, KEGG, and other gene enrichment functions of genes of interest in traits or diseases
+            - 📁hg19: Store the GO, KEGG, and other gene enrichment functions of genes of interest in traits or diseases with the reference genome hg19
+            - 📁hg38: Store the GO, KEGG, and other gene enrichment functions of genes of interest in traits or diseases with the reference genome hg38
+          - 📁gene_enrichment_trait_table: Store the GO, KEGG, and other gene enrichment functions of genes of interest in traits or diseases
+            - 📁hg19: Store the GO, KEGG, and other gene enrichment functions of genes of interest in traits or diseases with the reference genome hg19
+              - 📄`t_gene_enrichment_trait_hg19_{group}.txt`: Corresponds to the `t_gene_enrichment_trait_hg19_{group}` table in the database
+            - 📁hg38: Store the GO, KEGG, and other gene enrichment functions of genes of interest in traits or diseases with the reference genome hg38
+              - 📄`t_gene_enrichment_trait_hg38_{group}.txt`: Corresponds to the `t_gene_enrichment_trait_hg38_{group}` table in the database
+          - 📁hg19: Store the gene data of traits or diseases of interest with the reference genome hg19 (with enrichment scores)
+            - 📄`t_magma_{group}.txt`: Corresponds to the `t_magma_hg19_{group}` table in the database
+          - 📁hg19_anno: Store the gene data of traits or diseases of interest with the reference genome hg19 (with mutation and gene mapping)
+            - 📄`t_magma_{group}.txt`: Corresponds to the `t_magma_anno_hg19_{group}` table in the database
+          - 📁hg38: Store the gene data of traits or diseases of interest with the reference genome hg38 (with enrichment scores)
+            - 📄`t_magma_{group}.txt`: Corresponds to the `t_magma_hg38_{group}` table in the database
+          - 📁hg38_anno: Store the gene data of traits or diseases of interest with the reference genome hg38 (with mutation and gene mapping)
+            - 📄`t_magma_{group}.txt`: Corresponds to the `t_magma_anno_hg38_{group}` table in the database
+          - 📄t_magma_gene_trait_count.txt: Store the number of Genes in trait or disease samples and transcription factors under different reference genomes, corresponding to the `t_gene_trait_count` table in the database
+          - 📄t_magma.txt: Store the mapping relationship between trait or disease samples and genes under different reference genomes
+          - 📄t_magma_hg19.txt: Store the mapping relationship between hg19 trait or disease samples and genes, corresponding to the `t_trait_gene_hg19` table in the database
+          - 📄t_magma_hg38.txt: Store the mapping relationship between hg38 trait or disease samples and genes, corresponding to the `t_trait_gene_hg38` table in the database
+        - 📁scatac: Store the database content related to scATAC-seq data
+          - 📁difference_gene: Differential gene enrichment of single-cell samples
+            - `{scATAC-seq}_difference_gene_data.txt`: Differential gene enrichment of a certain single-cell sample (not used, kept)
+          - 📁difference_tf: Differential transcription factor enrichment of single-cell samples
+            - `{scATAC-seq}_difference_tf_data.txt`: Differential transcription factor enrichment of a certain single-cell sample (not used, kept)
+          - 📁gene_enrichment_table: Differential gene GO, KEGG, and other pathway enrichment of single-cell samples
+            - `{scATAC-seq}_gene_enrichment_data.txt`: Differential gene GO, KEGG, and other pathway enrichment of a certain single-cell sample, corresponding to the `t_gene_enrichment_{scATAC-seq}` table in the database
+          - 📄difference_gene_data.txt: Differential gene enrichment of all single-cell samples, corresponding to the `t_difference_gene` table in the database
+          - 📄difference_tf_data.txt: Differential transcription factor enrichment of all single-cell samples, corresponding to the `t_difference_tf` table in the database
+          - 📄gene_enrichment_table_data.txt: Differential gene GO, KEGG, and other pathway enrichment of all single-cell samples (not used, kept)
+          - 📄sample_gene_data.txt: File storing the mapping relationship between single-cell samples and genes, corresponding to the `t_sample_gene` table in the database
+        - 📁trait_variant_overlap: Store the overlap status between all single-cell data and all traits or diseases (overlap status: !whether all TRS scores are zero)
+          - 📄gchromvar_sample_enrichment.txt: Store the overlap status of the g-chromVAR method in a txt file, corresponding to the `t_difference_tf` table in the database
+          - 📄scavenge_sample_enrichment.txt: Store the overlap status of the SCAVENGE method in a txt file, corresponding to the `t_difference_tf` table in the database
+          - 📄trs_overlap_gchromvar.h5ad: Store the overlap status of the g-chromVAR method in an h5ad file (not used, kept)
+          - 📄trs_overlap_scavenge.h5ad: Store the overlap status of the SCAVENGE method in an h5ad file (not used, kept)
+        - 📁trs: Store the data content for visual display when the website reads files (the result h5ad files are split into 100 sub - files here)
+          - 📁`{scATAC-seq}`: Represent different single-cell data and store the results of a certain single-cell data integrated with grouped traits or diseases
+            - 📁cell_type: TRS results with cell type as the resolution
+              - 📄`{scATAC-seq}_cell_type_trs_gchromvar.h5ad`: Cell types-traits matrix calculated by the g-chromVAR method
+              - 📄`{scATAC-seq}_cell_type_trs_scavenge.h5ad`: Cell types-traits matrix calculated by the SCAVENGE method
+            - 📁chunk: TRS results
+              - 📄`{scATAC-seq}_{group}_trs_gchromvar.h5ad`: Cells-traits matrix calculated by the g-chromVAR method
+              - 📄`{scATAC-seq}_{group}_trs_scavenge.h5ad`: Cells-traits matrix calculated by the SCAVENGE method
+        - 📁trs_big: Store the files downloaded from the website (here store the result h5ad files without splitting)
+          - 📁`{scATAC-seq}`: Represent different single-cell data and store the results of a certain single-cell data integrated with all traits or diseases
+              - 📄`{scATAC-seq}_trs_gchromvar.h5ad`: Cells-traits matrix calculated by the g-chromVAR method
+              - 📄`{scATAC-seq}_trs_scavenge.h5ad`: Cells-traits matrix calculated by the SCAVENGE method
+        - 📁variant: Store the data of the website's mutation information database
+          - 📁hg19: Store the fine-mapping result data with the reference genome hg19
+            - 📄`t_variant_{group}_hg19.txt`: Corresponds to the `t_variant_hg19_{group}` table in the database
+          - 📁hg38: Store the fine-mapping result data with the reference genome hg38
+            - 📄`t_variant_{group}_hg38.txt`: Corresponds to the `t_variant_hg38_{group}` table in the database
+          - 📄t_trait_chr_count.txt: Store the number of different chromatin in traits or diseases, corresponding to the `t_trait_chr_count` table in the database
+      - 📁variant: Store the input fine-mapping result data for running data
+        - 📁hg19: Store the fine-mapping result data with the reference genome hg19
+        - 📁hg38: Store the fine-mapping result data with the reference genome hg38
+        - 📄fine_mapping_result.pkl: Store the fine-mapping result data of all reference genomes in a file
+        - 📄fine_mapping_result_hg19.pkl: Store the fine-mapping result data with the reference genome hg19 in a file
+        - 📄fine_mapping_result_hg38.pkl: Store the fine-mapping result data with the reference genome hg38 in a file
+  - 📁gene: Store gene-related data
+    - 📁download: Store the gene version consistent with SnapATAC2 currently
+      - 📄gencode.v41.annotation.gtf.gz: Reference genome hg38
+      - 📄gencode.v41lift37.annotation.gtf.gz: Reference genome hg19
+    - 📁result: Store the standardized tabular data processed from the downloaded data
+      - 📄gene_hg19_all.txt: Tabular data containing all columns
+      - 📄gene_hg38_all.txt: Tabular data containing all columns
+      - 📄gene_data.txt: Data input into the database, corresponding to the `t_gene` table in the database
+      - 📄gene_hg19_data.txt: Extract hg19 data from the gene_data.txt table
+      - 📄gene_hg38_data.txt: Extract hg38 data from the gene_data.txt table
+    - 📁annotation: Store files related to gene annotation
+      - 📁dbSNP: Files downloaded from dbSNP
+        - 📁common_snp_chunk: Store the chunked data of common SNPs split by reference genome
+          - 📁hg19: Store the chunked data of common SNPs with reference genome hg19
+          - 📁hg38: Store the chunked data of common SNPs with reference genome hg38
+        - 📄dbsnp_common_snp_hg19.txt: Store the text-format data of common dbSNP SNPs with reference genome hg19
+        - 📄dbsnp_common_snp_hg19.cvf: Downloaded common SNP data for hg19
+        - 📄dbsnp_common_snp_hg38.txt: Store the text-format data of common dbSNP SNPs with reference genome hg38
+        - 📄dbsnp_common_snp_hg38.cvf: Downloaded common SNP data for hg38
+      - 📁dbSUPER: Files downloaded from dbSUPER
+        - 📁all_hg19_bed: Downloaded SE data for hg19
+        - 📁liftOver: Store files for reference genome conversion
+          - 📁input: Store original files before conversion
+          - 📁output: Store converted result files
+          - 📁result: Store finalized and standardized converted files
+        - 📄all_hg19_bed.zip: Store the compressed SE data for the hg19 reference genome downloaded from dbSUPER
+        - 📄dbsuper_super_enhancer_hg19.txt: Store the text data of dbSUPER super-enhancers for the hg19 reference genome
+        - 📄dbsuper_super_enhancer_hg38.txt: Store the text data of dbSUPER super-enhancers for the hg38 reference genome
+      - 📁GTEx: Files downloaded from GTEx
+        - 📁eqtl_chunk: Store the chunked eQTL data split by reference genome
+          - 📁hg19: Store the chunked eQTL data with reference genome hg19
+          - 📁hg38: Store the chunked eQTL data with reference genome hg38
+        - 📁GTEx_Analysis_v10_eQTL_updated: Downloaded eQTL data
+        - 📁liftOver: Store files for reference genome conversion
+          - 📁input: Input files for conversion to the corresponding reference genome
+          - 📁output: Output files after conversion to the corresponding reference genome
+          - 📁result: Final gene annotation files corresponding to the reference genome
+        - 📄gtex_v10_eqtl_hg19.txt: Store the GTEx v10 eQTL data with the reference genome hg19
+        - 📄gtex_v10_eqtl_hg38.txt: Store the GTEx v10 eQTL data with the reference genome hg38
+        - 📄gtex_v10_eqtl_hg38.tar: Downloaded GTEx v10 eQTL data in compressed format for the hg38 reference genome
+      - 📁gwasATLAS: Files downloaded from gwasATLAS
         - 📁liftOver:
-        - 📄all_hg19_bed.zip:
-        - 📄dbsuper_super_enhancer_hg19.txt:
-        - 📄dbsuper_super_enhancer_hg38.txt:
-      - 📁GTEx: 在 GTEx 下载的文件
-        - 📁eqtl_chunk:
-          - 📁hg19:
-          - 📁hg38:
-        - 📁GTEx_Analysis_v10_eQTL_updated:
+          - 📁input: Input files for conversion to the corresponding reference genome
+          - 📁output: Output files after conversion to the corresponding reference genome
+          - 📁result: Final gene annotation files corresponding to the reference genome
+        - 📄gwasATLAS_v20191115.txt: Downloaded risk SNP overview data
+        - 📄gwasATLAS_v20191115_riskloci.txt: Downloaded risk SNP data
+        - 📄gwasatlas_v20191115_risk_snp_hg19.txt: Risk SNP data for the hg19 reference genome processed from the downloaded files
+        - 📄gwasatlas_v20191115_risk_snp_hg38.txt: Risk SNP data for the hg38 reference genome processed from the downloaded files
+      - 📁SEA: Files downloaded from SEA
         - 📁liftOver:
-          - 📁input: 转成对应参考基因组的输入文件
-          - 📁output: 转成对应参考基因组的输出文件
-          - 📁result: 最终对应参考基因组的基因注释文件
-        - 📄gtex_v10_eqtl_hg19.txt:
-        - 📄gtex_v10_eqtl_hg38.txt:
-        - 📄gtex_v10_eqtl_hg38.tar:
-      - 📁gwasATLAS: 在 gwasATLAS 下载的文件
+          - 📁input: Input files for conversion to the corresponding reference genome
+          - 📁output: Output files after conversion to the corresponding reference genome
+          - 📁result: Final gene annotation files corresponding to the reference genome
+        - 📄sea_v3_enhancer_hg19.txt: Store the SEA v3 enhancer data with the reference genome hg19
+        - 📄sea_v3_enhancer_hg38.txt: Store the SEA v3 enhancer data with the reference genome hg38
+        - 📄sea_v3_super_enhancer_hg19.txt: Store the SEA v3 super-enhancer data with the reference genome hg19
+        - 📄sea_v3_super_enhancer_hg38.txt: Store the SEA v3 super-enhancer data with the reference genome hg38
+        - 📄sea_v3_super_enhancer_hg38.bed: Store the SEA v3 super-enhancer data with the reference genome hg38 in BED format
+      - 📁SEdb: Files downloaded from SEdb
+        - 📁enhancer_chunk: Store the chunked enhancer data split by reference genome
+          - 📁hg19: Store the chunked enhancer data with reference genome hg19
+          - 📁hg38: Store the chunked enhancer data with reference genome hg38
         - 📁liftOver:
-          - 📁input: 转成对应参考基因组的输入文件
-          - 📁output: 转成对应参考基因组的输出文件
-          - 📁result: 最终对应参考基因组的基因注释文件
-        - 📄gwasATLAS_v20191115.txt:
-        - 📄gwasATLAS_v20191115_riskloci.txt:
-        - 📄gwasatlas_v20191115_risk_snp_hg19.txt:
-        - 📄gwasatlas_v20191115_risk_snp_hg38.txt:
-      - 📁SEA: 在 SEA 下载的文件
-        - 📁liftOver:
-          - 📁input: 转成对应参考基因组的输入文件
-          - 📁output: 转成对应参考基因组的输出文件
-          - 📁result: 最终对应参考基因组的基因注释文件
-        - 📄sea_v3_enhancer_hg19.txt:
-        - 📄sea_v3_enhancer_hg38.txt:
-        - 📄sea_v3_super_enhancer_hg19.txt:
-        - 📄sea_v3_super_enhancer_hg38.txt:
-        - 📄sea_v3_super_enhancer_hg38.bed:
-      - 📁SEdb: 在 SEdb 下载的文件
-        - 📁enhancer_chunk:
-        - 📁liftOver:
-          - 📁input: 转成对应参考基因组的输入文件
-          - 📁output: 转成对应参考基因组的输出文件
-          - 📁result: 最终对应参考基因组的基因注释文件
-        - 📄SEdb_2.0_sample_information.txt:
-        - 📄sedb_v2_enhancer_hg19.txt:
-        - 📄sedb_v2_enhancer_hg38.txt:
-        - 📄sedb_v2_enhancer_hg38_middle.txt:
-        - 📄sedb_v2_super_enhancer_hg19.txt:
-        - 📄sedb_v2_super_enhancer_hg38.txt:
-        - 📄sedb_v2_super_enhancer_hg38_middle.txt:
-        - 📄SE_package_hg38.bed:
-        - 📄TE_package_hg38.bed:
-  - 📁project_code: 存储代码
-    - 📁scvdb_reproducibility: 此文件夹表示本项目的根路径
+          - 📁input: Input files for conversion to the corresponding reference genome
+          - 📁output: Output files after conversion to the corresponding reference genome
+          - 📁result: Final gene annotation files corresponding to the reference genome
+        - 📄SEdb_2.0_sample_information.txt: Download the sample information of SEdb v2.0
+        - 📄sedb_v2_enhancer_hg19.txt: Store the enhancer data of SEdb v2.0 with the reference genome hg19
+        - 📄sedb_v2_enhancer_hg38.txt: Store the enhancer data of SEdb v2.0 with the reference genome hg38
+        - 📄sedb_v2_enhancer_hg38_middle.txt: Store the intermediate enhancer data of SEdb v2.0 with the reference genome hg38 during processing
+        - 📄sedb_v2_super_enhancer_hg19.txt: Store the super-enhancer data of SEdb v2.0 with the reference genome hg19
+        - 📄sedb_v2_super_enhancer_hg38.txt: Store the super-enhancer data of SEdb v2.0 with the reference genome hg38
+        - 📄sedb_v2_super_enhancer_hg38_middle.txt: Store the intermediate super-enhancer data of SEdb v2.0 with the reference genome hg38 during processing
+        - 📄SE_package_hg38.bed: Download the super-enhancer package data in BED format with the reference genome hg38
+        - 📄TE_package_hg38.bed: Download the transposable element package data in BED format with the reference genome hg38
+  - 📁project_code: Store code
+    - 📁scvdb_reproducibility: This folder represents the root path of this project
   - 📁scATAC: 
-    - 📁`{GSE_ID}`: 存储不同单细胞样本整体的处理流程数据
-      - 📁data: 存储通过来源 rds 文件处理成统一规格的数据
-        - `{scATAC-seq}`: 存储不同单细胞样本处理成统一规格的数据
-          - 📁meta: 存储单细胞样本的元数据
-            - 📄barcodes.tsv: barcodes 信息
-            - 📄matrix.mtx: 稀疏矩阵信息
-            - 📄peaks.bed: peak 信息
-          - 📄annotation.txt: 未处理前所有细胞注释的文件
-          - 📄annotation_stdn.txt: 未处理单细胞注释的统一规范文件
-          - 📄`{scATAC-seq}_sc_atac.h5ad`: 未预处理的单细胞样本文件
-          - 📄`{scATAC-seq}_fragments.tsv.gz`: 单细胞样本的 fragments 文件
-          - 📄`{scATAC-seq}_sc_atac_snapATAC2.h5ad`: 预处理后的单细胞样本文件
-          - 📄`{scATAC-seq}_cell_anno.txt`: 单细胞预处理后细胞注释的文件
-          - 📄`{scATAC-seq}_cell_anno_stdn.txt`: 单细胞预处理后细胞注释的统一规范文件 (最终)
-          - 📄`{scATAC-seq}_cell_type_stdn.txt`: 单细胞预处理后细胞类型注释的统一规范文件
-          - 📄`{scATAC-seq}_gene_expression_data.h5ad`: 单细胞样本的基因表达数据
-          - 📄`{scATAC-seq}_difference_gene.h5ad`: 单细胞样本的差异基因数据
-          - 📄`{scATAC-seq}_gene_enrichment.txt`: 单细胞样本的差异基因富集文件
-          - 📄`{scATAC-seq}_difference_peak.h5ad`: 单细胞样本的差异 peak 数据
-          - 📄`{scATAC-seq}_tf_activity_data.h5ad`: 单细胞样本的差异转录因子文件
-      - 📄`{scATAC-seq}_ATAC.rds`: 不同单细胞样本的来源 rds 文件
-      - 📄`{scATAC-seq}_metadata.txt`: 不同单细胞样本的来源的注释文件
-  - 📁topic: SCIV 算法的根路径信息内容
-  - 📁variant: 关于所有 fine-mapping 结果文件的存储 (来源到最终)
-    - 📁source: 所有 fine-mapping 结果文件的来源数据
-      - 📁BBJ: 所有 BBJ 队列 fine-mapping 结果文件的来源数据
-        - 📁decompression: 对所有下载的文件进行压缩
-          - 📄`BBJ.{trait}.Kanai2021.FINEMAP.tsv.gz`: FINEMAP 软件跑出来的结果
-          - 📄`BBJ.{trait}.Kanai2021.SuSiE.tsv.gz`: SuSiE软件跑出来的结果 (未使用)
-        - 📁download: 下载 BBJ 的所有 fine-mapping 结果文件
-          - 📄`hum0197.v5.finemap.{trait}.v1.zip`: 下载的 BBJ 的性状或疾病文件
-        - 📁finemap: 对所有 FINEMAP 软件跑出来的结果进行压缩
-          - 📄`BBJ.{trait}.Kanai2021.FINEMAP.tsv.txt`: 对 FINEMAP 方法得到的结果解压后的文件
-      - 📁CAUSALdb: 所有 CAUSALdb 队列 fine-mapping 结果文件的来源数据
-        - 📁download: 下载 fine-mapping 结果文件
-          - 📁credible_set.v2.1.20240623: fine-mapping 结果解压后的文件夹
-            - 📁v2.1: fine-mapping 结果解压后的文件夹
-              - 📄credible_set.txt: 每个性状或疾病的详细内容信息
-              - 📄meta.txt: 每个性状或疾病的概述文件
-          - 📄credible_set.v2.1.20240623.tar.gz: 下载 fine-mapping 结果的压缩文件
-      - 📁FinnGen: 所有 FinnGen 队列 fine-mapping 结果文件的来源数据
-        - 📁decompression: 对所有下载的文件进行压缩
-          - 📄`finngen_R11_{trait}.txt`: 解压后的文件
-        - 📁download: 下载 FinnGen 的所有 fine-mapping 结果文件
-          - 📄`finngen_R11_{trait}.gz`: 下载的压缩文件
-      - 📁UKBB: 所有 UKBB 队列 fine-mapping 结果文件的来源数据
-        - 📁decompression: 对 UKBB_94traits_release1.bed.gz 文件进行压缩
-          - 📄UKBB_94traits_release1.bed: 解压后的文件
-        - 📁download: 下载 UKBB 的 fine-mapping 结果文件
-          - 📁release1.1: 对下载 fine-mapping 结果文件进行解压
+    - 📁`{GSE_ID}`: Store the overall processing flow data of different single-cell samples
+      - 📁data: Store the data processed from the source rds files into a unified format
+        - `{scATAC-seq}`: Store the data of different single-cell samples processed into a unified format
+          - 📁meta: Store the metadata of single-cell samples
+            - 📄barcodes.tsv: Barcodes information
+            - 📄matrix.mtx: Sparse matrix information
+            - 📄peaks.bed: Peak information
+          - 📄annotation.txt: File of all cell annotations before processing
+          - 📄annotation_stdn.txt: Unified standard file for single-cell annotations before processing
+          - 📄`{scATAC-seq}_sc_atac.h5ad`: Unpreprocessed single-cell sample file
+          - 📄`{scATAC-seq}_fragments.tsv.gz`: Fragments file of single-cell samples
+          - 📄`{scATAC-seq}_sc_atac_snapATAC2.h5ad`: Preprocessed single-cell sample file
+          - 📄`{scATAC-seq}_cell_anno.txt`: File of cell annotations after single-cell preprocessing
+          - 📄`{scATAC-seq}_cell_anno_stdn.txt`: Final unified standard file for cell annotations after single-cell preprocessing
+          - 📄`{scATAC-seq}_cell_type_stdn.txt`: Unified standard file for cell type annotations after single-cell preprocessing
+          - 📄`{scATAC-seq}_gene_expression_data.h5ad`: Gene expression data of single-cell samples
+          - 📄`{scATAC-seq}_difference_gene.h5ad`: Differential gene data of single-cell samples
+          - 📄`{scATAC-seq}_gene_enrichment.txt`: Differential gene enrichment file of single-cell samples
+          - 📄`{scATAC-seq}_difference_peak.h5ad`: Differential peak data of single-cell samples
+          - 📄`{scATAC-seq}_tf_activity_data.h5ad`: Differential transcription factor file of single-cell samples
+      - 📄`{scATAC-seq}_ATAC.rds`: Source rds files of different single-cell samples
+      - 📄`{scATAC-seq}_metadata.txt`: Source annotation files of different single-cell samples
+  - 📁topic: Root path information content of the SCIV algorithm
+  - 📁variant: Store all fine-mapping result files (from source to final)
+    - 📁source: Source data of all fine-mapping result files
+      - 📁BBJ: Source data of all fine-mapping result files from the BBJ cohort
+        - 📁decompression: Compress all downloaded files
+          - 📄`BBJ.{trait}.Kanai2021.FINEMAP.tsv.gz`: Results generated by the FINEMAP software
+          - 📄`BBJ.{trait}.Kanai2021.SuSiE.tsv.gz`: Results generated by the SuSiE software (not used)
+        - 📁download: Download all fine-mapping result files of BBJ
+          - 📄`hum0197.v5.finemap.{trait}.v1.zip`: Downloaded BBJ trait or disease files
+        - 📁finemap: Compress all results generated by the FINEMAP software
+          - 📄`BBJ.{trait}.Kanai2021.FINEMAP.tsv.txt`: Uncompressed files of the results obtained by the FINEMAP method
+      - 📁CAUSALdb: Source data of all fine-mapping result files from the CAUSALdb cohort
+        - 📁download: Download fine-mapping result files
+          - 📁credible_set.v2.1.20240623: Folder after decompressing the fine-mapping results
+            - 📁v2.1: Folder after decompressing the fine-mapping results
+              - 📄credible_set.txt: Detailed content information of each trait or disease
+              - 📄meta.txt: Overview file of each trait or disease
+          - 📄credible_set.v2.1.20240623.tar.gz: Compressed file of the downloaded fine-mapping results
+      - 📁FinnGen: Source data of all fine-mapping result files from the FinnGen cohort
+        - 📁decompression: Compress all downloaded files
+          - 📄`finngen_R11_{trait}.txt`: Uncompressed file
+        - 📁download: Download all fine-mapping result files of FinnGen
+          - 📄`finngen_R11_{trait}.gz`: Downloaded compressed file
+      - 📁UKBB: Source data of all fine-mapping result files from the UKBB cohort
+        - 📁decompression: Compress the UKBB_94traits_release1.bed.gz file
+          - 📄UKBB_94traits_release1.bed: Uncompressed file
+        - 📁download: Download the fine-mapping result files of UKBB
+          - 📁release1.1: Decompress the downloaded fine-mapping result files
             - 📄README.html
             - 📄README.md
             - 📄UKBB_94traits_release1.bed.gz
@@ -233,57 +238,57 @@
             - 📄UKBB_94traits_release1_regions.bed.gz
             - 📄UKBB_94traits_release1_regions.bed.gz.tbi
             - 📄UKBB_94traits_release1_regions.cols
-          - 📄UKBB_94traits_release1.1.tar.gz: 下载 fine-mapping 结果文件
-    - 📁output: 对所有下载后解压的文件进行处理成统一的规范格式存储路径
-      - 📁`{source}`: 不同的来源队列
-        - 📁finemap: 形成 SCAVENGE 的算法输入格式, 以及跑 HOMER, MAGMA 的输入格式
-        - 📁trait: 形成对性状或者疾病详细内容的文件
-    - 📁filter: 这里存储的是通过一定规则过滤 fine-mapping 数据并且通过 liftOver 进行转化为对应的参考基因组数据
-      - 📁finemap: output 文件夹内的 finemap 过滤后的数据
-      - 📁input_hg19: 需要转化为 hg38 的输入性状或疾病数据
-      - 📁input_hg38: 需要转化为 hg19 的输入性状或疾病数据
-      - 📁output_hg19: 已经是 hg19 的和转化为 hg19 的输出数据
-      - 📁output_hg38: 已经是 hg38 的和转化为 hg38 的输出数据
-      - 📁result_hg19: hg38 的输出数据转化为统一的规范格式数据
-      - 📁result_hg38: hg19 的输出数据转化为统一的规范格式数据
-      - 📁trait: output 文件夹内的 trait 过滤后的数据
-      - 📁unmap_hg19: 转化为 hg19 的未映射的数据
-      - 📁unmap_hg38: 转化为 hg38 的未映射的数据
-    - 📁finish: fine-mapping 结果数据统一处理后的最终文件, 此数据用于跑 g-chromVAR, SCAVENGE, HOMER, MAGMA 等方法的输入文件
-      - 📁hg19: 参考基因组为 hg19 的 fine-mapping 结果最终数据
-        - 📄`{trait_label}.bed`: 性状或疾病算法的输入数据
-      - 📁hg38: 参考基因组为 hg38 的 fine-mapping 结果最终数据
-        - 📄`{trait_label}.bed`: 性状或疾病算法的输入数据
-      - 📁trait: fine-mapping 结果数据统一处理后的最终文件, 此路径下的是详细的性状或疾病的内容信息
-        - 📄`{trait_label}.txt`: 性状或疾病的详细内容信息
-      - 📄variant_id.txt: 存储突变位点和 rsId 映射关系文件
-      - 📄variant_id_tmp.txt: 存储临时突变位点和 rsId 映射关系文件
-    - 📁homer: 所有性状或疾病跑 HOMER 的结果数据
-      - 📁hg19: 参考基因组为 hg19 的所有性状或疾病跑 HOMER 的结果数据
-        - 📁`{trait_label}`: 参考基因组为 hg19 的此性状或疾病跑 HOMER 的结果数据
-      - 📁hg38: 参考基因组为 hg38 的所有性状或疾病跑 HOMER 的结果数据
-        - 📁`{trait_label}`: 参考基因组为 hg38 的此性状或疾病跑 HOMER 的结果数据
-    - 📁magma: 所有性状或疾病跑 MAGMA 的结果数据
-      - 📁gene: MAGMA 参考基因数据
+          - 📄UKBB_94traits_release1.1.tar.gz: Downloaded fine-mapping result file
+    - 📁output: Store the path of files processed into a unified standard format after decompressing all downloaded files
+      - 📁`{source}`: Different source cohorts
+        - 📁finemap: Form the input format for the SCAVENGE algorithm, as well as the input format for running HOMER and MAGMA
+        - 📁trait: Form files with detailed content of traits or diseases
+    - 📁filter: Store the fine-mapping data filtered by certain rules and converted to the corresponding reference genome data through liftOver
+      - 📁finemap: Filtered finemap data in the output folder
+      - 📁input_hg19: Input trait or disease data that needs to be converted to hg38
+      - 📁input_hg38: Input trait or disease data that needs to be converted to hg19
+      - 📁output_hg19: Output data that is already hg19 and converted to hg19
+      - 📁output_hg38: Output data that is already hg38 and converted to hg38
+      - 📁result_hg19: Output data of hg38 converted to a unified standard format data
+      - 📁result_hg38: Output data of hg19 converted to a unified standard format data
+      - 📁trait: Filtered trait data in the output folder
+      - 📁unmap_hg19: Unmapped data when converting to hg19
+      - 📁unmap_hg38: Unmapped data when converting to hg38
+    - 📁finish: Final files after unified processing of fine-mapping result data, which are used as input files for running methods such as g-chromVAR, SCAVENGE, HOMER, and MAGMA
+      - 📁hg19: Final fine-mapping result data with the reference genome hg19
+        - 📄`{trait_label}.bed`: Input data for trait or disease algorithms
+      - 📁hg38: Final fine-mapping result data with the reference genome hg38
+        - 📄`{trait_label}.bed`: Input data for trait or disease algorithms
+      - 📁trait: Final files after unified processing of fine-mapping result data, which contain detailed content information of traits or diseases in this path
+        - 📄`{trait_label}.txt`: Detailed content information of traits or diseases
+      - 📄variant_id.txt: File storing the mapping relationship between mutation sites and rsId
+      - 📄variant_id_tmp.txt: File storing the temporary mapping relationship between mutation sites and rsId
+    - 📁homer: Result data of running HOMER for all traits or diseases
+      - 📁hg19: Result data of running HOMER for all traits or diseases with the reference genome hg19
+        - 📁`{trait_label}`: Result data of running HOMER for this trait or disease with the reference genome hg19
+      - 📁hg38: Result data of running HOMER for all traits or diseases with the reference genome hg38
+        - 📁`{trait_label}`: Result data of running HOMER for this trait or disease with the reference genome hg38
+    - 📁magma: Result data of running MAGMA for all traits or diseases
+      - 📁gene: MAGMA reference gene data
         - 📄gene_hg19.bed
         - 📄gene_hg38.bed
-      - 📁magma_input: 形成的 MAGMA 输入的文件数据信息
-        - 📁g1000_afr: African 参考背景模板数据
-        - 📁g1000_amr: American 参考背景模板数据
-        - 📁g1000_eas: East Asian 参考背景模板数据
-        - 📁g1000_eur: European 参考背景模板数据
-        - 📁g1000_sas: South Asian 参考背景模板数据
-        - 📁hg19: 参考基因组为 hg19 的 MAGMA 输入的文件
-          - `{trait_label}.bim`: 用于第一步的基因匹配 SNP 位点
-          - `{trait_label}.txt`: 用于第二步的基因富集注释
-        - 📁hg38: 参考基因组为 hg38 的 MAGMA 输入的文件
-          - `{trait_label}.bim`: 用于第一步的基因匹配 SNP 位点
-          - `{trait_label}.txt`: 用于第二步的基因富集注释
+      - 📁magma_input: File data information of the formed MAGMA input
+        - 📁g1000_afr: African reference background template data
+        - 📁g1000_amr: American reference background template data
+        - 📁g1000_eas: East Asian reference background template data
+        - 📁g1000_eur: European reference background template data
+        - 📁g1000_sas: South Asian reference background template data
+        - 📁hg19: MAGMA input files with the reference genome hg19
+          - `{trait_label}.bim`: Used for the first-step gene matching SNP sites
+          - `{trait_label}.txt`: Used for the second-step gene enrichment annotation
+        - 📁hg38: MAGMA input files with the reference genome hg38
+          - `{trait_label}.bim`: Used for the first-step gene matching SNP sites
+          - `{trait_label}.txt`: Used for the second-step gene enrichment annotation
       - 📁magma_output: 
-        - 📁hg19_anno: 参考基因组为 hg19 的 MAGMA 第一步的输出文件
-        - 📁hg19_gene: 参考基因组为 hg19 的 MAGMA 第二步的输出文件
-        - 📁hg38_anno: 参考基因组为 hg38 的 MAGMA 第一步的输出文件
-        - 📁hg38_gene: 参考基因组为 hg38 的 MAGMA 第二步的输出文件
+        - 📁hg19_anno: First-step output files of MAGMA with the reference genome hg19
+        - 📁hg19_gene: Second-step output files of MAGMA with the reference genome hg19
+        - 📁hg38_anno: First-step output files of MAGMA with the reference genome hg38
+        - 📁hg38_gene: Second-step output files of MAGMA with the reference genome hg38
 
 ## 2. Database data transmission
 
