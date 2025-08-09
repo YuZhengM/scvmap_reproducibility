@@ -1,36 +1,29 @@
-# scvdb_handler
+# Welcome to scVMAP!
 
-#### Description
-scvdb 数据处理
+> scVMAP: https://bio.liclab.net/scvmap/
 
-#### Software Architecture
-Software architecture description
+> scVMAP tutorial: https://scvmap.readthedocs.io/en/latest/
 
-#### Installation
+> scVMAP front-end: https://github.com/YuZhengM/scvmap_web
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+> scVMAP back-end: https://github.com/YuZhengM/scvmap
 
-#### Instructions
+> scVMAP API: https://bio.liclab.net/scvmap_service/swagger-ui/index.html
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+A comprehensive platform for **integrating** `single-cell chromatin accessibility regions` with `causal variants`.
 
-#### Contribution
+scVMAP is a user-centric database that offers intuitive workflows, customizable parameters, and comprehensive data accessibility, featuring:
 
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
+1. Integrates causal variants and chromatin accessibility regions at single-cell resolution.
+2. Accommodates 183 scATAC-seq samples and 15,805 fine-mapping datasets.
+3. Records over 1,923,500 effective trait-sample pairs, over 13,060,000 effective trait-cell type pairs, and over 15,950,000,000 effective trait-cell pairs.
+4. Provides enrichment for traits and cells or cell types.
+5. Identifies relevant genes and transcription factors (TFs), as well as pathway enrichment functions of genes for the samples (including single-cell samples and traits).
+6. Constructs the gene and TF hub regulatory network from traits to samples.
+7. Provides epigenomic regulatory annotations related to genes, as well as a gene-relevant SNP regulatory network for specific traits.
+8. Establishes an SNP-associated regulatory network.
+9. Offers comprehensive download resources.
+10. Publishes full-stack development code.
+11. Provides API interfaces for data access.
 
-
-#### Gitee Feature
-
-1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
-2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
-3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
-4.  The most valuable open source project [GVP](https://gitee.com/gvp)
-5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
-6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+![overview.png](database/img/overview.png)
