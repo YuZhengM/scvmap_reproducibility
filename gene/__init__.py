@@ -1,7 +1,6 @@
 # -*- coding: UTF-8 -*-
 
 import pandas as pd
-# noinspection PyUnresolvedReferences
 from gtfparse import read_gtf
 from pandas import CategoricalDtype
 

@@ -1,6 +1,12 @@
-# SCVdb database
+# scVMAP database
+
+> scVMAP front-end: https://github.com/YuZhengM/scvmap_web
+
+> scVMAP back-end: https://github.com/YuZhengM/scvmap
 
 ## 1. Path storage instructions
+
+> Path storage information during data processing.
 
 > `path` is the root path
 
@@ -295,124 +301,129 @@
 ```shell
 source_path="/public/home/lcq/rgzn/yuzhengmin/keti"
 target_path="/mnt/data3/workspace/SCVdb"
+username="${username}"
+ip="${ip}"
+
+# test
+scp -r "$source_path/database/sc_variant/table/test.txt" "$username@$ip:$target_path/data/data/download/"
 
 # scATAC-seq
-scp -r "$source_path/database/sc_variant/table/download/scatac" "root@bio.liclab.net:$target_path/data/data/download/"
+scp -r "$source_path/database/sc_variant/table/download/scatac" "$username@$ip:$target_path/data/data/download/"
 
 # HOMER
-scp -r "$source_path/database/sc_variant/table/homer/hg19" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
-scp -r "$source_path/database/sc_variant/table/homer/hg38" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
-scp -r "$source_path/database/sc_variant/table/homer/t_homer_trait_tf_hg19.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
-scp -r "$source_path/database/sc_variant/table/homer/t_homer_trait_tf_hg38.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
-scp -r "$source_path/database/sc_variant/table/homer/t_homer_tf_trait_count.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/homer/"
-scp -r "$source_path/database/sc_variant/table/homer/trait_tf" "root@bio.liclab.net:$target_path/mysql/mysqlfile/"
+scp -r "$source_path/database/sc_variant/table/homer/hg19" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/hg38" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/t_homer_trait_tf_hg19.txt" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/t_homer_trait_tf_hg38.txt" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/t_homer_tf_trait_count.txt" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/homer/"
+scp -r "$source_path/database/sc_variant/table/homer/trait_tf" "$username@$ip:$target_path/mysql/mysqlfile/"
 
 # MAGMA
-scp -r "$source_path/database/sc_variant/table/magma/hg19" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
-scp -r "$source_path/database/sc_variant/table/magma/hg19_anno" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
-scp -r "$source_path/database/sc_variant/table/magma/hg38" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
-scp -r "$source_path/database/sc_variant/table/magma/hg38_anno" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
-scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait_table" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
-scp -r "$source_path/database/sc_variant/table/magma/t_magma_hg19.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
-scp -r "$source_path/database/sc_variant/table/magma/t_magma_hg38.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
-scp -r "$source_path/database/sc_variant/table/magma/t_magma_gene_trait_count.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/magma_homer/magma/"
-scp -r "$source_path/database/sc_variant/table/magma/trait_gene" "root@bio.liclab.net:$target_path/mysql/mysqlfile/"
+scp -r "$source_path/database/sc_variant/table/magma/hg19" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/hg19_anno" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/hg38" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/hg38_anno" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait_table" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/t_magma_hg19.txt" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/t_magma_hg38.txt" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/t_magma_gene_trait_count.txt" "$username@$ip:$target_path/mysql/mysqlfile/magma_homer/magma/"
+scp -r "$source_path/database/sc_variant/table/magma/trait_gene" "$username@$ip:$target_path/mysql/mysqlfile/"
 
-scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/sample" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample/"
-scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/trait" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/sample" "$username@$ip:$target_path/mysql/mysqlfile/trait_sample/"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/trait" "$username@$ip:$target_path/mysql/mysqlfile/trait_sample"
 
 # scATAC-seq
-scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
-scp -r "$source_path/database/sc_variant/table/scatac/difference_tf" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
-scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
-scp -r "$source_path/database/sc_variant/table/scatac/difference_gene_data.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
-scp -r "$source_path/database/sc_variant/table/scatac/difference_tf_data.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
-scp -r "$source_path/database/sc_variant/table/scatac/sample_gene_data.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "$username@$ip:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_tf" "$username@$ip:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table" "$username@$ip:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_gene_data.txt" "$username@$ip:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_tf_data.txt" "$username@$ip:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/sample_gene_data.txt" "$username@$ip:$target_path/mysql/mysqlfile/scatac/"
 
 # Overlap
-scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/gchromvar_sample_enrichment.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample/"
-scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/scavenge_sample_enrichment.txt" "root@bio.liclab.net:$target_path/mysql/mysqlfile/trait_sample/"
-scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/trs_overlap_gchromvar.h5ad" "root@bio.liclab.net:$target_path/data/data/trait_variant_overlap/"
-scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/trs_overlap_scavenge.h5ad" "root@bio.liclab.net:$target_path/data/data/trait_variant_overlap/"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/gchromvar_sample_enrichment.txt" "$username@$ip:$target_path/mysql/mysqlfile/trait_sample/"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/scavenge_sample_enrichment.txt" "$username@$ip:$target_path/mysql/mysqlfile/trait_sample/"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/trs_overlap_gchromvar.h5ad" "$username@$ip:$target_path/data/data/trait_variant_overlap/"
+scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/trs_overlap_scavenge.h5ad" "$username@$ip:$target_path/data/data/trait_variant_overlap/"
 
 # variant
-scp -r "$source_path/database/sc_variant/table/variant" "root@bio.liclab.net:$target_path/mysql/mysqlfile/"
+scp -r "$source_path/database/sc_variant/table/variant" "$username@$ip:$target_path/mysql/mysqlfile/"
 
 # TRS
-scp -r "$source_path/database/sc_variant/table/trs" "root@bio.liclab.net:$target_path/data/data/"
-scp -r "$source_path/database/sc_variant/table/trs_big" "root@bio.liclab.net:$target_path/data/data/download/"
+scp -r "$source_path/database/sc_variant/table/trs" "$username@$ip:$target_path/data/data/"
+scp -r "$source_path/database/sc_variant/table/trs_big" "$username@$ip:$target_path/data/data/download/"
 
 # HOMER
-scp -r "$source_path/variant/homer" "root@bio.liclab.net:$target_path/data/data/"
-scp -r "$source_path/database/sc_variant/table/homer/trait_tf_hg19.txt" "root@bio.liclab.net:$target_path/data/data/download/magma_homer/"
-scp -r "$source_path/database/sc_variant/table/homer/trait_tf_hg38.txt" "root@bio.liclab.net:$target_path/data/data/download/magma_homer/"
+scp -r "$source_path/variant/homer" "$username@$ip:$target_path/data/data/"
+scp -r "$source_path/database/sc_variant/table/homer/trait_tf_hg19.txt" "$username@$ip:$target_path/data/data/download/magma_homer/"
+scp -r "$source_path/database/sc_variant/table/homer/trait_tf_hg38.txt" "$username@$ip:$target_path/data/data/download/magma_homer/"
 
 # MAGMA
-scp -r $source_path/variant/magma/magma_output/hg19_anno/*.genes.annot root@bio.liclab.net:"$target_path/data/data/magma/magma_output/hg19_anno/"
-scp -r $source_path/variant/magma/magma_output/hg19_gene/*.genes.out root@bio.liclab.net:"$target_path/data/data/magma/magma_output/hg19_gene/"
-scp -r $source_path/variant/magma/magma_output/hg38_anno/*.genes.annot root@bio.liclab.net:"$target_path/data/data/magma/magma_output/hg38_anno/"
-scp -r $source_path/variant/magma/magma_output/hg38_gene/*.genes.out root@bio.liclab.net:"$target_path/data/data/magma/magma_output/hg38_gene/"
+scp -r $source_path/variant/magma/magma_output/hg19_anno/*.genes.annot $username@$ip:"$target_path/data/data/magma/magma_output/hg19_anno/"
+scp -r $source_path/variant/magma/magma_output/hg19_gene/*.genes.out $username@$ip:"$target_path/data/data/magma/magma_output/hg19_gene/"
+scp -r $source_path/variant/magma/magma_output/hg38_anno/*.genes.annot $username@$ip:"$target_path/data/data/magma/magma_output/hg38_anno/"
+scp -r $source_path/variant/magma/magma_output/hg38_gene/*.genes.out $username@$ip:"$target_path/data/data/magma/magma_output/hg38_gene/"
 
-scp -r "$source_path/database/sc_variant/table/magma/magma_anno_hg19_data.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/magma_homer/"
-scp -r "$source_path/database/sc_variant/table/magma/magma_anno_hg38_data.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/magma_homer/"
-scp -r "$source_path/database/sc_variant/table/magma/magma_hg19_data.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/magma_homer/"
-scp -r "$source_path/database/sc_variant/table/magma/magma_hg38_data.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/magma_homer/"
+scp -r "$source_path/database/sc_variant/table/magma/magma_anno_hg19_data.tar.gz" "$username@$ip:$target_path/data/data/download/magma_homer/"
+scp -r "$source_path/database/sc_variant/table/magma/magma_anno_hg38_data.tar.gz" "$username@$ip:$target_path/data/data/download/magma_homer/"
+scp -r "$source_path/database/sc_variant/table/magma/magma_hg19_data.tar.gz" "$username@$ip:$target_path/data/data/download/magma_homer/"
+scp -r "$source_path/database/sc_variant/table/magma/magma_hg38_data.tar.gz" "$username@$ip:$target_path/data/data/download/magma_homer/"
 
 # Difference Gene/TF
-scp -r "$source_path/database/sc_variant/table/scatac/difference_gene_data.txt" "root@bio.liclab.net:$target_path/data/data/download/difference/"
-scp -r "$source_path/database/sc_variant/table/scatac/difference_tf_data.txt" "root@bio.liclab.net:$target_path/data/data/download/difference/"
-scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "root@bio.liclab.net:$target_path/data/data/download/difference/"
-scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
-scp -r "$source_path/database/sc_variant/table/scatac/difference_tf" "root@bio.liclab.net:$target_path/data/data/download/difference/"
-scp -r "$source_path/database/sc_variant/table/scatac/difference_tf" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
-scp -r "$source_path/database/sc_variant/table/scatac/sample_gene" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
-scp -r "$source_path/database/sc_variant/table/scatac/sample_tf" "root@bio.liclab.net:$target_path/mysql/mysqlfile/scatac/"
-scp -r $source_path/scATAC/**/**/**/*_difference_gene.h5ad root@bio.liclab.net:"$target_path/data/data/download/difference/difference_gene_h5ad/"
-scp -r $source_path/scATAC/**/**/**/*_tf_activity_data.h5ad root@bio.liclab.net:"$target_path/data/data/download/difference/difference_tf_h5ad/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_gene_data.txt" "$username@$ip:$target_path/data/data/download/difference/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_tf_data.txt" "$username@$ip:$target_path/data/data/download/difference/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "$username@$ip:$target_path/data/data/download/difference/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_gene" "$username@$ip:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_tf" "$username@$ip:$target_path/data/data/download/difference/"
+scp -r "$source_path/database/sc_variant/table/scatac/difference_tf" "$username@$ip:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/sample_gene" "$username@$ip:$target_path/mysql/mysqlfile/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/sample_tf" "$username@$ip:$target_path/mysql/mysqlfile/scatac/"
+scp -r $source_path/scATAC/**/**/**/*_difference_gene.h5ad $username@$ip:"$target_path/data/data/download/difference/difference_gene_h5ad/"
+scp -r $source_path/scATAC/**/**/**/*_tf_activity_data.h5ad $username@$ip:"$target_path/data/data/download/difference/difference_tf_h5ad/"
 
 # Difference gene enrichment
-scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table_data.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
-scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table" "root@bio.liclab.net:$target_path/data/data/download/enrichment/scatac/"
-scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment" root@bio.liclab.net:"$target_path/data/data/download/enrichment/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table_data.tar.gz" "$username@$ip:$target_path/data/data/download/enrichment/"
+scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment_table" "$username@$ip:$target_path/data/data/download/enrichment/scatac/"
+scp -r "$source_path/database/sc_variant/table/scatac/gene_enrichment" $username@$ip:"$target_path/data/data/download/enrichment/scatac/"
 
 # variant
-scp -r "$source_path/variant/finish/fine_mapping_hg19.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/trait/"
-scp -r "$source_path/variant/finish/fine_mapping_hg38.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/trait/"
-scp -r "$source_path/variant/finish/fine_mapping_trait.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/trait/"
+scp -r "$source_path/variant/finish/fine_mapping_hg19.tar.gz" "$username@$ip:$target_path/data/data/download/trait/"
+scp -r "$source_path/variant/finish/fine_mapping_hg38.tar.gz" "$username@$ip:$target_path/data/data/download/trait/"
+scp -r "$source_path/variant/finish/fine_mapping_trait.tar.gz" "$username@$ip:$target_path/data/data/download/trait/"
 
 # Trait gene enrichment
-scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_enrichment_trait_hg19.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
-scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_enrichment_trait_hg38.tar.gz" "root@bio.liclab.net:$target_path/data/data/download/enrichment/"
+scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_enrichment_trait_hg19.tar.gz" "$username@$ip:$target_path/data/data/download/enrichment/"
+scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/gene_enrichment_trait_hg38.tar.gz" "$username@$ip:$target_path/data/data/download/enrichment/"
 
-scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg19" "root@bio.liclab.net:$target_path/data/data/download/enrichment/trait/"
-scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg38" "root@bio.liclab.net:$target_path/data/data/download/enrichment/trait/"
+scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg19" "$username@$ip:$target_path/data/data/download/enrichment/trait/"
+scp -r "$source_path/database/sc_variant/table/magma/gene_enrichment_trait/hg38" "$username@$ip:$target_path/data/data/download/enrichment/trait/"
 
 # GENE
-scp -r $source_path/gene/annotation/dbSNP/common_snp_chunk/* root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/dbSNP/common_snp_chunk/"
-scp -r $source_path/gene/annotation/dbSUPER/*.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/dbSUPER/"
-scp -r $source_path/gene/annotation/GTEx/eqtl_chunk/* root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/GTEx/eqtl_chunk/"
-scp -r $source_path/gene/annotation/gwasATLAS/gwasatlas_v20191115_risk_snp_*.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/gwasATLAS/"
-scp -r $source_path/gene/annotation/SEA/sea_v3_*.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEA/"
-scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg19.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
-scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg38.txt root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
-scp -r $source_path/gene/annotation/SEdb/enhancer_chunk/* root@bio.liclab.net:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/enhancer_chunk/"
+scp -r $source_path/gene/annotation/dbSNP/common_snp_chunk/* $username@$ip:"$target_path/mysql/mysqlfile/gene/annotation/dbSNP/common_snp_chunk/"
+scp -r $source_path/gene/annotation/dbSUPER/*.txt $username@$ip:"$target_path/mysql/mysqlfile/gene/annotation/dbSUPER/"
+scp -r $source_path/gene/annotation/GTEx/eqtl_chunk/* $username@$ip:"$target_path/mysql/mysqlfile/gene/annotation/GTEx/eqtl_chunk/"
+scp -r $source_path/gene/annotation/gwasATLAS/gwasatlas_v20191115_risk_snp_*.txt $username@$ip:"$target_path/mysql/mysqlfile/gene/annotation/gwasATLAS/"
+scp -r $source_path/gene/annotation/SEA/sea_v3_*.txt $username@$ip:"$target_path/mysql/mysqlfile/gene/annotation/SEA/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg19.txt $username@$ip:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg38.txt $username@$ip:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/"
+scp -r $source_path/gene/annotation/SEdb/enhancer_chunk/* $username@$ip:"$target_path/mysql/mysqlfile/gene/annotation/SEdb/enhancer_chunk/"
 
-scp -r $source_path/gene/annotation/dbSNP/dbsnp_common_snp_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
-scp -r $source_path/gene/annotation/dbSNP/dbsnp_common_snp_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
-scp -r $source_path/gene/annotation/dbSUPER/dbsuper_super_enhancer_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
-scp -r $source_path/gene/annotation/dbSUPER/dbsuper_super_enhancer_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
-scp -r $source_path/gene/annotation/GTEx/gtex_v10_eqtl_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
-scp -r $source_path/gene/annotation/GTEx/gtex_v10_eqtl_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
-scp -r $source_path/gene/annotation/gwasATLAS/gwasatlas_v20191115_risk_snp_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
-scp -r $source_path/gene/annotation/gwasATLAS/gwasatlas_v20191115_risk_snp_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
-scp -r $source_path/gene/annotation/SEA/sea_v3_enhancer_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
-scp -r $source_path/gene/annotation/SEA/sea_v3_enhancer_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
-scp -r $source_path/gene/annotation/SEA/sea_v3_super_enhancer_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
-scp -r $source_path/gene/annotation/SEA/sea_v3_super_enhancer_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
-scp -r $source_path/gene/annotation/SEdb/sedb_v2_enhancer_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
-scp -r $source_path/gene/annotation/SEdb/sedb_v2_enhancer_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
-scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg19.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg19/"
-scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg38.tar.gz root@bio.liclab.net:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/dbSNP/dbsnp_common_snp_hg19.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/dbSNP/dbsnp_common_snp_hg38.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/dbSUPER/dbsuper_super_enhancer_hg19.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/dbSUPER/dbsuper_super_enhancer_hg38.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/GTEx/gtex_v10_eqtl_hg19.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/GTEx/gtex_v10_eqtl_hg38.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/gwasATLAS/gwasatlas_v20191115_risk_snp_hg19.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/gwasATLAS/gwasatlas_v20191115_risk_snp_hg38.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/SEA/sea_v3_enhancer_hg19.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/SEA/sea_v3_enhancer_hg38.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/SEA/sea_v3_super_enhancer_hg19.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/SEA/sea_v3_super_enhancer_hg38.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_enhancer_hg19.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_enhancer_hg38.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg38/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg19.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg19/"
+scp -r $source_path/gene/annotation/SEdb/sedb_v2_super_enhancer_hg38.tar.gz $username@$ip:"$target_path/data/data/download/gene/hg38/"
 
 ```
 

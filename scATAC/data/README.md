@@ -1,9 +1,9 @@
+# Data Description
 
-# 数据
-
-> 此文件夹一共会生成四个文件
-> 1. cell_anno.txt: 单细胞样本的细胞注释文件 (文件较大未上传 Github)
-> 2. cell_type_anno.txt: 单细胞样本的细胞类型注释文件 (文件较大未上传 Github)
-> 3. sample.xlsx: 整理的中间文件, 需使用 [sample_info.txt](sample_info.txt) 文件
-> 4. [sample_info.txt](sample_info.txt): 此文件为最终的单细胞样本概述文件
+> This folder will generate a total of four files:
+> 
+> 1. cell_anno.txt: Cell annotation file for single-cell samples (large file size not uploaded to Github).
+> 2. cell_type_anno.txt: Cell type annotation file for single-cell samples (the file is too large and has not been uploaded to Github).
+> 3. sample.xlsx: The intermediate file compiled from the cell type annotation file for single-cell samples (which is too large to be uploaded to Github) requires the use of the [sample_info.txt](sample_info.txt) file.
+> 4. [sample_info.txt](sample_info.txt): This document is the final overview of single-cell samples.
 

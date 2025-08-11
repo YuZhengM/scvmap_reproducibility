@@ -1,17 +1,35 @@
-# scATACdb 与 Variant 处理过程
+# Process of g-chromVAR and SCAVENGE methods
 
-> 对文件夹的叙述
+## R code
+
+Input scATAC-seq datas and fine-mapping results to obtain TRS through methods `g-chromVAR` and `SCAVENGE`.
+
+> [run.R](R_code/run.R): This file is used as the entry file for executing the `g-chromVAR` and `SCAVENGE` methods, and it references.
+> 1. [library.R](R_code/library.R): Loading package files
+> 2. [integration.R](R_code/integration.R): The file that integrates `scATAC-seq` and `fine-mapping` results
+> 3. [static_function.R](R_code/static_function.R): Most of the main processes are here
+
+> [meta_to_seurat.R](R_code/meta_to_seurat.R): This conversion file is used for running `g-chromVAR` and `SCAVENGE` methods on other data.
+
+> [seurat_to_meta.R](R_code/seurat_to_meta.R): This data conversion file is used to run the `g-chromVAR` and `SCAVENGE` methods before running `SnapATAC2`.
+
+## TRS result
+
+> [__init__.py](RResult/__init__.py): Processing of TRS results
+
+> Each sample and each trait or disease will generate a file, and these result files need to be merged and processed into a single h5ad file containing data for one sample and all traits or diseases.
+
+
+## Environment
+
+> Environment creation
 
 ```shell
 conda create -n python3_R4 python=3.10.11
 conda install -c conda-forge r-base
 ```
 
-# scATAC-seq data
-
-> Data
-
-> R 信息 `sessoinInfo()`
+> R `sessoinInfo()`
 
 ```R
 R version 4.3.2 (2023-10-31)

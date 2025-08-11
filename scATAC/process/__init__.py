@@ -153,5 +153,5 @@ if __name__ == '__main__':
     # path: str = r"H:\scATAC"
     path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC"
     # Obtain annotation information for all sample cells
-    # form_sample_cell_anno_file()
+    form_sample_cell_anno_file()
     form_sample_table()

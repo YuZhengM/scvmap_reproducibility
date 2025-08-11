@@ -26,24 +26,7 @@ class HandlerVariant:
     """
     The process of processing fine-mapping result files
     https://github.com/mkanai/finemapping-insights
-    BBJ:
-        https://humandbs.dbcls.jp/en/hum0197-v18
-        https://humandbs.dbcls.jp/en/hum0197-v18#hum0197.v5.gwas.v1
-        https://www.cog-genomics.org/plink/1.9/formats#bed
-        https://humandbs.dbcls.jp/files/hum0197/hum0197_v5_finemap_v1_header.html
-    UKBB (finucanelab):
-        https://www.finucanelab.org/data
-        https://docs.google.com/document/d/14LWxqlSC6hl9FtA984CQjUdFcgQQkXuffYcbXaUoqGM/edit#
-        https://www.dropbox.com/s/cdsdgwxkxkcq8cn/UKBB_94traits_release1.1.tar.gz?dl=0
-        https://www.medrxiv.org/content/medrxiv/early/2021/09/05/2021.09.03.21262975/DC2/embed/media-2.xlsx?download=true
-    FinnGen:
-        https://finngen.gitbook.io/documentation/data-download
-        https://storage.googleapis.com/finngen-public-data-r11
-        https://r11.finngen.fi/
-    CAUSALdb:
-        http://www.mulinlab.org/causaldb/index.html
-        https://connecthkuhk-my.sharepoint.com/:f:/g/personal/mulinli_connect_hku_hk/EhIzjbe6LIdGrxXGzVMDkTgBkn13ZayTuW0rCWCU8IR-Bw?e=PUhjDZ
-        https://connecthkuhk-my.sharepoint.com/personal/mulinli_connect_hku_hk/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fmulinli%5Fconnect%5Fhku%5Fhk%2FDocuments%2Fmulinlab%2FCAUSALdb&ga=1
+    BBJ, UKBB (finucanelab), FinnGen, CAUSALdb
     """
 
     def __init__(self, path: str):
@@ -153,13 +136,13 @@ class HandlerVariant:
             w.close()
 
     def decompression_zip(self, file_path: str, decompression_path: str, read_file: str = None):
-        # 创建文件夹
+        # create folder
         self.file.makedirs(decompression_path)
-        # 解压文件
+        # unzip
         zip_files_path: list = self.file.get_files_path(file_path)
         for zip_file_path in zip_files_path:
             self.log.info(f"Start decompressing file {zip_file_path}")
-            # 判断是否解压报错, 若解压报错则由于下载不完整导致的
+            # Check if there is an error message during decompression. If there is an error message during decompression, it may be caused by incomplete download.
             try:
                 z = zipfile.ZipFile(zip_file_path, 'r')
                 z.extractall(path=decompression_path)
@@ -173,9 +156,9 @@ class HandlerVariant:
                 #     self.decompression_zip(file_path, decompression_path)
 
     def decompression_gz_file(self, file_path: str, decompression_path: str, read_file: str = None, suffix=".gz"):
-        # 创建文件夹
+        # create folder
         self.file.makedirs(decompression_path)
-        # 解压文件
+        # unzip
         gz_files_path: list = self.file.get_files_path(file_path)
         for gz_file_path in gz_files_path:
             self.log.info(f"Start extracting file {gz_file_path}")
@@ -203,7 +186,7 @@ class HandlerVariant:
         self.file.makedirs(download_path)
         # Obtain downloaded files
         files: list = self.file.get_files(download_path)
-        # 下载文件
+        # Download files
         download_info = self.read_header.get_content(read_file)
         need_download_count = download_info.shape[0] - len(files)
         number = 0
@@ -240,7 +223,8 @@ class HandlerVariant:
         # Positioning through xpath
         links_container: list = html.xpath("//*[@id='jsn-mainbody']/div[2]/div[2]/table[2]/thead//span/a/@href")
         self.log.info(f"Complete obtaining connection (size: {len(links_container)}, content: {links_container})")
-        # 存储内容
+
+        # Store content
         self.log.info("Start writing connection content")
         with open("./data/BBJ/download.txt", "w", encoding="utf-8", buffering=1, newline="\n") as f:
             f.write("name\turl\n")
@@ -262,7 +246,7 @@ class HandlerVariant:
         # Read trait mapping file
         BBJ_trait_map = self.read_header.get_content("./data/BBJ/BJJ_fine_mapping_trait.txt")
 
-        # 处理文件
+        # get files
         files_dict: dict = self.file.entry_files_dict(self.BBJ_finemap_path)
         files_name: list = files_dict["name"]
         files_name.sort()
