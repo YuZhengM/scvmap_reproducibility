@@ -19,15 +19,7 @@ Input scATAC-seq datas and fine-mapping results to obtain TRS through methods `g
 
 > Each sample and each trait or disease will generate a file, and these result files need to be merged and processed into a single h5ad file containing data for one sample and all traits or diseases.
 
-
 ## Environment
-
-> Environment creation
-
-```shell
-conda create -n python3_R4 python=3.10.11
-conda install -c conda-forge r-base
-```
 
 > R `sessoinInfo()`
 
