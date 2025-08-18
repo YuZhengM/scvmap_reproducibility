@@ -253,31 +253,5 @@ integration_process <- function(identifier, genome, trait_file, integration_path
 
   save(sample_mat, mutualknn30, file=paste0(integration_path, "/", identifier, "__", genome, "__", basename(trait_file), "__mat_info.rda"))
   write.table(sample_mat, file = result_file_path, sep = "\t", row.names = F, col.names = T, quote = F)
-
-  ###################################################################################
-  # 这个步骤时间比较长
-  ###################################################################################
-  # Trait relevant cell determination from permutation test
-  # please set @mycores >= 1 and @permutation_times >= 1,000 in the real setting
-#   print0(identifier, genome, trait_file, "start permutation")
-#   mono_permu <- get_sigcell_simple(knn_sparse_mat=mutualknn30,
-#                                    seed_idx=sample_mat$seed_idx,
-#                                    topseed_npscore=sample_mat$np_score,
-#                                    permutation_times=1000, # Increase to >=1000 in practice
-#                                    true_cell_significance=0.05,
-#                                    rda_output=FALSE,
-#                                    mycores=1,# Increase in practice
-#                                    rw_gamma=0.05)
-#   print0(identifier, genome, trait_file, "end permutation")
-#
-#   sample_mat2 <- data.frame(sample_mat, mono_permu)
-#   sample_mat2["identifier"] <- identifier
-#   sample_mat2["genome"] <- genome
-#   sample_mat2["trait_file"] <- trait_file
-#
-#   # 保存
-#   write.table(sample_mat2, file = result_file_path, sep = "\t", row.names = F, col.names = T, quote = F)
-#   save(sample_mat2, mutualknn30, file=paste0(integration_path, "/", identifier, "__", genome, "__", basename(trait_file), "__mat2_info.rda"))
   print0(identifier, genome, trait_file, "save finish")
-
 }
