@@ -38,3 +38,12 @@
 6. [_save_.py](_save_.py): Save the results in pkl format.
 7. [__init__.py](magma/__init__.py): Run the MAGMA process on the data to obtain trait-relevant gene data.
 8. [__init__.py](homer/__init__.py): Run the HOMER process on the data to obtain trait-relevant TF data.
+
+
+
+CAUSALdb: abf, finemap, paintor, caviarbf, susie, polyfun_finemap, polyfun_susie
+BBJ: FINEMAP, SuSiE
+FinnGen: FINEMAP, SUSIE
+UKBB: FINEMAP, SUSIE
+
+

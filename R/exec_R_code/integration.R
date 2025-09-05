@@ -1,3 +1,28 @@
+##########################################################
+# 加载所需要的包
+##########################################################
+
+library(Matrix)
+library(SCAVENGE)
+library(chromVAR)
+library(gchromVAR)
+library(SummarizedExperiment)
+library(data.table)
+library(dplyr)
+library(BSgenome.Hsapiens.UCSC.hg38)
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(igraph)
+library(Seurat)
+library(tidyverse)
+library(stringr)
+library(magick)
+library(Metrics)
+library(circlize)
+library(filesstrings)
+library(parallel)
+library(doParallel)
+
+#sessionInfo()
 
 print0 <- function(...) {
   cat("****************")
@@ -18,138 +43,10 @@ chrs = c(
   "chr20", "chr21", "chr22", "chrx", "chrX", "chry", "chrY"
 )
 
-###################################################################
-# path: scATAC 输入路径
-# identifier: 数据的标识符，如 GSE
-# genome: scATAC 的参考基因组
-# id_path: SE_gvar, SE_gvar_bg 输出路径
-# layer: layer: RDS 文件中是 counts 数据的层
-###################################################################
-scATAC_process <- function(path, identifier, genome, id_path, layer = "counts") {
-
-  print0(identifier, genome, "start get information and save them")
-
-  # read counts and metadata
-  counts_file <- paste0(path, "/", identifier, "_ATAC.rds")
-  scATAC <- readRDS(counts_file)
-
-  if (layer == "counts") {
-    counts <- scATAC@assays[["ATAC"]]@counts
-  } else if (layer == "data") {
-    counts <- scATAC@assays[["ATAC"]]@data
-  }
-
-  metadata <- scATAC@meta.data
-  metadata$barcodes <- rownames(metadata)
-
-  new_scATAC <- CreateSeuratObject(counts = counts, assay = "ATAC", min.cells = 1)
-  new_metadata <- new_scATAC@meta.data
-  new_metadata$barcodes <- rownames(new_metadata)
-  colData <- plyr::join(x = new_metadata, y = metadata, by = "barcodes", type = "left", match = "first")
-  new_scATAC@meta.data <- colData
-
-  full_version <- packageVersion("SeuratObject")
-  version_string <- as.character(full_version)
-  version_parts <- unlist(strsplit(version_string, split = ".", fixed = TRUE))
-  main_version <- version_parts[1]
-
-  # Change according to the different versions of SeuratObject.
-  if (main_version == "5") {
-    counts <- new_scATAC@assays[["ATAC"]]$counts
-  } else {
-    counts <- new_scATAC@assays[["ATAC"]]@counts
-  }
-
-  # peak
-  peaks <- row.names(new_scATAC)
-
-  new_peak <- list()
-
-  for (i in peaks) {
-    result <- strsplit(i, split = ",")[[1]][1]
-    new_peak[[length(new_peak) + 1]] <- gsub(":", "-", result)
-  }
-
-  peaks <- data.frame(names=unlist(new_peak))
-  peaks <- separate(data = peaks, col = names, into = c("chr", "start", "end"), sep = "-", remove = F)
-
-  # get chr information
-  chrs_index <- list()
-  chr_index <- 1
-  for (chr in peaks$chr) {
-    if (chr %in% chrs) {
-      chrs_index[[length(chrs_index) + 1]] <- chr_index
-    }
-    chr_index <- chr_index + 1
-  }
-  chrs_index <- unlist(chrs_index)
-
-  # filter
-  rowRanges <- GRanges(seqnames=rep(peaks$chr), ranges=IRanges(start=as.numeric(peaks$start), end=as.numeric(peaks$end)))
-  rowRanges <- rowRanges[chrs_index,]
-  counts <- counts[chrs_index,]
-
-  # Clear column and row names
-  rownames(counts) <- NULL
-  colnames(counts) <- NULL
-
-  SE_gvar <- SummarizedExperiment(
-    assays = list(counts = counts),
-    rowRanges = rowRanges,
-    colData = colData
-  )
-
-  assayNames(SE_gvar) <- "counts"
-
-  if (genome == "hg19") {
-    genome_packages = BSgenome.Hsapiens.UCSC.hg19
-  } else {
-    genome_packages = BSgenome.Hsapiens.UCSC.hg38
-  }
-  # 计算 SC 含量 bias
-  print0(identifier, genome, "start addGCBias, getBackgroundPeaks")
-  SE_gvar <- addGCBias(SE_gvar, genome = genome_packages)
-  rowData(SE_gvar)$bias[which(is.na(rowData(SE_gvar)$bias))] = 1e-5
-  SE_gvar_bg <- getBackgroundPeaks(SE_gvar, niterations=200)
-
-  colData$identifier = identifier
-  colData$genome = genome
-  # 保存信息
-  write.table(colData, file = paste0(id_path, "/", identifier, ".txt"), sep="\t", row.names = F, col.names = T, quote = F)
-  save(SE_gvar, SE_gvar_bg, file=paste0(id_path, "/", identifier, "_SE_gvar_SE_gvar_bg.rda"))
-
-  # 加载数据
-  peak_by_cell_mat <- SummarizedExperiment::assay(SE_gvar)
-
-  print0(identifier, genome, id_path, "start tfidf")
-  # Construct m-knn graph
-  # Calculate tfidf-mat
-  tfidf_mat <- tfidf(
-    bmat=peak_by_cell_mat,
-    mat_binary=TRUE,
-    TF=TRUE,
-    log_TF=TRUE
-  )
-  print0(identifier, genome, id_path, "end tfidf")
-
-  # Calculate lsi-mat
-  print0(identifier, genome, id_path, "start lsi_mat")
-  lsi_mat <- do_lsi(mat = tfidf_mat, dims = 30)
-  print0(identifier, genome, id_path, "end lsi_mat")
-
-  # Please be sure that there is no potential batch effects for cell-to-cell graph construction. If the cells are from different samples or different conditions etc., please consider using Harmony analysis (HarmonyMatrix from Harmony package). Typically you could take the lsi_mat as the input with parameter do_pca = FALSE and provide meta data describing extra data such as sample and batch for each cell. Finally, a harmony-fixed LSI matrix can be used as input for the following analysis.
-  # Calculate m-knn graph
-  print0(identifier, genome, id_path, "start mutualknn30")
-  mutualknn30 <- getmutualknn(lsimat = lsi_mat, num_k = 30)
-  print0(identifier, genome, id_path, "end mutualknn30")
-
-  print0(identifier, genome, id_path, "Start saving intermediate results")
-  counts_mat <- counts(SE_gvar)
-  expectation <- computeExpectations(SE_gvar)
-  fragments_per_sample <- colSums(counts_mat)
-  save(SE_gvar, SE_gvar_bg, mutualknn30, counts_mat, expectation, fragments_per_sample, file=paste0(id_path, "/", identifier, "_all.rda"))
-  print0(identifier, genome, id_path, "End saving intermediate results")
-}
+full_version <- packageVersion("SeuratObject")
+version_string <- as.character(full_version)
+version_parts <- unlist(strsplit(version_string, split = ".", fixed = TRUE))
+main_version <- version_parts[1]
 
 integration_process <- function(identifier, genome, trait_file, integration_path, SE_gvar, background_peaks, mutualknn30, counts_mat, expectation, fragments_per_sample, result_file_path) {
 
@@ -254,4 +151,136 @@ integration_process <- function(identifier, genome, trait_file, integration_path
   save(sample_mat, mutualknn30, file=paste0(integration_path, "/", identifier, "__", genome, "__", basename(trait_file), "__mat_info.rda"))
   write.table(sample_mat, file = result_file_path, sep = "\t", row.names = F, col.names = T, quote = F)
   print0(identifier, genome, trait_file, "save finish")
+}
+
+
+core_process <- function(base_path, identifier, scFileId, variantFileId, genome, layer = "counts") {
+
+  # 处理路径
+  scATAC_path <- paste0(base_path, "/scATAC")
+
+  # 存放结果路径
+  result_path <- paste0(base_path, "/result/", identifier)
+  # 读取突变文件的路径
+  trait_file <- paste0(base_path, "/variant/", variantFileId)
+
+  if (!dir.exists(result_path)) {
+    dir.create(result_path, recursive=T)
+  }
+
+  print0(identifier, genome, "Read scATAC-seq data information")
+
+  # read counts and metadata
+  counts_file <- paste0(scATAC_path, "/", scFileId)
+  scATAC <- readRDS(counts_file)
+
+  if (layer == "counts") {
+    if (main_version == "5") {
+      counts <- scATAC@assays[["ATAC"]]$counts
+    } else {
+      counts <- scATAC@assays[["ATAC"]]@counts
+    }
+  } else if (layer == "data") {
+    if (main_version == "5") {
+      counts <- scATAC@assays[["ATAC"]]$data
+    } else {
+      counts <- scATAC@assays[["ATAC"]]@data
+    }
+  }
+
+  colData <- scATAC@meta.data
+  colData$barcodes <- rownames(colData)
+
+  # peak
+  peaks <- row.names(scATAC)
+
+  new_peak <- list()
+
+  for (i in peaks) {
+    result <- strsplit(i, split = ",")[[1]][1]
+    new_peak[[length(new_peak) + 1]] <- gsub(":", "-", result)
+  }
+
+  peaks <- data.frame(names=unlist(new_peak))
+  peaks <- separate(data = peaks, col = names, into = c("chr", "start", "end"), sep = "-", remove = F)
+
+  # get chr information
+  chrs_index <- list()
+  chr_index <- 1
+  for (chr in peaks$chr) {
+    if (chr %in% chrs) {
+      chrs_index[[length(chrs_index) + 1]] <- chr_index
+    }
+    chr_index <- chr_index + 1
+  }
+  chrs_index <- unlist(chrs_index)
+
+  # filter
+  rowRanges <- GRanges(seqnames=rep(peaks$chr), ranges=IRanges(start=as.numeric(peaks$start), end=as.numeric(peaks$end)))
+  rowRanges <- rowRanges[chrs_index,]
+  counts <- counts[chrs_index,]
+
+  # Clear column and row names
+  rownames(counts) <- NULL
+  colnames(counts) <- NULL
+
+  SE_gvar <- SummarizedExperiment(
+    assays = list(counts = counts),
+    rowRanges = rowRanges,
+    colData = colData
+  )
+
+  assayNames(SE_gvar) <- "counts"
+
+  if (genome == "hg19") {
+    genome_packages = BSgenome.Hsapiens.UCSC.hg19
+  } else {
+    genome_packages = BSgenome.Hsapiens.UCSC.hg38
+  }
+
+  # 计算 SC 含量 bias
+  print0(identifier, genome, "Start addGCBias, getBackgroundPeaks")
+  SE_gvar <- addGCBias(SE_gvar, genome = genome_packages)
+  rowData(SE_gvar)$bias[which(is.na(rowData(SE_gvar)$bias))] = 1e-5
+  SE_gvar_bg <- getBackgroundPeaks(SE_gvar, niterations=200)
+  print0(identifier, genome, "End addGCBias, getBackgroundPeaks")
+
+  colData$identifier = identifier
+  colData$genome = genome
+
+  # 加载数据
+  peak_by_cell_mat <- SummarizedExperiment::assay(SE_gvar)
+
+  print0(identifier, genome, "Start TF-IDF")
+  # Construct m-knn graph
+  # Calculate tfidf-mat
+  tfidf_mat <- tfidf(
+    bmat=peak_by_cell_mat,
+    mat_binary=TRUE,
+    TF=TRUE,
+    log_TF=TRUE
+  )
+  print0(identifier, genome, "End TF-IDF")
+
+  # Calculate lsi-mat
+  print0(identifier, genome, "Start LSI")
+  lsi_mat <- do_lsi(mat = tfidf_mat, dims = 30)
+  print0(identifier, genome, "End LSI")
+
+  # Please be sure that there is no potential batch effects for cell-to-cell graph construction. If the cells are from different samples or different conditions etc., please consider using Harmony analysis (HarmonyMatrix from Harmony package). Typically you could take the lsi_mat as the input with parameter do_pca = FALSE and provide meta data describing extra data such as sample and batch for each cell. Finally, a harmony-fixed LSI matrix can be used as input for the following analysis.
+  # Calculate m-knn graph
+  print0(identifier, genome, "Start M-kNN")
+  mutualknn30 <- getmutualknn(lsimat = lsi_mat, num_k = 30)
+  print0(identifier, genome, "End M-kNN")
+
+  print0(identifier, genome, result_path, "Start saving intermediate results")
+  counts_mat <- counts(SE_gvar)
+  expectation <- computeExpectations(SE_gvar)
+  fragments_per_sample <- colSums(counts_mat)
+  save(SE_gvar, SE_gvar_bg, mutualknn30, counts_mat, expectation, fragments_per_sample, file=paste0(result_path, "/", identifier, "_intermediate_data.rda"))
+  print0(identifier, genome, result_path, "End saving intermediate results")
+
+  # 结果文件
+  result_file_path <- paste0(result_path, "/", identifier, "_result.txt")
+  integration_process(identifier, genome, trait_file, result_path, SE_gvar, SE_gvar_bg, mutualknn30, counts_mat, expectation, fragments_per_sample, result_file_path)
 }

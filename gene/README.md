@@ -5,3 +5,11 @@
 > 2. hg19: [gencode.v41lift37.annotation.gtf.gz](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_41/GRCh37_mapping/gencode.v41lift37.annotation.gtf.gz)
 
 > `gtfparse`: This package is incompatible with other environments and requires a new environment to execute the code.
+
+
+# gene-tissue type
+
+https://geneorganizer.huji.ac.il/downloads/
+
+
+
