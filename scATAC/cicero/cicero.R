@@ -1,6 +1,7 @@
 library(cicero)
 library(tidyverse)
 library(Matrix)
+library(Seurat)
 
 cicero_handle <- function (path, anno_file = NULL, cicero_interactions_file = NULL) {
     message("load scATAC data")
@@ -10,18 +11,26 @@ cicero_handle <- function (path, anno_file = NULL, cicero_interactions_file = NU
     indata@x[indata@x > 0] <- 1
 
     # format cell info
-    cellinfo <- read.table(paste0(path, "/barcodes.tsv"))
+    cellinfo <- read.table(paste0(path, "/barcodes.tsv"), comment.char = "")
     row.names(cellinfo) <- cellinfo$V1
     names(cellinfo) <- "cells"
 
     # format peak info
     peakinfo <- read.table(paste0(path, "/peaks.bed"))
     names(peakinfo) <- c("chr", "bp1", "bp2")
-    peakinfo$site_name <- paste(peakinfo$chr, peakinfo$bp1, peakinfo$bp2, sep="_")
+    peakinfo$site_name <- paste(peakinfo$chr, peakinfo$bp1, peakinfo$bp2, sep="-")
     row.names(peakinfo) <- peakinfo$site_name
 
     row.names(indata) <- row.names(peakinfo)
     colnames(indata) <- row.names(cellinfo)
+
+    scATAC <- CreateSeuratObject(counts = indata, assay = "ATAC", min.cells = 0.04 * nrow(cellinfo), min.features = 0.037 * nrow(peakinfo)) # GSE195460_diabetic_kidney
+#     scATAC <- CreateSeuratObject(counts = indata, assay = "ATAC", min.cells = 0.05 * nrow(cellinfo), min.features = 0.01 * nrow(peakinfo))
+
+    indata <- scATAC@assays[["ATAC"]]$counts
+    peakinfo <- peakinfo[row.names(indata),]
+    cellinfo <- data.frame(cells=colnames(indata))
+    row.names(cellinfo) <- cellinfo$cells
 
     message("format newCellDataSet data")
     # make CDS
@@ -51,8 +60,7 @@ cicero_handle <- function (path, anno_file = NULL, cicero_interactions_file = NU
             max_components = 2,
             num_dim=6,
             reduction_method = 'tSNE',
-            norm_method = "none",
-            verbose = T
+            norm_method = "none"
         )
 
         coords <- t(reducedDimA(input_cds))
@@ -63,7 +71,9 @@ cicero_handle <- function (path, anno_file = NULL, cicero_interactions_file = NU
         }
         # Reading annotation files to obtain coordinate information
         # column: {barcodes	UMAP1	UMAP2	clusters}
-        anno_info <- read.table(anno_file, header=T, sep="\t")
+        anno_info <- read.table(anno_file, header=T, sep="\t", comment.char = "")
+        row.names(anno_info) <- anno_info$barcodes
+        anno_info <- anno_info[cellinfo$cells,]
         coords <- data.frame(UMAP1=anno_info$UMAP1, UMAP2=anno_info$UMAP2)
         row.names(coords) <- anno_info$barcodes
     }
@@ -105,18 +115,19 @@ genome <- "hg38"
 gse <- "GSE195460"
 label <- "GSE195460_diabetic_kidney"
 
+genome <- "hg38"
+gse <- "GSE175621"
+label <- "coronary_artery_disease"
+
 load(paste0("/root/private_data/keti/software/cicero/human_", genome, "_genome.rda"))
 load(paste0("/root/private_data/keti/software/cicero/gene_", genome, "_annotation.rda"))
 
-set_path <- paste0("/public/home/ac1dyrvmyl/keti/scATAC/", label)
-if (!dir.exists(set_path)) {
-    dir.create(set_path)
-}
+set_path <- paste0("/public/home/ac1dyrvmyl/keti/scATAC/", gse)
 setwd(set_path)
 
-path <- paste0("/public/home/ac1dyrvmyl/keti/scATAC/", gse, "/data/", label, "/meta")
-cicero_interactions_file <- paste0("/public/home/ac1dyrvmyl/keti/scATAC/", label, "_cicero_interactions.txt")
-anno_file <- paste0(path, "/annotation.txt")
+path <- paste0(set_path, "/data/", label, "/meta")
+cicero_interactions_file <- paste0("/public/home/ac1dyrvmyl/keti/scATAC/", gse, "/", label, "_cicero_interactions.txt")
+anno_file <- paste0(path, "/annotation.txt") # GSE195460_diabetic_kidney no anno_file
 
 cicero_handle(path, anno_file, cicero_interactions_file)
 
