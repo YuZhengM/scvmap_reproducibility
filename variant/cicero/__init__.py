@@ -427,6 +427,7 @@ def form_table(group_count: int = 20):
             if _sample_trait_gene_data_.empty:
                 continue
 
+            _sample_trait_gene_data_["trait_id"] = trait_id
             _sample_trait_gene_list_.append(_sample_trait_gene_data_)
 
         print("Save files")
@@ -437,6 +438,33 @@ def form_table(group_count: int = 20):
 
         sample_trait_gene_all_data = pd.concat(list(sample_trait_gene_dict.values()))
         sample_trait_gene_all_data.to_csv(os.path.join(output_path, f"trait_gene_{sample_id}.txt"), sep="\t", header=True, index=False, encoding="utf-8")
+
+
+def form_sql_file(group_count: int = 100):
+    with open("./result/create_cicero.sql", "w", encoding="utf-8", newline="\n") as f:
+        for sample_id in sample_info["f_sample_id"]:
+            for i in range(group_count):
+                # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_trait_gene_{sample_id}_{i}`; \n" + \
+                          f"CREATE TABLE `scvdb`.`t_trait_gene_{sample_id}_{i}` (\n" + \
+                          f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
+                          f"  `f_trait_peak` varchar(128) NOT NULL,\n" + \
+                          f"  `f_gene_peak` varchar(128) NOT NULL,\n" + \
+                          f"  `f_score` double(26,20) NOT NULL,\n" + \
+                          f"  `f_position` int NOT NULL,\n" + \
+                          f"  `f_gene` varchar(128) NOT NULL,\n" + \
+                          f"  `f_rs_id` varchar(128) NOT NULL,\n" + \
+                          f"  `f_pp` double(26,20) NOT NULL,\n" + \
+                          f"  `f_trait_abbr` varchar(128) NOT NULL,\n" + \
+                          f"  `f_gene` varchar(128) NOT NULL,\n" + \
+                          f"  `f_weight` double(26,20) NOT NULL,\n" + \
+                          f"  KEY `t_trait_gene_{sample_id}_{i}_trait_id_gene_index` (`f_trait_id`,`f_gene`) USING BTREE,\n" + \
+                          f"  KEY `t_trait_gene_{sample_id}_{i}_trait_id_weight_index` (`f_trait_id`,`f_weight`) USING BTREE,\n" + \
+                          f"  KEY `t_trait_gene_{sample_id}_{i}_trait_id_rs_id_index` (`f_trait_id`,`f_rs_id`) USING BTREE\n" + \
+                          f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                          f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_gene/{sample_id}/t_trait_gene_{sample_id}_{i}.txt\" INTO TABLE `scvdb`.`t_trait_gene_{sample_id}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+                f.write(sql_str)
 
 
 if __name__ == '__main__':
@@ -467,3 +495,4 @@ if __name__ == '__main__':
     # exec_trait_gene_map()
 
     form_table()
+    form_sql_file()
