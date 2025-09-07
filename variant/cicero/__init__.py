@@ -7,6 +7,7 @@ from typing import Tuple
 
 import pandas as pd
 import torch
+from pandas import DataFrame
 from torch import nn, Tensor
 from tqdm import tqdm
 from yzm_file import StaticMethod
@@ -415,9 +416,9 @@ def form_table(group_count: int = 20):
     sample_id_list: list = sample_dict["name"]
     sample_id_list.sort()
 
-    print("Start executing: trait_gene_map.")
+    print("Start executing: form_table.")
 
-    for sample_id in sample_id_list[0:10]:
+    for sample_id in sample_id_list:
         sample_id: str
 
         print("Start executing sample: {}".format(sample_id))
@@ -442,17 +443,71 @@ def form_table(group_count: int = 20):
             pool.map(_form_table_core_, params)
             pool.close()
 
-            print("Save files")
-            sample_trait_gene_all_data_list: list = []
+        print("Save files")
+        sample_trait_gene_all_data_list: list = []
 
-            for _group_ in tqdm(range(group_count)):
-                _sample_trait_gene_list_ = sample_trait_gene_dict[_group_]
-                group_data = pd.concat(_sample_trait_gene_list_)
-                sample_trait_gene_all_data_list.append(group_data)
-                group_data.to_csv(os.path.join(sample_trait_gene_output_path, f"t_trait_gene_{sample_id}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
+        for _group_ in tqdm(range(group_count)):
+            _sample_trait_gene_list_ = sample_trait_gene_dict[_group_]
+            group_data = pd.concat(_sample_trait_gene_list_)
+            sample_trait_gene_all_data_list.append(group_data)
+            group_data.to_csv(os.path.join(sample_trait_gene_output_path, f"t_trait_gene_{sample_id}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
 
-            sample_trait_gene_all_data = pd.concat(sample_trait_gene_all_data_list)
-            sample_trait_gene_all_data.to_csv(os.path.join(output_path, f"trait_gene_{sample_id}.txt"), sep="\t", header=True, index=False, encoding="utf-8")
+        print(f"Save trait_gene_{sample_id}.txt file")
+        sample_trait_gene_all_data = pd.concat(sample_trait_gene_all_data_list)
+        sample_trait_gene_all_data.to_csv(os.path.join(output_path, f"trait_gene_{sample_id}.txt"), sep="\t", header=True, index=False, encoding="utf-8")
+
+
+def word_to_number(word: str) -> int:
+    return sum(ord(char) for char in word)
+
+
+def chunk_gene_file(group_count: int = 100):
+    input_path: str = os.path.join(base_path, "trait_gene_table")
+    output_path: str = os.path.join(base_path, "trait_gene_chunk_table")
+    sample_output_path: str = os.path.join(output_path, "sample")
+    trait_output_path: str = os.path.join(output_path, "trait")
+    file.makedirs(sample_output_path)
+    file.makedirs(trait_output_path)
+
+    files_dict = file.entry_files_dict(input_path)
+    filenames: list = files_dict["name"]
+
+    all_data_list: list = []
+
+    print("Start executing: chunk_gene_file.")
+    for filename in tqdm(filenames):
+        filename: str
+        sample_id = filename.split("_gene_")[1].split(".")[0]
+        file_path: str = files_dict[filename]
+        _data_content_ = pd.read_table(file_path)
+        _data_content_["sample_id"] = sample_id
+        all_data_list.append(_data_content_)
+
+    print("Concat files")
+    all_data = pd.concat(all_data_list)
+
+    print("Handle files")
+    sample_gene_score: DataFrame = all_data[["sample_id", "gene", "score"]]
+    sample_gene_score = sample_gene_score.groupby(["sample_id", "gene"])["score"].max().reset_index()
+    sample_gene_score.to_csv(f"{output_path}/cicero_sample_gene.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+
+    trait_gene_score = all_data[["trait_id", "gene", "score"]]
+    trait_gene_score = trait_gene_score.groupby(["trait_id", "gene"])["score"].max().reset_index()
+    trait_gene_score.to_csv(f"{output_path}/cicero_trait_gene.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+
+
+    print("Start chunk")
+    sample_gene_score["group"] = sample_gene_score["gene"].apply(word_to_number) % group_count
+    trait_gene_score["group"] = trait_gene_score["gene"].apply(word_to_number) % group_count
+
+    for group in tqdm(range(group_count)):
+        _data_sample_gene_ = sample_gene_score[sample_gene_score["group"] == group]
+        _data_sample_gene_ = _data_sample_gene_.drop(columns="group", axis=0)
+        _data_sample_gene_.to_csv(f"{sample_output_path}/t_cicero_sample_gene_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+
+        _data_trait_gene_ = trait_gene_score[trait_gene_score["group"] == group]
+        _data_trait_gene_ = _data_sample_gene_.drop(columns="group", axis=0)
+        _data_trait_gene_.to_csv(f"{trait_output_path}/t_cicero_trait_gene_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
 
 def form_sql_file(group_count: int = 20):
@@ -460,24 +515,23 @@ def form_sql_file(group_count: int = 20):
         for sample_id in sample_info["f_sample_id"]:
             for i in range(group_count):
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_trait_gene_{sample_id}_{i}`; \n" + \
-                          f"CREATE TABLE `scvdb`.`t_trait_gene_{sample_id}_{i}` (\n" + \
-                          f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
+                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_cicero_trait_gene_{sample_id}_{i}`; \n" + \
+                          f"CREATE TABLE `scvdb`.`t_cicero_trait_gene_{sample_id}_{i}` (\n" + \
                           f"  `f_trait_peak` varchar(128) NOT NULL,\n" + \
                           f"  `f_gene_peak` varchar(128) NOT NULL,\n" + \
                           f"  `f_score` double(26,20) NOT NULL,\n" + \
                           f"  `f_position` int NOT NULL,\n" + \
-                          f"  `f_gene` varchar(128) NOT NULL,\n" + \
                           f"  `f_rs_id` varchar(128) NOT NULL,\n" + \
                           f"  `f_pp` double(26,20) NOT NULL,\n" + \
                           f"  `f_trait_abbr` varchar(128) NOT NULL,\n" + \
                           f"  `f_gene` varchar(128) NOT NULL,\n" + \
                           f"  `f_weight` double(26,20) NOT NULL,\n" + \
-                          f"  KEY `t_trait_gene_{sample_id}_{i}_trait_id_gene_index` (`f_trait_id`,`f_gene`) USING BTREE,\n" + \
-                          f"  KEY `t_trait_gene_{sample_id}_{i}_trait_id_weight_index` (`f_trait_id`,`f_weight`) USING BTREE,\n" + \
-                          f"  KEY `t_trait_gene_{sample_id}_{i}_trait_id_rs_id_index` (`f_trait_id`,`f_rs_id`) USING BTREE\n" + \
+                          f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
+                          f"  KEY `t_cicero_trait_gene_{sample_id}_{i}_trait_id_gene_index` (`f_trait_id`,`f_gene`) USING BTREE,\n" + \
+                          f"  KEY `t_cicero_trait_gene_{sample_id}_{i}_trait_id_weight_index` (`f_trait_id`,`f_weight`) USING BTREE,\n" + \
+                          f"  KEY `t_cicero_trait_gene_{sample_id}_{i}_trait_id_rs_id_index` (`f_trait_id`,`f_rs_id`) USING BTREE\n" + \
                           f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                          f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_gene/{sample_id}/t_trait_gene_{sample_id}_{i}.txt\" INTO TABLE `scvdb`.`t_trait_gene_{sample_id}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                          f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_gene_table/{sample_id}/t_trait_gene_{sample_id}_{i}.txt\" INTO TABLE `scvdb`.`t_cicero_trait_gene_{sample_id}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
                 f.write(sql_str)
 
@@ -496,7 +550,7 @@ if __name__ == '__main__':
     sample_file = "../../scATAC/data/sample_info.txt"
     sample_info = pd.read_table(sample_file)
 
-    group_size = 30
+    group_size = 50
     trait_file = "../result/trait_info.xlsx"
     trait_info = pd.read_excel(trait_file)
 
@@ -509,5 +563,7 @@ if __name__ == '__main__':
 
     # exec_trait_gene_map()
 
-    form_table()
+    # form_table()
+    chunk_gene_file()
+
     # form_sql_file()

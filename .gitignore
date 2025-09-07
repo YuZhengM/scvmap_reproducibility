@@ -149,6 +149,7 @@ cython_debug/
 # large file
 scATAC/data/cell_anno.txt
 scATAC/data/cell_type_anno.txt
+scATAC/data/new_cell_anno.txt
 
 
 

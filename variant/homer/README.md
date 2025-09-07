@@ -2,6 +2,10 @@
 
 > [HOMER](http://homer.ucsd.edu/homer/)
 
+```shell
+conda create -n yzm_homer
+```
+
 ## Install HOMER
 
 ```shell
