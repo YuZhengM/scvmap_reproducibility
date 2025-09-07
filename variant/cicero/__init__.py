@@ -388,6 +388,24 @@ def exec_trait_gene_map():
                 model(gene_peak_datas, peak_pair_datas, output_files)
 
 
+def _form_table_core_(param: Tuple):
+    sample_trait_gene_path, sample_id, trait_id, sample_trait_gene_dict, trait_index, group_count, pbar = param
+
+    # sample_id_93_trait_id_1_trait_gene_map.txt
+    # sample_trait_gene_file = os.path.join(sample_trait_gene_path, f"{sample_id}_{trait_id}_trait_gene_map.txt")
+    sample_trait_gene_file = f"{sample_trait_gene_path}/{sample_id}_{trait_id}_trait_gene_map.txt"
+
+    if os.path.exists(sample_trait_gene_file):
+        _sample_trait_gene_list_: list = sample_trait_gene_dict[int(trait_index) % group_count]
+        _sample_trait_gene_data_ = pd.read_table(sample_trait_gene_file)
+
+        if not _sample_trait_gene_data_.empty:
+            _sample_trait_gene_data_["trait_id"] = trait_id
+            _sample_trait_gene_list_.append(_sample_trait_gene_data_)
+
+    pbar.update(1)
+
+
 def form_table(group_count: int = 20):
 
     trait_gene_path: str = os.path.join(base_path, "trait_gene")
@@ -399,7 +417,7 @@ def form_table(group_count: int = 20):
 
     print("Start executing: trait_gene_map.")
 
-    for sample_id in sample_id_list:
+    for sample_id in sample_id_list[0:10]:
         sample_id: str
 
         print("Start executing sample: {}".format(sample_id))
@@ -413,34 +431,31 @@ def form_table(group_count: int = 20):
         for i in range(group_count):
             sample_trait_gene_dict.update({i: []})
 
-        for trait_id, trait_index in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_index"])):
-            # sample_id_93_trait_id_1_trait_gene_map.txt
-            # sample_trait_gene_file = os.path.join(sample_trait_gene_path, f"{sample_id}_{trait_id}_trait_gene_map.txt")
-            sample_trait_gene_file = f"{sample_trait_gene_path}/{sample_id}_{trait_id}_trait_gene_map.txt"
+        with tqdm(total=trait_info.shape[0]) as pbar:
 
-            if not os.path.exists(sample_trait_gene_file):
-                continue
+            params = []
 
-            _sample_trait_gene_list_: list = sample_trait_gene_dict[int(trait_index) % group_count]
-            _sample_trait_gene_data_ = pd.read_table(sample_trait_gene_file)
+            for trait_id, trait_index in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_index"])):
+                params.append((sample_trait_gene_path, sample_id, trait_id, sample_trait_gene_dict, trait_index, group_count, pbar))
 
-            if _sample_trait_gene_data_.empty:
-                continue
+            pool = Pool(group_size)
+            pool.map(_form_table_core_, params)
+            pool.close()
 
-            _sample_trait_gene_data_["trait_id"] = trait_id
-            _sample_trait_gene_list_.append(_sample_trait_gene_data_)
+            print("Save files")
+            sample_trait_gene_all_data_list: list = []
 
-        print("Save files")
-        for _group_ in tqdm(range(group_count)):
-            _sample_trait_gene_list_ = sample_trait_gene_dict[_group_]
-            group_data = pd.concat(_sample_trait_gene_list_)
-            group_data.to_csv(os.path.join(sample_trait_gene_output_path, f"t_trait_gene_{sample_id}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
+            for _group_ in tqdm(range(group_count)):
+                _sample_trait_gene_list_ = sample_trait_gene_dict[_group_]
+                group_data = pd.concat(_sample_trait_gene_list_)
+                sample_trait_gene_all_data_list.append(group_data)
+                group_data.to_csv(os.path.join(sample_trait_gene_output_path, f"t_trait_gene_{sample_id}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
 
-        sample_trait_gene_all_data = pd.concat(list(sample_trait_gene_dict.values()))
-        sample_trait_gene_all_data.to_csv(os.path.join(output_path, f"trait_gene_{sample_id}.txt"), sep="\t", header=True, index=False, encoding="utf-8")
+            sample_trait_gene_all_data = pd.concat(sample_trait_gene_all_data_list)
+            sample_trait_gene_all_data.to_csv(os.path.join(output_path, f"trait_gene_{sample_id}.txt"), sep="\t", header=True, index=False, encoding="utf-8")
 
 
-def form_sql_file(group_count: int = 100):
+def form_sql_file(group_count: int = 20):
     with open("./result/create_cicero.sql", "w", encoding="utf-8", newline="\n") as f:
         for sample_id in sample_info["f_sample_id"]:
             for i in range(group_count):
@@ -495,4 +510,4 @@ if __name__ == '__main__':
     # exec_trait_gene_map()
 
     form_table()
-    form_sql_file()
+    # form_sql_file()
