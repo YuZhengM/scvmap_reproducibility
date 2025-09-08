@@ -469,32 +469,38 @@ def chunk_gene_file(group_count: int = 100):
     file.makedirs(sample_output_path)
     file.makedirs(trait_output_path)
 
-    files_dict = file.entry_files_dict(input_path)
-    filenames: list = files_dict["name"]
+    sample_gene_score_file = f"{output_path}/cicero_sample_gene.txt"
+    trait_gene_score_file = f"{output_path}/cicero_trait_gene.txt"
 
-    all_data_list: list = []
+    if os.path.exists(sample_gene_score_file) and os.path.exists(trait_gene_score_file):
+        sample_gene_score = pd.read_csv(sample_gene_score_file, sep="\t")
+        trait_gene_score = pd.read_csv(trait_gene_score_file, sep="\t")
+    else:
+        files_dict = file.entry_files_dict(input_path)
+        filenames: list = files_dict["name"]
 
-    print("Start executing: chunk_gene_file.")
-    for filename in tqdm(filenames):
-        filename: str
-        sample_id = filename.split("_gene_")[1].split(".")[0]
-        file_path: str = files_dict[filename]
-        _data_content_ = pd.read_table(file_path)
-        _data_content_["sample_id"] = sample_id
-        all_data_list.append(_data_content_)
+        all_data_list: list = []
 
-    print("Concat files")
-    all_data = pd.concat(all_data_list)
+        print("Start executing: chunk_gene_file.")
+        for filename in tqdm(filenames):
+            filename: str
+            sample_id = filename.split("_gene_")[1].split(".")[0]
+            file_path: str = files_dict[filename]
+            _data_content_ = pd.read_table(file_path)
+            _data_content_["sample_id"] = sample_id
+            all_data_list.append(_data_content_)
 
-    print("Handle files")
-    sample_gene_score: DataFrame = all_data[["sample_id", "gene", "score"]]
-    sample_gene_score = sample_gene_score.groupby(["sample_id", "gene"])["score"].max().reset_index()
-    sample_gene_score.to_csv(f"{output_path}/cicero_sample_gene.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+        print("Concat files")
+        all_data = pd.concat(all_data_list)
 
-    trait_gene_score = all_data[["trait_id", "gene", "score"]]
-    trait_gene_score = trait_gene_score.groupby(["trait_id", "gene"])["score"].max().reset_index()
-    trait_gene_score.to_csv(f"{output_path}/cicero_trait_gene.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+        print("Handle files")
+        sample_gene_score: DataFrame = all_data[["sample_id", "gene", "score"]]
+        sample_gene_score = sample_gene_score.groupby(["sample_id", "gene"])["score"].max().reset_index()
+        sample_gene_score.to_csv(sample_gene_score_file, sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
 
+        trait_gene_score = all_data[["trait_id", "gene", "score"]]
+        trait_gene_score = trait_gene_score.groupby(["trait_id", "gene"])["score"].max().reset_index()
+        trait_gene_score.to_csv(trait_gene_score_file, sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
 
     print("Start chunk")
     sample_gene_score["group"] = sample_gene_score["gene"].apply(word_to_number) % group_count
@@ -506,14 +512,14 @@ def chunk_gene_file(group_count: int = 100):
         _data_sample_gene_.to_csv(f"{sample_output_path}/t_cicero_sample_gene_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
         _data_trait_gene_ = trait_gene_score[trait_gene_score["group"] == group]
-        _data_trait_gene_ = _data_sample_gene_.drop(columns="group", axis=0)
+        _data_trait_gene_ = _data_trait_gene_.drop(columns="group", axis=0)
         _data_trait_gene_.to_csv(f"{trait_output_path}/t_cicero_trait_gene_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
 
-def form_sql_file(group_count: int = 20):
+def form_sql_file():
     with open("./result/create_cicero.sql", "w", encoding="utf-8", newline="\n") as f:
         for sample_id in sample_info["f_sample_id"]:
-            for i in range(group_count):
+            for i in range(20):
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
                 sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_cicero_trait_gene_{sample_id}_{i}`; \n" + \
                           f"CREATE TABLE `scvdb`.`t_cicero_trait_gene_{sample_id}_{i}` (\n" + \
@@ -534,6 +540,36 @@ def form_sql_file(group_count: int = 20):
                           f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_gene_table/{sample_id}/t_trait_gene_{sample_id}_{i}.txt\" INTO TABLE `scvdb`.`t_cicero_trait_gene_{sample_id}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
                 f.write(sql_str)
+
+    with open("./result/create_cicero_sample_gene.sql", "w", encoding="utf-8", newline="\n") as f:
+        for i in range(100):
+            # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_cicero_sample_gene_{i}`; \n" + \
+                      f"CREATE TABLE `scvdb`.`t_cicero_sample_gene_{i}` (\n" + \
+                      f"  `f_sample_id` varchar(32) NOT NULL,\n" + \
+                      f"  `f_gene` varchar(128) NOT NULL,\n" + \
+                      f"  `f_score` double(26,20) NOT NULL,\n" + \
+                      f"  KEY `t_cicero_sample_gene_{i}_gene_index` (`f_gene`) USING BTREE,\n" + \
+                      f"  KEY `t_cicero_sample_gene_{i}_score_index` (`f_score`) USING BTREE\n" + \
+                      f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                      f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_gene_chunk_table/sample/t_cicero_sample_gene_{i}.txt\" INTO TABLE `scvdb`.`t_cicero_sample_gene_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+            f.write(sql_str)
+
+    with open("./result/create_cicero_trait_gene.sql", "w", encoding="utf-8", newline="\n") as f:
+        for i in range(100):
+            # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_cicero_trait_gene_{i}`; \n" + \
+                      f"CREATE TABLE `scvdb`.`t_cicero_trait_gene_{i}` (\n" + \
+                      f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
+                      f"  `f_gene` varchar(128) NOT NULL,\n" + \
+                      f"  `f_score` double(26,20) NOT NULL,\n" + \
+                      f"  KEY `t_cicero_trait_gene_{i}_gene_index` (`f_gene`) USING BTREE,\n" + \
+                      f"  KEY `t_cicero_trait_gene_{i}_score_index` (`f_score`) USING BTREE\n" + \
+                      f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                      f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_gene_chunk_table/trait/t_cicero_trait_gene_{i}.txt\" INTO TABLE `scvdb`.`t_cicero_trait_gene_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+            f.write(sql_str)
 
 
 if __name__ == '__main__':
@@ -564,6 +600,6 @@ if __name__ == '__main__':
     # exec_trait_gene_map()
 
     # form_table()
-    chunk_gene_file()
+    # chunk_gene_file()
 
-    # form_sql_file()
+    form_sql_file()

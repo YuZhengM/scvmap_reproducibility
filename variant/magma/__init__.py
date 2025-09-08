@@ -37,7 +37,6 @@ def get_variant_anno():
             # P value index 11
             if _trait_code_.startswith("UKBB"):
                 trait_data["p_value"] = 2 * (1 - norm.cdf(abs(trait_data["z_score"])))
-                # trait_data["p_value"] = 1e-8
 
             trait_data[["rsId", "p_value"]].to_csv(_result_data_all_, sep="\t", header=False, index=False, lineterminator="\n")
             trait_data = trait_data[["allele1", "allele2", "maf", "af", "index"]]

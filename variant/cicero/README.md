@@ -8,3 +8,7 @@ scp -r -P 50303 root@ksai.scnet.cn:/public/home/ac1dyrvmyl/keti/database/sc_vari
 ```
 
 
+```shell
+scp -r -P 50303 root@ksai.scnet.cn:/root/private_data/keti/database/sc_variant/table/cicero/trait_gene_chunk_table /mnt/data3/workspace/SCVdb/mysql/mysqlfile/cicero/
+```
+
