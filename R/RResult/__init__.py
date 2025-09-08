@@ -17,7 +17,7 @@ from yzm_file import StaticMethod, Read, Create
 
 class ScVariantSave:
 
-    def __init__(self, input_path: str, anno_file: str):
+    def __init__(self, input_path: str, anno_file: str, is_error: bool = True):
         self.log = Logger("RResult")
         self.file = StaticMethod()
         self.read = Read(header=None)
@@ -25,6 +25,7 @@ class ScVariantSave:
         self.create = Create(header=False)
         self.create_header = Create()
 
+        self.is_error = is_error
         self.input_path = input_path
         self.anno_info = self.read_header.get_content(anno_file)
         self.trait_info = self.read_header.get_content(trait_info_file)
@@ -39,7 +40,7 @@ class ScVariantSave:
         files_dict: dict = self.file.entry_contents_dict(self.input_path, 1, ".txt")
         filenames: list = files_dict["name"]
 
-        if len(filenames) != self.trait_size:
+        if len(filenames) != self.trait_size and self.is_error:
             self.log.error("The quantity is incorrect and has not been completed.")
             raise RuntimeError("The quantity is incorrect and has not been completed.")
 
@@ -290,11 +291,13 @@ def get_statistics_count():
         method_enrich_file = f"{database_path}/sc_variant/table/trait_variant_overlap/trs_overlap_{_method_}.h5ad"
         method_data = sciv.fl.read_h5ad(method_enrich_file)
         method_enrich_count = method_data.X[method_data.X != 0].size
-        data_dict.append({
-            "method": _method_,
-            "item":   "sample_enrich",
-            "count":  method_enrich_count
-        })
+        data_dict.append(
+            {
+                "method": _method_,
+                "item": "sample_enrich",
+                "count": method_enrich_count
+            }
+        )
 
         cell_count: int = 0
         cell_type_count: int = 0
@@ -306,16 +309,20 @@ def get_statistics_count():
             label_cell_type_method_data = sciv.pp.adata_group(label_method_data, "f_cell_type", axis=1)
             cell_type_count += label_cell_type_method_data.layers["sum"][label_cell_type_method_data.layers["sum"] != 0].size
 
-        data_dict.append({
-            "method": _method_,
-            "item":   "cell_enrich",
-            "count":  cell_count
-        })
-        data_dict.append({
-            "method": _method_,
-            "item":   "cell_type_enrich",
-            "count":  cell_type_count
-        })
+        data_dict.append(
+            {
+                "method": _method_,
+                "item": "cell_enrich",
+                "count": cell_count
+            }
+        )
+        data_dict.append(
+            {
+                "method": _method_,
+                "item": "cell_type_enrich",
+                "count": cell_type_count
+            }
+        )
 
     print(data_dict)
     enrich_data = pd.DataFrame(data_dict, columns=columns)
@@ -384,6 +391,51 @@ def create_enrich_sql(group_count: int = 100):
                 f.write(sql_str)
 
 
+def process_distribution():
+    process = ScVariantSave(
+        input_path=f"{database_path}/sc_variant_distribution/result/GSE129785_TME-All",
+        anno_file=f"{scatac_path}/GSE129785/data/GSE129785_TME-All/GSE129785_TME-All_cell_anno_stdn.txt",
+        is_error=False
+    )
+    output_file = Path(f"{database_path}/sc_variant_distribution/scATAC/GSE129785_TME-All/GSE129785_TME-All_trs_scavenge_data.h5ad")
+
+    trs = process.get_trs()
+    trs = trs[~pd.isna(trs.obs["f_umap_x"]) & ~pd.isna(trs.obs["f_umap_y"])]
+    print(trs)
+    sciv.fl.save_h5ad(trs, output_file)
+
+
+def process_distribution_plot():
+    trs_finemap_data = sciv.fl.read_h5ad(f"{database_path}/sc_variant/scATAC/GSE129785_TME-All/GSE129785_TME-All_trs_scavenge_data.h5ad")
+    trs_sisue_data = sciv.fl.read_h5ad(f"{database_path}/sc_variant_distribution/scATAC/GSE129785_TME-All/GSE129785_TME-All_trs_scavenge_data.h5ad")
+    trs_finemap_data = trs_finemap_data[:, trs_sisue_data.var[trs_sisue_data.var["f_source_name"] == "BBJ"].index]
+    trs_sisue_data = trs_sisue_data[:, trs_sisue_data.var[trs_sisue_data.var["f_source_name"] == "BBJ"].index]
+
+    trait_index = trs_sisue_data.X.sum(axis=0) != 0
+    trs_finemap_matrix = sciv.ul.to_dense(trs_finemap_data[:, trait_index].X)
+    trs_sisue_matrix = sciv.ul.to_dense(trs_sisue_data[:, trait_index].X)
+
+    trait_list = trs_sisue_data[:, trait_index].var.index
+    kl_score_list = []
+
+    for i in range(trs_sisue_matrix.shape[1]):
+        divergence = sciv.tl.kl_divergence(trs_finemap_matrix[:, i].astype(float).flatten(), trs_sisue_matrix[:, i].astype(float).flatten())
+        kl_score_list.append(divergence)
+
+    #
+    print(f"The maximum KL divergence of TRS result distribution: {np.mean(kl_score_list)}.")
+
+    sciv.pl.bar(
+        trait_list,
+        kl_score_list,
+        width=15,
+        height=4,
+        x_name="Trait",
+        y_name="KL Divergence",
+        output=f"{database_path}/sc_variant_distribution/scATAC/GSE129785_TME-All/trs_distribution_kl.pdf"
+    )
+
+
 if __name__ == '__main__':
     print("run...")
 
@@ -399,10 +451,13 @@ if __name__ == '__main__':
 
     identifier_list: list = list(sample_info["f_label"])
 
-    process_sc_variant_save()
-    process_sc_variant_data()
-    process_enriched_sample_trait()
-    form_enriched_sample_file()
-    get_statistics_count()
-    enriched_data_chunk()
-    create_enrich_sql()
+    # process_sc_variant_save()
+    # process_sc_variant_data()
+    # process_enriched_sample_trait()
+    # form_enriched_sample_file()
+    # get_statistics_count()
+    # enriched_data_chunk()
+    # create_enrich_sql()
+
+    process_distribution()
+    process_distribution_plot()

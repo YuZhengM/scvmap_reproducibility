@@ -35,52 +35,70 @@ for (i in c(1:31)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
 
-# id: scvdb1 finish
+# id: scvmap1 finish
 for (i in c(32:47)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
 
-# id: scvdb2 finish
+# id: scvmap2 finish
 for (i in c(48:62)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
 
-# id: scvdb3 finish
+# id: scvmap3 finish
 for (i in c(63:77)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
 
-# id: scvdb4 finish
+# id: scvmap4 finish
 for (i in c(78:92)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
 
-# id: scvdb5 finish
+# id: scvmap5 finish
 for (i in c(93:107)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
 
-# id: scvdb6 finish
+# id: scvmap6 finish
 for (i in c(108:122)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
 
-# id: scvdb7 finish
+# id: scvmap7 finish
 for (i in c(123:137)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
 
-# id: scvdb8 finish
+# id: scvmap8 finish
 for (i in c(138:152)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
 
-# id: scvdb9 finish
+# id: scvmap9 finish
 for (i in c(153:167)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
 
-# id: scvdb10 finish
+# id: scvmap10 finish
 for (i in c(168:183)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
+
+# Verify TRS distribution
+
+library_path <- "/public/home/lcq/rgzn/yuzhengmin/keti/database/code/yiyuan_chaosuan"
+source(paste0(library_path, "/library.R"))
+source(paste0(library_path, "/static_function.R"))
+source(paste0(library_path, "/integration_distribution.R"))
+path <- "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC"
+base_path <- "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant_distribution"
+
+core_process_distribution(
+    paste0(path, "/GSE129785"),
+    base_path,
+    "GSE129785_TME-All",
+    "hg19",
+    "data",
+    "/public/home/lcq/rgzn/yuzhengmin/keti/variant/output/BBJ/finemap_susie"
+)
