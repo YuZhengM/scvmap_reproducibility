@@ -422,7 +422,7 @@ def process_distribution_plot():
         divergence = sciv.tl.kl_divergence(trs_finemap_matrix[:, i].astype(float).flatten(), trs_sisue_matrix[:, i].astype(float).flatten())
         kl_score_list.append(divergence)
 
-    #
+    # 0.07573787618637001
     print(f"The maximum KL divergence of TRS result distribution: {np.mean(kl_score_list)}.")
 
     sciv.pl.bar(
