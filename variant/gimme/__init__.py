@@ -12,15 +12,23 @@ from gimmemotifs.motif import read_motifs
 from gimmemotifs.scanner import Scanner
 from gimmemotifs.fasta import Fasta
 from pandas import DataFrame
+from yzm_file import StaticMethod
 from yzm_log import Logger
 import pandas as pd
 
 
 class RunGimme:
 
-    def __init__(self, genomes_path: str, tf_name_list: list = None, columns: Union[list, Tuple] = ("start", "end", "end")):
+    def __init__(
+        self,
+        genomes_path: str,
+        tf_name_list: list = None,
+        columns: Union[list, Tuple] = ("chr", "start", "end"),
+        peak_split_character: Tuple = (":", "-")
+    ):
         self.genomes_path = genomes_path
         self.columns = columns
+        self.peak_split_character = peak_split_character
         self.log = Logger()
 
         # Load motif database (default to use motifs provided by GimmeMotifs)
@@ -50,7 +58,7 @@ class RunGimme:
         for _chr_, _start_, _end_ in zip(peak_df[self.columns[0]], peak_df[self.columns[1]], peak_df[self.columns[2]]):
             seq_content = get_genome_seq(chrom=_chr_, start=_start_, end=_end_)
             # Create SeqRecord object
-            record = SeqRecord(Seq(seq_content), id=f"{_chr_}:{_start_}-{_end_}", description="")
+            record = SeqRecord(Seq(seq_content), id=f"{_chr_}{self.peak_split_character[0]}{_start_}{self.peak_split_character[1]}{_end_}", description="")
             records.append(record)
 
         # Write file
@@ -84,7 +92,23 @@ class RunGimme:
     def get_hg38_scanner(self) -> str:
         return self.get_scanner("hg38")
 
-    def get_motif_result(self, genome: str, peak_df: DataFrame):
+    def get_single_seq(self, seq_name: str) -> Tuple:
+
+        if self.peak_split_character[0] == self.peak_split_character[1]:
+            _split_ = seq_name.split(self.peak_split_character[0])
+            seq_chr = _split_[0]
+            seq_start = _split_[1]
+            seq_end = _split_[2]
+        else:
+            _split_ = seq_name.split(self.peak_split_character[0])
+            seq_chr = _split_[0]
+            _split_ = _split_[1].split(self.peak_split_character[1])
+            seq_start = _split_[0]
+            seq_end = _split_[1]
+
+        return seq_chr, seq_start, seq_end
+
+    def get_motif_result(self, genome: str, peak_df: DataFrame) -> DataFrame:
 
         tmp_fa_file = self.create_tmp_fa_file(genome, peak_df)
 
@@ -100,22 +124,75 @@ class RunGimme:
 
         self.log.info("Motif matches data")
 
+        data_list = []
+
         for i, result in enumerate(motif_matches_data):
-            seqname = seqs.ids[i]
+            seq_name: str = seqs.ids[i]
+            seq_chr, seq_start, seq_end = self.get_single_seq(seq_name)
+
             for m, matches in enumerate(result):
                 motif = self.motifs[m]
                 tf_name_list = motif.factors['direct']
+
                 for score, pos, strand in matches:
+                    _strand_ = '+' if strand == 1 else '-'
+
                     for tf in tf_name_list:
-                        print(seqname, motif, tf, score, pos, strand)
+                        data_list.append([seq_chr, seq_start, seq_end, motif, tf, score, pos, _strand_, seq_name])
+
+        motif_matches_df = pd.DataFrame(data_list, columns=['chr', 'start', 'end', 'motif', 'tf', 'score', 'position', 'strand', 'seq_name'])
+
+        if os.path.exists(tmp_fa_file):
+            os.remove(tmp_fa_file)
+
+        return motif_matches_df
+
+
+def get_motif_scanner_result():
+
+    for sample_id, _genome_ in zip(sample_info["f_sample_id"], sample_info["f_genome"]):
+        print(f"Start exec {sample_id}...")
+        peak_data = pd.read_table(f"{base_path}/peak/{sample_id}_peak.txt")
+        peak_data.columns = ["chr", "start", "end", "_"]
+        sample_id_motif_scanner_result = gimme.get_motif_result(genome=_genome_, peak_df=peak_data)
+        sample_id_motif_scanner_result.to_csv(f"{output_path}/{sample_id}_{_genome_}_tf_peak_map.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+
+
+def handle_motif_scanner_reault():
+
+    for sample_id, _genome_ in zip(sample_info["f_sample_id"], sample_info["f_genome"]):
+        print(f"Start exec {sample_id} (handle)...")
+        motif_scanner_data = pd.read_table(f"{output_path}/{sample_id}_{_genome_}_tf_peak_map.txt")
+
+        grouped_obj = motif_scanner_data.groupby(['chr', 'start', 'end', 'motif', 'tf', 'seq_name'])
+
+        # 使用分组对象进行聚合操作
+        grouped = grouped_obj.agg(
+            score_mean=('score', 'mean'),
+            position_set=('position', lambda x: ','.join(map(str, set(x)))),
+            strand_set=('strand', lambda x: ','.join(set(x)))
+        ).reset_index()
+
+        # 添加数量列
+        grouped['count'] = grouped_obj.size().values
+        grouped.to_csv(f"{output_handle_path}/{sample_id}_{_genome_}_tf_peak_map.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
 
 
 if __name__ == '__main__':
     print("run ...")
 
+    file = StaticMethod()
+
     tf_data = pd.read_table("../../tf/data/t_tf.txt")
     # gimme = RunGimme("/public/home/lcq/rgzn/.local/share/genomes")
-    gimme = RunGimme("/root/private_data/keti/software/gimmemotifs/genomes", tf_name_list=tf_data["f_tf_name"].tolist())
+    gimme = RunGimme("/root/private_data/keti/software/gimmemotifs/genomes", tf_name_list=tf_data["f_tf_name"].tolist(), peak_split_character=("_", "_"))
 
-    peak_df = pd.read_table("/root/private_data/keti/database/sc_variant/table/cicero/peak/sample_id_1_peak.txt")
-    gimme.get_motif_result(genome="hg19", peak_df=peak_df)
+    base_path: str = "/root/private_data/keti/database/sc_variant/table/cicero"
+    output_path: str = os.path.join(base_path, "tf_peak")
+    file.makedirs(output_path)
+
+    sample_info = pd.read_table("../../scATAC/data/sample_info.txt")
+    get_motif_scanner_result()
+
+    output_handle_path: str = os.path.join(base_path, "tf_peak_handle")
+    handle_motif_scanner_reault()
