@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 import os
-import threading
+import sys
 from multiprocessing.dummy import Pool
 from typing import Union, Tuple
 
@@ -159,11 +159,14 @@ class RunGimme:
 
 def _motif_scanner_core_(param: Tuple) -> None:
 
-    sample_id, genome, threshold = param
+    gimme, sample_id, genome, threshold, output_path = param
+
+    print(f"Start exec {sample_id}...")
     peak_data = pd.read_table(f"{base_path}/peak/{sample_id}_peak.txt")
     peak_data.columns = ["chr", "start", "end", "_"]
     motif_scanner_data = gimme.get_motif_result(genome=genome, peak_df=peak_data)
 
+    print(f"Start exec {sample_id} (handle)...")
     motif_scanner_data = motif_scanner_data[motif_scanner_data["score"] >= threshold]
     grouped_obj = motif_scanner_data.groupby(['chr', 'start', 'end', 'tf', 'seq_name'])
 
@@ -177,38 +180,132 @@ def _motif_scanner_core_(param: Tuple) -> None:
 
     # Add count
     grouped['count'] = grouped_obj.size().values
+
+    print(f"Save {sample_id}_{genome}_tf_peak_map.txt file")
     grouped.to_csv(f"{output_path}/{sample_id}_{genome}_tf_peak_map.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
 
 
 def get_motif_scanner_result(threshold: float = 6):
+    gimme = RunGimme("/root/private_data/keti/software/gimmemotifs/genomes", tf_name_list=tf_data["f_tf_name"].tolist(), peak_split_character=("_", "_"))
 
-    params: list = []
+    output_path: str = os.path.join(base_path, "tf_peak")
+    file.makedirs(output_path)
 
     for sample_id, _genome_ in zip(sample_info["f_sample_id"], sample_info["f_genome"]):
 
         if not os.path.exists(f"{output_path}/{sample_id}_{_genome_}_tf_peak_map.txt"):
-            params.append((sample_id, _genome_, threshold))
+            _motif_scanner_core_((gimme, sample_id, _genome_, threshold, output_path))
 
-    pool = Pool(3)
-    pool.map(_motif_scanner_core_, params)
-    pool.close()
-    pool.join()
+
+def _trait_tf_map_core_(param: Tuple) -> None:
+    tf_peak_data, trait_peak_file, peak_pair_data, output_file, pbar = param
+
+    sample_trait_peak = pd.read_table(trait_peak_file, sep="\t", header=None)
+
+    if not sample_trait_peak.empty:
+
+        sample_trait_peak.columns = ["_", "_", "position", "rsId", "pip", "trait_abbr", "_", "_", "_", "_", "trait_peak"]
+        sample_trait_peak = sample_trait_peak[["position", "rsId", "pip", "trait_abbr", "trait_peak"]]
+
+        # 合并数据 - 情况1
+        merged1 = pd.merge(peak_pair_data, sample_trait_peak, left_on="peak1", right_on="trait_peak", how='inner')
+        merged1 = pd.merge(merged1, tf_peak_data, left_on="peak2", right_on="seq_name", how='inner')
+
+        # 合并数据 - 情况2
+        merged2 = pd.merge(peak_pair_data, sample_trait_peak, left_on="peak2", right_on="trait_peak", how='inner')
+        merged2 = pd.merge(merged2, tf_peak_data, left_on="peak1", right_on="seq_name", how='inner')
+
+        final_result = pd.concat([merged1, merged2])
+        final_result = final_result[['trait_peak', 'seq_name', 'score', 'position', 'rsId', 'pip', 'trait_abbr',
+                                     "tf", "score_mean", "motif_set", "position_set", "strand_set", "count"]].drop_duplicates()
+
+        # 第3列是 coaccess（浮点数），第5列是 rsID
+        final_result['score'] = final_result['score'].astype(float)
+
+        # 按 rsID 分组，计算总和
+        pp_total = final_result.groupby('rsId')['score'].transform(lambda x: x.sum())
+
+        # ratio = 每行 coaccess / 总和（如果只有一行，则除以1）
+        final_result['weight'] = final_result['score'] / pp_total
+
+        # 保存，保留原始行顺序
+        final_result.to_csv(output_file, sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+
+        pbar.update(1)
+
+
+def exec_trait_tf_map():
+    # sample_id_1/sample_id_1_trait_id_10000_trait_peak_map.txt
+    trait_peak_path = os.path.join(base_path, "trait_peak")
+    # sample_id_1_hg19_tf_peak_map.txt
+    tf_peak_path = os.path.join(base_path, "tf_peak")
+    # sample_id_1_cicero_interactions.txt
+    pair_path = os.path.join(base_path, "pair")
+
+    output_path = os.path.join(base_path, "trait_tf")
+
+    print("Start executing: trait_tf_map.")
+
+    for sample_id, _genome_ in zip(sample_info["f_sample_id"], sample_info["f_genome"]):
+
+        print("Start executing sample: {}".format(sample_id))
+
+        sample_tf_peak_file = os.path.join(tf_peak_path, f"{sample_id}_{_genome_}_tf_peak_map.txt")
+        sample_peak_pair_file = os.path.join(pair_path, f"{sample_id}_cicero_interactions.txt")
+
+        sample_trait_peak_path = os.path.join(trait_peak_path, sample_id)
+        sample_trait_tf_output_path = os.path.join(output_path, sample_id)
+        file.makedirs(sample_trait_tf_output_path)
+
+        # 读入
+        sample_tf_peak = pd.read_table(sample_tf_peak_file, sep="\t")
+        sample_tf_peak = sample_tf_peak[["tf", "seq_name", "score_mean", "motif_set", "position_set", "strand_set", "count"]]
+
+        sample_peak_pair = pd.read_table(sample_peak_pair_file, sep="\t", header=0)
+        sample_peak_pair.columns = ["peak1", "peak2", "score"]
+
+        params: list = []
+
+        pbar = tqdm()
+
+        for trait_id in trait_info["f_trait_id"]:
+            sample_trait_peak_file = os.path.join(sample_trait_peak_path, f"{sample_id}_{trait_id}_trait_peak_map.txt")
+            sample_trait_tf_output_file = os.path.join(sample_trait_tf_output_path, f"{sample_id}_{trait_id}_trait_tf_map.txt")
+
+            if os.path.getsize(sample_trait_peak_file) == 0 or os.path.exists(sample_trait_tf_output_file):
+                continue
+
+            params.append((sample_tf_peak, sample_trait_peak_file, sample_peak_pair, sample_trait_tf_output_file, pbar))
+
+        pbar.total = len(params)
+
+        pool = Pool(3)
+        pool.map(_trait_tf_map_core_, params)
+        pool.close()
+        pool.join()
+
+        pbar.close()
 
 
 if __name__ == '__main__':
     print("run ...")
 
     file = StaticMethod()
-    lock = threading.Lock()
 
     tf_data = pd.read_table("../../tf/data/t_tf.txt")
-    sample_info = pd.read_table("../../scATAC/data/sample_info.txt")[0:35]
+    sample_info = pd.read_table("../../scATAC/data/sample_info.txt")[int(sys.argv[1]):int(sys.argv[2])]
 
-    # gimme = RunGimme("/public/home/lcq/rgzn/.local/share/genomes")
-    gimme = RunGimme("/root/private_data/keti/software/gimmemotifs/genomes", tf_name_list=tf_data["f_tf_name"].tolist(), peak_split_character=("_", "_"))
+    trait_file = "../result/trait_info.xlsx"
+    trait_info = pd.read_excel(trait_file)
+
+    genomes = ["hg19", "hg38"]
 
     base_path: str = "/root/private_data/keti/database/sc_variant/table/cicero"
-    output_path: str = os.path.join(base_path, "tf_peak")
-    file.makedirs(output_path)
 
-    get_motif_scanner_result()
+    # get_motif_scanner_result()
+
+    # finsh: 5, 7, 10, 11, 12, 13, 14, 16, 18
+    # 0:8
+    # 8:21
+    # 21:27
+    exec_trait_tf_map()
