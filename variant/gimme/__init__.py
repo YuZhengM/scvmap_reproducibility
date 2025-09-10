@@ -32,6 +32,7 @@ class RunGimme:
         self.genomes_path = genomes_path
         self.columns = columns
         self.peak_split_character = peak_split_character
+        self.tf_name_list = tf_name_list
         self.log = Logger()
 
         # Load motif database (default to use motifs provided by GimmeMotifs)
@@ -141,7 +142,12 @@ class RunGimme:
                     _strand_ = '+' if strand == 1 else '-'
 
                     for tf in tf_name_list:
-                        data_list.append([seq_chr, seq_start, seq_end, str(motif), tf, score, pos, _strand_, seq_name])
+
+                        if self.tf_name_list is not None:
+                            if tf in self.tf_name_list:
+                                data_list.append([seq_chr, seq_start, seq_end, str(motif), tf, score, pos, _strand_, seq_name])
+                        else:
+                            data_list.append([seq_chr, seq_start, seq_end, str(motif), tf, score, pos, _strand_, seq_name])
 
         motif_matches_df = pd.DataFrame(data_list, columns=['chr', 'start', 'end', 'motif', 'tf', 'score', 'position', 'strand', 'seq_name'])
 
@@ -153,22 +159,12 @@ class RunGimme:
 
 def _motif_scanner_core_(param: Tuple) -> None:
 
-    sample_id, genome, threshold, pbar = param
-
-    lock.acquire()
-    print(f"Start exec {sample_id}...")
-    lock.release()
-
+    sample_id, genome, threshold = param
     peak_data = pd.read_table(f"{base_path}/peak/{sample_id}_peak.txt")
     peak_data.columns = ["chr", "start", "end", "_"]
     motif_scanner_data = gimme.get_motif_result(genome=genome, peak_df=peak_data)
 
     motif_scanner_data = motif_scanner_data[motif_scanner_data["score"] >= threshold]
-
-    lock.acquire()
-    print(f"Start exec {sample_id} (handle)...")
-    lock.release()
-
     grouped_obj = motif_scanner_data.groupby(['chr', 'start', 'end', 'tf', 'seq_name'])
 
     # Use grouped objects for aggregation operations
@@ -181,28 +177,22 @@ def _motif_scanner_core_(param: Tuple) -> None:
 
     # Add count
     grouped['count'] = grouped_obj.size().values
-
-    lock.acquire()
-    print(f"Save {sample_id}_{genome}_tf_peak_map.txt file")
-    lock.release()
-
     grouped.to_csv(f"{output_path}/{sample_id}_{genome}_tf_peak_map.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
-
-    pbar.update(1)
 
 
 def get_motif_scanner_result(threshold: float = 6):
 
-    with tqdm(total=sample_info.shape[0]) as pbar:
+    params: list = []
 
-        params: list = []
-        for sample_id, _genome_ in zip(sample_info["f_sample_id"], sample_info["f_genome"]):
-            params.append((sample_id, _genome_, threshold, pbar))
+    for sample_id, _genome_ in zip(sample_info["f_sample_id"], sample_info["f_genome"]):
 
-        pool = Pool(18)
-        pool.map(_motif_scanner_core_, params)
-        pool.close()
-        pool.join()
+        if not os.path.exists(f"{output_path}/{sample_id}_{_genome_}_tf_peak_map.txt"):
+            params.append((sample_id, _genome_, threshold))
+
+    pool = Pool(3)
+    pool.map(_motif_scanner_core_, params)
+    pool.close()
+    pool.join()
 
 
 if __name__ == '__main__':
@@ -212,7 +202,7 @@ if __name__ == '__main__':
     lock = threading.Lock()
 
     tf_data = pd.read_table("../../tf/data/t_tf.txt")
-    sample_info = pd.read_table("../../scATAC/data/sample_info.txt")[18 * 7:]
+    sample_info = pd.read_table("../../scATAC/data/sample_info.txt")[0:35]
 
     # gimme = RunGimme("/public/home/lcq/rgzn/.local/share/genomes")
     gimme = RunGimme("/root/private_data/keti/software/gimmemotifs/genomes", tf_name_list=tf_data["f_tf_name"].tolist(), peak_split_character=("_", "_"))
