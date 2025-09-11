@@ -279,7 +279,7 @@ def exec_trait_tf_map():
 
         pbar.total = len(params)
 
-        pool = Pool(3)
+        pool = Pool(10)
         pool.map(_trait_tf_map_core_, params)
         pool.close()
         pool.join()
@@ -304,8 +304,4 @@ if __name__ == '__main__':
 
     # get_motif_scanner_result()
 
-    # finsh: 5, 7, 10, 11, 12, 13, 14, 16, 18
-    # 0:8
-    # 8:21
-    # 21:27
     exec_trait_tf_map()
