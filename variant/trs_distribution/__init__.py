@@ -82,9 +82,6 @@ def handle_bjj_susie_finemap():
 
         trait_info_data_tmp = trait_info_data[trait_info_data["pip"] > pip_threshold]
 
-        if trait_info_data_tmp.empty:
-            trait_info_data_tmp = trait_info_data[trait_info_data["pip"] >= pip_threshold_try]
-
         trait_info_data_tmp["index"] = np.arange(len(trait_info_data_tmp)) + 1
         trait_info_data_tmp.to_csv(fine_mapping_file, sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
@@ -101,9 +98,8 @@ if __name__ == '__main__':
     log = Logger()
 
     pip_threshold: float = 0.001
-    pip_threshold_try: float = 0.0001
 
     base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant"
 
-    # obtain_bjj_susie_finemap()
+    obtain_bjj_susie_finemap()
     handle_bjj_susie_finemap()

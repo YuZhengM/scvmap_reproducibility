@@ -14,62 +14,8 @@ from yzm_file import StaticMethod
 from yzm_util import Util
 
 
-def cicero_interactions_files():
-    sample_cicero_dict: dict = file.entry_files_dict(os.path.join(base_path, "source"))
-    sample_cicero_filenames: list = sample_cicero_dict["name"]
-    sample_cicero_filenames.sort()
-
-    pair_output = os.path.join(base_path, "pair")
-    peak_output = os.path.join(base_path, "peak")
-    file.makedirs(pair_output)
-    file.makedirs(peak_output)
-
-    for filename in sample_cicero_filenames:
-        filename: str
-        print(f"Start {filename}...")
-
-        peak_file = os.path.join(peak_output, filename.split("_cicero")[0] + "_peak.txt")
-
-        if os.path.exists(peak_file):
-            print(f"File {peak_file} exists, skip it.")
-            continue
-
-        if filename.endswith("cicero.txt"):
-
-            cicero_data = pd.read_table(sample_cicero_dict[filename], header=None)
-            cicero_data.columns = ["sample_id", "Peak1", "Peak2", "coaccess"]
-            cicero_data = cicero_data[["Peak1", "Peak2", "coaccess"]]
-
-            if "," in str(cicero_data["Peak1"][0]):
-                cicero_data["Peak1"] = cicero_data["Peak1"].str.split(",", expand=True)[0]
-
-            if "," in str(cicero_data["Peak2"][0]):
-                cicero_data["Peak2"] = cicero_data["Peak2"].str.split(",", expand=True)[0]
-
-            cicero_data.to_csv(os.path.join(pair_output, filename.split(".")[0] + "_interactions.txt"), sep="\t", header=True, index=False, lineterminator="\n", encoding="utf-8")
-        else:
-            cicero_data = pd.read_table(sample_cicero_dict[filename])
-
-            if "-" in str(cicero_data["Peak1"][0]):
-                cicero_data['Peak1'] = cicero_data['Peak1'].apply(lambda x: x.replace("-", "_"))
-                cicero_data['Peak2'] = cicero_data['Peak2'].apply(lambda x: x.replace("-", "_"))
-
-            cicero_data.to_csv(os.path.join(pair_output, filename), sep="\t", header=True, index=False, lineterminator="\n", encoding="utf-8")
-
-        peak_list = cicero_data["Peak1"].unique().tolist()
-        peak_list.extend(cicero_data["Peak2"].unique().tolist())
-        peak_list = list(set(peak_list))
-
-        peak_df = pd.DataFrame([s.split('_') for s in peak_list], columns=['chr', 'start', 'end'])
-        # Converting 'start' and 'end' columns to integer
-        peak_df['start'] = peak_df['start'].astype(int)
-        peak_df['end'] = peak_df['end'].astype(int)
-        peak_df['id'] = peak_list
-        peak_df.sort_values(by=['chr', 'start'], inplace=True)
-        # Converting 'start' and 'end' columns to integer
-        peak_df['start'] = peak_df['start'].astype(str)
-        peak_df['end'] = peak_df['end'].astype(str)
-        peak_df.to_csv(peak_file, sep="\t", header=False, index=False, lineterminator="\n", encoding="utf-8")
+def hic_interactions_files():
+    pass
 
 
 def check_gpu_availability(verbose: bool = True) -> bool:
@@ -175,7 +121,7 @@ def exec_bedtools_gene():
 
         genome: str = list(sample_info[sample_info["f_sample_id"] == sample_id]["f_genome"])[0]
 
-        gene_file: str = os.path.join(base_path, "anno", f"cicero_gene_{genome}_annotation.txt")
+        gene_file: str = os.path.join(base_path, "anno", f"hic_gene_{genome}_annotation.txt")
 
         peak_file = peak_file_dict[peak_filename]
         output_file = os.path.join(output_path, f"{sample_id}_{genome}_gene_peak_map.txt")
@@ -320,7 +266,7 @@ def exec_trait_gene_map():
     trait_peak_path = os.path.join(base_path, "trait_peak")
     # sample_id_1_hg19_gene_peak_map.txt
     gene_peak_path = os.path.join(base_path, "gene_peak")
-    # sample_id_1_cicero_interactions.txt
+    # sample_id_1_hic_interactions.txt
     pair_path = os.path.join(base_path, "pair")
 
     output_path = os.path.join(base_path, "trait_gene")
@@ -339,7 +285,7 @@ def exec_trait_gene_map():
         genome: str = list(sample_info[sample_info["f_sample_id"] == sample_id]["f_genome"])[0]
 
         sample_gene_peak_file = os.path.join(gene_peak_path, f"{sample_id}_{genome}_gene_peak_map.txt")
-        sample_peak_pair_file = os.path.join(pair_path, f"{sample_id}_cicero_interactions.txt")
+        sample_peak_pair_file = os.path.join(pair_path, f"{sample_id}_hic_interactions.txt")
 
         sample_trait_peak_path = os.path.join(trait_peak_path, sample_id)
         sample_trait_gene_output_path = os.path.join(output_path, sample_id)
@@ -469,8 +415,8 @@ def chunk_gene_file(group_count: int = 100):
     file.makedirs(sample_output_path)
     file.makedirs(trait_output_path)
 
-    sample_gene_score_file = f"{output_path}/cicero_sample_gene.txt"
-    trait_gene_score_file = f"{output_path}/cicero_trait_gene.txt"
+    sample_gene_score_file = f"{output_path}/hic_sample_gene.txt"
+    trait_gene_score_file = f"{output_path}/hic_trait_gene.txt"
 
     if os.path.exists(sample_gene_score_file) and os.path.exists(trait_gene_score_file):
         sample_gene_score = pd.read_csv(sample_gene_score_file, sep="\t")
@@ -509,20 +455,20 @@ def chunk_gene_file(group_count: int = 100):
     for group in tqdm(range(group_count)):
         _data_sample_gene_ = sample_gene_score[sample_gene_score["group"] == group]
         _data_sample_gene_ = _data_sample_gene_.drop(columns="group", axis=0)
-        _data_sample_gene_.to_csv(f"{sample_output_path}/t_cicero_sample_gene_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+        _data_sample_gene_.to_csv(f"{sample_output_path}/t_hic_sample_gene_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
         _data_trait_gene_ = trait_gene_score[trait_gene_score["group"] == group]
         _data_trait_gene_ = _data_trait_gene_.drop(columns="group", axis=0)
-        _data_trait_gene_.to_csv(f"{trait_output_path}/t_cicero_trait_gene_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+        _data_trait_gene_.to_csv(f"{trait_output_path}/t_hic_trait_gene_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
 
 def form_sql_file():
-    with open("./result/create_cicero.sql", "w", encoding="utf-8", newline="\n") as f:
+    with open("./result/create_hic.sql", "w", encoding="utf-8", newline="\n") as f:
         for sample_id in sample_info["f_sample_id"]:
             for i in range(20):
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_cicero_trait_gene_{sample_id}_{i}`; \n" + \
-                          f"CREATE TABLE `scvdb`.`t_cicero_trait_gene_{sample_id}_{i}` (\n" + \
+                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_hic_trait_gene_{sample_id}_{i}`; \n" + \
+                          f"CREATE TABLE `scvdb`.`t_hic_trait_gene_{sample_id}_{i}` (\n" + \
                           f"  `f_trait_peak` varchar(128) NOT NULL,\n" + \
                           f"  `f_gene_peak` varchar(128) NOT NULL,\n" + \
                           f"  `f_score` double(26,20) NOT NULL,\n" + \
@@ -533,41 +479,41 @@ def form_sql_file():
                           f"  `f_gene` varchar(128) NOT NULL,\n" + \
                           f"  `f_weight` double(26,20) NOT NULL,\n" + \
                           f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
-                          f"  KEY `t_cicero_trait_gene_{sample_id}_{i}_trait_id_gene_index` (`f_trait_id`,`f_gene`) USING BTREE,\n" + \
-                          f"  KEY `t_cicero_trait_gene_{sample_id}_{i}_trait_id_weight_index` (`f_trait_id`,`f_weight`) USING BTREE,\n" + \
-                          f"  KEY `t_cicero_trait_gene_{sample_id}_{i}_trait_id_rs_id_index` (`f_trait_id`,`f_rs_id`) USING BTREE\n" + \
+                          f"  KEY `t_hic_trait_gene_{sample_id}_{i}_trait_id_gene_index` (`f_trait_id`,`f_gene`) USING BTREE,\n" + \
+                          f"  KEY `t_hic_trait_gene_{sample_id}_{i}_trait_id_weight_index` (`f_trait_id`,`f_weight`) USING BTREE,\n" + \
+                          f"  KEY `t_hic_trait_gene_{sample_id}_{i}_trait_id_rs_id_index` (`f_trait_id`,`f_rs_id`) USING BTREE\n" + \
                           f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                          f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_gene_table/{sample_id}/t_trait_gene_{sample_id}_{i}.txt\" INTO TABLE `scvdb`.`t_cicero_trait_gene_{sample_id}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                          f"LOAD DATA LOCAL INFILE \"/root/hic/trait_gene_table/{sample_id}/t_trait_gene_{sample_id}_{i}.txt\" INTO TABLE `scvdb`.`t_hic_trait_gene_{sample_id}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
                 f.write(sql_str)
 
-    with open("./result/create_cicero_sample_gene.sql", "w", encoding="utf-8", newline="\n") as f:
+    with open("./result/create_hic_sample_gene.sql", "w", encoding="utf-8", newline="\n") as f:
         for i in range(100):
             # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_cicero_sample_gene_{i}`; \n" + \
-                      f"CREATE TABLE `scvdb`.`t_cicero_sample_gene_{i}` (\n" + \
+            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_hic_sample_gene_{i}`; \n" + \
+                      f"CREATE TABLE `scvdb`.`t_hic_sample_gene_{i}` (\n" + \
                       f"  `f_sample_id` varchar(32) NOT NULL,\n" + \
                       f"  `f_gene` varchar(128) NOT NULL,\n" + \
                       f"  `f_score` double(26,20) NOT NULL,\n" + \
-                      f"  KEY `t_cicero_sample_gene_{i}_gene_index` (`f_gene`) USING BTREE,\n" + \
-                      f"  KEY `t_cicero_sample_gene_{i}_score_index` (`f_score`) USING BTREE\n" + \
+                      f"  KEY `t_hic_sample_gene_{i}_gene_index` (`f_gene`) USING BTREE,\n" + \
+                      f"  KEY `t_hic_sample_gene_{i}_score_index` (`f_score`) USING BTREE\n" + \
                       f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                      f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_gene_chunk_table/sample/t_cicero_sample_gene_{i}.txt\" INTO TABLE `scvdb`.`t_cicero_sample_gene_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                      f"LOAD DATA LOCAL INFILE \"/root/hic/trait_gene_chunk_table/sample/t_hic_sample_gene_{i}.txt\" INTO TABLE `scvdb`.`t_hic_sample_gene_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
             f.write(sql_str)
 
-    with open("./result/create_cicero_trait_gene.sql", "w", encoding="utf-8", newline="\n") as f:
+    with open("./result/create_hic_trait_gene.sql", "w", encoding="utf-8", newline="\n") as f:
         for i in range(100):
             # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_cicero_trait_gene_{i}`; \n" + \
-                      f"CREATE TABLE `scvdb`.`t_cicero_trait_gene_{i}` (\n" + \
+            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_hic_trait_gene_{i}`; \n" + \
+                      f"CREATE TABLE `scvdb`.`t_hic_trait_gene_{i}` (\n" + \
                       f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
                       f"  `f_gene` varchar(128) NOT NULL,\n" + \
                       f"  `f_score` double(26,20) NOT NULL,\n" + \
-                      f"  KEY `t_cicero_trait_gene_{i}_gene_index` (`f_gene`) USING BTREE,\n" + \
-                      f"  KEY `t_cicero_trait_gene_{i}_score_index` (`f_score`) USING BTREE\n" + \
+                      f"  KEY `t_hic_trait_gene_{i}_gene_index` (`f_gene`) USING BTREE,\n" + \
+                      f"  KEY `t_hic_trait_gene_{i}_score_index` (`f_score`) USING BTREE\n" + \
                       f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                      f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_gene_chunk_table/trait/t_cicero_trait_gene_{i}.txt\" INTO TABLE `scvdb`.`t_cicero_trait_gene_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                      f"LOAD DATA LOCAL INFILE \"/root/hic/trait_gene_chunk_table/trait/t_hic_trait_gene_{i}.txt\" INTO TABLE `scvdb`.`t_hic_trait_gene_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
             f.write(sql_str)
 
@@ -578,13 +524,8 @@ if __name__ == '__main__':
     file = StaticMethod()
     util = Util()
 
-    # base_path = r"L:\keti\cicero"
-    # base_path = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/cicero"
-    base_path = "/public/home/ac1dyrvmyl/keti/database/sc_variant/table/cicero"
+    base_path = "/root/private_data/keti/database/sc_variant/table/cicero/HiC"
     trait_path = "/public/home/ac1dyrvmyl/keti/variant/finish"
-
-    sample_file = "../../scATAC/data/sample_info.txt"
-    sample_info = pd.read_table(sample_file)
 
     group_size = 50
     trait_file = "../result/trait_info.xlsx"
@@ -592,7 +533,7 @@ if __name__ == '__main__':
 
     genomes = ["hg19", "hg38"]
 
-    # cicero_interactions_files()
+    hic_interactions_files()
 
     # exec_bedtools_gene()
     # exec_bedtools_trait()

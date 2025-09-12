@@ -51,7 +51,7 @@ def form_difference_gene_file():
         df = df[((df["f_adjusted_p_value"] < adjusted_p_value_value) |
                  ((df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value)) |
                  (df["f_p_value"] < p_value_value)) |
-                (df["f_score"] > 0)]
+                (df["f_score"] > p_value_value)]
 
         df.sort_values(by="f_score", ascending=False, inplace=True)
 
@@ -100,7 +100,7 @@ def form_difference_tf_file():
 
         df = df[(df["f_adjusted_p_value"] < adjusted_p_value_value) |
                 ((df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value)) |
-                (df["f_p_value"] > 0)]
+                (df["f_p_value"] > p_value_value)]
 
         df["f_tf"] = df["f_tf_all"].str.split("+", expand=True)[0]
         df["f_tf_id"] = df["f_tf_all"].str.split("+", expand=True)[1]
@@ -356,7 +356,7 @@ if __name__ == '__main__':
 
     form_difference_gene_file()
     form_difference_tf_file()
-    gene_enrichment_analysis()
+    # gene_enrichment_analysis()
 
     # file.makedirs(f"{output_path}/gene_enrichment")
     # while len(os.listdir(f"{output_path}/gene_enrichment")) != 184:
@@ -366,6 +366,6 @@ if __name__ == '__main__':
     #         print(e)
     #         continue
 
-    gene_enrichment_file()
-    form_sample_gene_tf_chunk()
-    create_table_sql()
+    # gene_enrichment_file()
+    # form_sample_gene_tf_chunk()
+    # create_table_sql()

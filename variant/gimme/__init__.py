@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 
+import math
 import os
 import sys
 from multiprocessing.dummy import Pool
@@ -207,11 +208,11 @@ def _trait_tf_map_core_(param: Tuple) -> None:
         sample_trait_peak.columns = ["_", "_", "position", "rsId", "pip", "trait_abbr", "_", "_", "_", "_", "trait_peak"]
         sample_trait_peak = sample_trait_peak[["position", "rsId", "pip", "trait_abbr", "trait_peak"]]
 
-        # 合并数据 - 情况1
+        # Merge data - Case 1
         merged1 = pd.merge(peak_pair_data, sample_trait_peak, left_on="peak1", right_on="trait_peak", how='inner')
         merged1 = pd.merge(merged1, tf_peak_data, left_on="peak2", right_on="seq_name", how='inner')
 
-        # 合并数据 - 情况2
+        # Merge data - Case 2
         merged2 = pd.merge(peak_pair_data, sample_trait_peak, left_on="peak2", right_on="trait_peak", how='inner')
         merged2 = pd.merge(merged2, tf_peak_data, left_on="peak1", right_on="seq_name", how='inner')
 
@@ -219,16 +220,15 @@ def _trait_tf_map_core_(param: Tuple) -> None:
         final_result = final_result[['trait_peak', 'seq_name', 'score', 'position', 'rsId', 'pip', 'trait_abbr',
                                      "tf", "score_mean", "motif_set", "position_set", "strand_set", "count"]].drop_duplicates()
 
-        # 第3列是 coaccess（浮点数），第5列是 rsID
         final_result['score'] = final_result['score'].astype(float)
 
-        # 按 rsID 分组，计算总和
+        # Group by rsId, calculate the sum
         pp_total = final_result.groupby('rsId')['score'].transform(lambda x: x.sum())
 
-        # ratio = 每行 coaccess / 总和（如果只有一行，则除以1）
+        # ratio = each row coaccess / sum (if only one row, then divide by 1)
         final_result['weight'] = final_result['score'] / pp_total
 
-        # 保存，保留原始行顺序
+        # Save, keep the original row order
         final_result.to_csv(output_file, sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
 
         pbar.update(1)
@@ -257,7 +257,7 @@ def exec_trait_tf_map():
         sample_trait_tf_output_path = os.path.join(output_path, sample_id)
         file.makedirs(sample_trait_tf_output_path)
 
-        # 读入
+        # Read data
         sample_tf_peak = pd.read_table(sample_tf_peak_file, sep="\t")
         sample_tf_peak = sample_tf_peak[["tf", "seq_name", "score_mean", "motif_set", "position_set", "strand_set", "count"]]
 
@@ -277,14 +277,264 @@ def exec_trait_tf_map():
 
             params.append((sample_tf_peak, sample_trait_peak_file, sample_peak_pair, sample_trait_tf_output_file, pbar))
 
-        pbar.total = len(params)
+        if len(sys.argv) == 4:
 
-        pool = Pool(10)
-        pool.map(_trait_tf_map_core_, params)
+            _chunk_ = math.ceil(len(params) / 6)
+            _params_chunk_ = params[(int(sys.argv[3]) - 1) * _chunk_:min(_chunk_ * int(sys.argv[3]), len(params))]
+
+        else:
+            _params_chunk_ = params
+
+        pbar.total = len(_params_chunk_)
+
+        pool = Pool(3)
+        pool.map(_trait_tf_map_core_, _params_chunk_)
         pool.close()
         pool.join()
 
         pbar.close()
+
+def _form_table_core_(param: Tuple):
+    """
+    Form a table for trait-tf mapping.
+
+    :param param: A tuple containing the following elements:
+        - sample_trait_tf_path: The path to the directory containing the trait-tf map files.
+        - sample_id: The ID of the sample.
+        - trait_id: The ID of the trait.
+        - sample_trait_tf_dict: A dictionary mapping trait indices to lists of trait-tf data.
+        - trait_index: The index of the trait in the sample_trait_tf_dict.
+        - group_count: The number of groups to divide the data into.
+        - top_count: The number of top TFs to keep for each interacting pair.
+        - pbar: A progress bar object to update the progress.
+    """
+    
+    sample_trait_tf_path, sample_id, trait_id, sample_trait_tf_dict, trait_index, group_count, top_count, pbar = param
+
+    # sample_id_93_trait_id_1_trait_tf_map.txt
+    sample_trait_tf_file = f"{sample_trait_tf_path}/{sample_id}_{trait_id}_trait_tf_map.txt"
+
+    if os.path.exists(sample_trait_tf_file) and os.path.getsize(sample_trait_tf_file) > 0:
+        _sample_trait_tf_list_: list = sample_trait_tf_dict[int(trait_index) % group_count]
+        _sample_trait_tf_data_ = pd.read_table(sample_trait_tf_file, low_memory=False)
+
+        if not _sample_trait_tf_data_.empty:
+            # The amount of data is too large, so let the interacting pairs retain the first 10 TFs and then obtain independent SNP-TF management
+            _sample_trait_tf_data_ = _sample_trait_tf_data_.groupby(['trait_peak', 'seq_name'], group_keys=False).apply(lambda x: x.sort_values('score_mean', ascending=False).head(top_count))
+
+            aggregation_rules = {
+                'score': 'sum',  # Sum the 'score' column
+                # 'position': 'first',
+                'pip': 'first',
+                # 'trait_abbr': 'first',
+                'score_mean': 'first',
+                'motif_set': 'first',
+                'position_set': 'first',
+                'strand_set': 'first',
+                'count': 'first'
+            }
+
+            _sample_trait_tf_aggregated_ = _sample_trait_tf_data_.groupby(['rsId', 'tf']).agg(aggregation_rules)
+            _sample_trait_tf_aggregated_ = _sample_trait_tf_aggregated_.reset_index()
+
+            del _sample_trait_tf_data_
+
+            _sample_trait_tf_aggregated_["trait_id"] = trait_id
+            _sample_trait_tf_list_.append(_sample_trait_tf_aggregated_)
+            del _sample_trait_tf_aggregated_
+
+    pbar.update(1)
+
+
+def form_table(group_count: int = 100, top_count: int = 10):
+    """
+    Form a table for trait-tf mapping.
+
+    :param group_count: The number of groups to divide the data into.
+    :param top_count: The number of top TFs to keep for each interacting pair.
+    """
+
+    trait_tf_path: str = os.path.join(base_path, "trait_tf")
+    output_path: str = os.path.join(base_path, "trait_tf_table")
+
+    sample_dict: dict = file.entry_dirs_dict(trait_tf_path)
+
+    print("Start executing: form_table.")
+
+    for sample_id in sample_info["f_sample_id"]:
+
+        print("Start executing sample: {}".format(sample_id))
+
+        sample_trait_tf_all_file = os.path.join(output_path, f"trait_tf_{sample_id}.txt")
+        if os.path.exists(sample_trait_tf_all_file):
+            continue
+
+        sample_trait_tf_path: str = sample_dict[sample_id]
+        sample_trait_tf_output_path: str = os.path.join(output_path, sample_id)
+        file.makedirs(sample_trait_tf_output_path)
+
+        sample_trait_tf_dict: dict = {}
+
+        for i in range(group_count):
+            sample_trait_tf_dict.update({i: []})
+
+        try:
+            with tqdm(total=trait_info.shape[0]) as pbar:
+
+                params = []
+
+                for trait_id, trait_index in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_index"])):
+                    params.append((sample_trait_tf_path, sample_id, trait_id, sample_trait_tf_dict, trait_index, group_count, top_count, pbar))
+
+                pool = Pool(10)
+                pool.map(_form_table_core_, params)
+                pool.close()
+                pool.join()
+
+            print("Save files")
+            sample_trait_tf_all_data_list: list = []
+
+            for _group_ in tqdm(range(group_count)):
+                _sample_trait_tf_list_ = sample_trait_tf_dict[_group_]
+                group_data = pd.concat(_sample_trait_tf_list_)
+                sample_trait_tf_all_data_list.append(group_data)
+                group_data.to_csv(os.path.join(sample_trait_tf_output_path, f"t_trait_tf_{sample_id}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
+                del group_data
+
+        except Exception as e:
+            print(f"{sample_id}: {e.args}")
+
+        del sample_trait_tf_dict
+
+        print(f"Save trait_tf_{sample_id}.txt file")
+
+        sample_trait_tf_all_data = pd.concat(sample_trait_tf_all_data_list)
+        sample_trait_tf_all_data.to_csv(sample_trait_tf_all_file, sep="\t", header=True, index=False, encoding="utf-8")
+        del sample_trait_tf_all_data
+
+
+def word_to_number(word: str) -> int:
+    return sum(ord(char) for char in word)
+
+
+def chunk_tf_file(group_count: int = 100):
+    input_path: str = os.path.join(base_path, "trait_tf_table")
+    output_path: str = os.path.join(base_path, "trait_tf_chunk_table")
+    sample_output_path: str = os.path.join(output_path, "sample")
+    trait_output_path: str = os.path.join(output_path, "trait")
+    file.makedirs(sample_output_path)
+    file.makedirs(trait_output_path)
+
+    sample_tf_score_file = f"{output_path}/gimme_sample_tf.txt"
+    trait_tf_score_file = f"{output_path}/gimme_trait_tf.txt"
+
+    if os.path.exists(sample_tf_score_file) and os.path.exists(trait_tf_score_file):
+        sample_tf_score = pd.read_csv(sample_tf_score_file, sep="\t")
+        trait_tf_score = pd.read_csv(trait_tf_score_file, sep="\t")
+    else:
+        files_dict = file.entry_files_dict(input_path)
+        filenames: list = files_dict["name"]
+
+        all_data_list: list = []
+
+        print("Start executing: chunk_tf_file.")
+        for filename in tqdm(filenames):
+            filename: str
+            sample_id = filename.split("_tf_")[1].split(".")[0]
+            file_path: str = files_dict[filename]
+            _data_content_ = pd.read_table(file_path)
+            _data_content_["sample_id"] = sample_id
+            all_data_list.append(_data_content_)
+
+        print("Concat files")
+        all_data = pd.concat(all_data_list)
+
+        print("Handle files")
+        sample_tf_score: DataFrame = all_data[["sample_id", "tf", "score"]]
+        sample_tf_score = sample_tf_score.groupby(["sample_id", "tf"])["score"].max().reset_index()
+        sample_tf_score.to_csv(sample_tf_score_file, sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+
+        trait_tf_score = all_data[["trait_id", "tf", "score"]]
+        trait_tf_score = trait_tf_score.groupby(["trait_id", "tf"])["score"].max().reset_index()
+        trait_tf_score.to_csv(trait_tf_score_file, sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+
+    print("Start chunk")
+    sample_tf_score["group"] = sample_tf_score["tf"].apply(word_to_number) % group_count
+    trait_tf_score["group"] = trait_tf_score["tf"].apply(word_to_number) % group_count
+
+    for group in tqdm(range(group_count)):
+        _data_sample_tf_ = sample_tf_score[sample_tf_score["group"] == group]
+        _data_sample_tf_ = _data_sample_tf_.drop(columns="group", axis=0)
+        _data_sample_tf_.to_csv(f"{sample_output_path}/t_gimme_sample_tf_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+
+        _data_trait_tf_ = trait_tf_score[trait_tf_score["group"] == group]
+        _data_trait_tf_ = _data_trait_tf_.drop(columns="group", axis=0)
+        _data_trait_tf_.to_csv(f"{trait_output_path}/t_gimme_trait_tf_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+
+
+def form_sql_file():
+    with open("./result/create_gimme.sql", "w", encoding="utf-8", newline="\n") as f:
+        for sample_id in sample_info["f_sample_id"]:
+            for i in range(100):
+                # trait_peak      seq_name        score   position        rsId    pip     trait_abbr      tf      score_mean      motif_set       position_set    strand_set      count   weight
+                # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_gimme_trait_tf_{sample_id}_{i}`; \n" + \
+                          f"CREATE TABLE `scvdb`.`t_gimme_trait_tf_{sample_id}_{i}` (\n" + \
+                          f"  `f_rs_id` varchar(128) NOT NULL,\n" + \
+                          f"  `f_tf` varchar(128) NOT NULL,\n" + \
+                          f"  `f_score` double(26,20) NOT NULL,\n" + \
+                          f"  `f_pp` double(26,20) NOT NULL,\n" + \
+                          f"  `f_score_mean` double(26,20) NOT NULL,\n" + \
+                          f"  `f_motif_set` varchar(2048) NOT NULL,\n" + \
+                          f"  `f_position_set` varchar(64) NOT NULL,\n" + \
+                          f"  `f_strand_set` varchar(64) NOT NULL,\n" + \
+                          f"  `f_count` int NOT NULL,\n" + \
+                          f"  `f_weight` double(26,20) NOT NULL,\n" + \
+                          f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
+                          f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_tf_index` (`f_trait_id`,`f_tf`) USING BTREE,\n" + \
+                          f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_score_index` (`f_trait_id`, `f_score`) USING BTREE,\n" + \
+                          f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_score_mean_index` (`f_trait_id`, `f_score_mean`) USING BTREE,\n" + \
+                          f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_count_index` (`f_trait_id`, `f_count`) USING BTREE,\n" + \
+                          f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_weight_index` (`f_trait_id`,`f_weight`) USING BTREE,\n" + \
+                          f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_rs_id_index` (`f_trait_id`,`f_rs_id`) USING BTREE\n" + \
+                          f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                          f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_tf_table/{sample_id}/t_trait_tf_{sample_id}_{i}.txt\" INTO TABLE `scvdb`.`t_gimme_trait_tf_{sample_id}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+                f.write(sql_str)
+
+    with open("./result/create_gimme_sample_tf.sql", "w", encoding="utf-8", newline="\n") as f:
+        for i in range(100):
+            # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_gimme_sample_tf_{i}`; \n" + \
+                      f"CREATE TABLE `scvdb`.`t_gimme_sample_tf_{i}` (\n" + \
+                      f"  `f_sample_id` varchar(32) NOT NULL,\n" + \
+                      f"  `f_tf` varchar(128) NOT NULL,\n" + \
+                      f"  `f_score` double(26,20) NOT NULL,\n" + \
+                      f"  `f_score_mean` double(26,20) NOT NULL,\n" + \
+                      f"  KEY `t_gimme_sample_tf_{i}_tf_index` (`f_tf`) USING BTREE,\n" + \
+                      f"  KEY `t_gimme_sample_tf_{i}_score_mean_index` (`f_score_mean`) USING BTREE,\n" + \
+                      f"  KEY `t_gimme_sample_tf_{i}_score_index` (`f_score`) USING BTREE\n" + \
+                      f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                      f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_tf_chunk_table/sample/t_gimme_sample_tf_{i}.txt\" INTO TABLE `scvdb`.`t_gimme_sample_tf_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+            f.write(sql_str)
+
+    with open("./result/create_gimme_trait_tf.sql", "w", encoding="utf-8", newline="\n") as f:
+        for i in range(100):
+            # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_gimme_trait_tf_{i}`; \n" + \
+                      f"CREATE TABLE `scvdb`.`t_gimme_trait_tf_{i}` (\n" + \
+                      f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
+                      f"  `f_tf` varchar(128) NOT NULL,\n" + \
+                      f"  `f_score` double(26,20) NOT NULL,\n" + \
+                      f"  `f_score_mean` double(26,20) NOT NULL,\n" + \
+                      f"  KEY `t_gimme_trait_tf_{i}_tf_index` (`f_tf`) USING BTREE,\n" + \
+                      f"  KEY `t_gimme_trait_tf_{i}_score_mean_index` (`f_score_mean`) USING BTREE,\n" + \
+                      f"  KEY `t_gimme_trait_tf_{i}_score_index` (`f_score`) USING BTREE\n" + \
+                      f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                      f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_tf_chunk_table/trait/t_gimme_trait_tf_{i}.txt\" INTO TABLE `scvdb`.`t_gimme_trait_tf_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+            f.write(sql_str)
 
 
 if __name__ == '__main__':
@@ -304,4 +554,9 @@ if __name__ == '__main__':
 
     # get_motif_scanner_result()
 
-    exec_trait_tf_map()
+    # exec_trait_tf_map()
+
+    form_table()
+    # chunk_tf_file()
+
+    # form_sql_file()
