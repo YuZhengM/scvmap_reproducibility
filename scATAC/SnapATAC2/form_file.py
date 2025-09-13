@@ -28,7 +28,7 @@ def form_difference_gene_file():
         adata.layers["adjusted_p_value"][adata.layers["adjusted_p_value"] == 0] = np.min(adata.layers["adjusted_p_value"][adata.layers["adjusted_p_value"] != 0])
         adata.layers["p_value"][adata.layers["p_value"] == 0] = np.min(adata.layers["p_value"][adata.layers["p_value"] != 0])
         # noinspection DuplicatedCode
-        sciv.fl.save_h5ad(adata, difference_gene_file)
+        # sciv.fl.save_h5ad(adata, difference_gene_file)
 
         # get score
         df: DataFrame = sciv.pp.adata_map_df(adata, column="score")
@@ -50,8 +50,7 @@ def form_difference_gene_file():
 
         df = df[((df["f_adjusted_p_value"] < adjusted_p_value_value) |
                  ((df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value)) |
-                 (df["f_p_value"] < p_value_value)) |
-                (df["f_score"] > p_value_value)]
+                 (df["f_p_value"] < p_value_value)) | (df["f_score"] > 0)]
 
         df.sort_values(by="f_score", ascending=False, inplace=True)
 
@@ -82,7 +81,7 @@ def form_difference_tf_file():
 
         adata.layers["adjusted_p_value"][adata.layers["adjusted_p_value"] == 0] = np.min(adata.layers["adjusted_p_value"][adata.layers["adjusted_p_value"] != 0])
         # noinspection DuplicatedCode
-        sciv.fl.save_h5ad(adata, difference_gene_file)
+        # sciv.fl.save_h5ad(adata, difference_gene_file)
 
         # get p_value
         df: DataFrame = sciv.pp.adata_map_df(adata, column="p_value")
@@ -100,7 +99,7 @@ def form_difference_tf_file():
 
         df = df[(df["f_adjusted_p_value"] < adjusted_p_value_value) |
                 ((df["f_log2_fold_change"] > log2_fold_change_value) | (df["f_log2_fold_change"] < -1 * log2_fold_change_value)) |
-                (df["f_p_value"] > p_value_value)]
+                (df["f_p_value"] < p_value_value)]
 
         df["f_tf"] = df["f_tf_all"].str.split("+", expand=True)[0]
         df["f_tf_id"] = df["f_tf_all"].str.split("+", expand=True)[1]
@@ -367,5 +366,5 @@ if __name__ == '__main__':
     #         continue
 
     # gene_enrichment_file()
-    # form_sample_gene_tf_chunk()
+    form_sample_gene_tf_chunk()
     # create_table_sql()

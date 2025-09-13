@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 import math
@@ -24,11 +25,11 @@ import pandas as pd
 class RunGimme:
 
     def __init__(
-        self,
-        genomes_path: str,
-        tf_name_list: list = None,
-        columns: Union[list, Tuple] = ("chr", "start", "end"),
-        peak_split_character: Tuple = (":", "-")
+            self,
+            genomes_path: str,
+            tf_name_list: list = None,
+            columns: Union[list, Tuple] = ("chr", "start", "end"),
+            peak_split_character: Tuple = (":", "-")
     ):
         self.genomes_path = genomes_path
         self.columns = columns
@@ -159,7 +160,6 @@ class RunGimme:
 
 
 def _motif_scanner_core_(param: Tuple) -> None:
-
     gimme, sample_id, genome, threshold, output_path = param
 
     print(f"Start exec {sample_id}...")
@@ -204,7 +204,6 @@ def _trait_tf_map_core_(param: Tuple) -> None:
     sample_trait_peak = pd.read_table(trait_peak_file, sep="\t", header=None)
 
     if not sample_trait_peak.empty:
-
         sample_trait_peak.columns = ["_", "_", "position", "rsId", "pip", "trait_abbr", "_", "_", "_", "_", "trait_peak"]
         sample_trait_peak = sample_trait_peak[["position", "rsId", "pip", "trait_abbr", "trait_peak"]]
 
@@ -294,6 +293,7 @@ def exec_trait_tf_map():
 
         pbar.close()
 
+
 def _form_table_core_(param: Tuple):
     """
     Form a table for trait-tf mapping.
@@ -308,7 +308,7 @@ def _form_table_core_(param: Tuple):
         - top_count: The number of top TFs to keep for each interacting pair.
         - pbar: A progress bar object to update the progress.
     """
-    
+
     sample_trait_tf_path, sample_id, trait_id, sample_trait_tf_dict, trait_index, group_count, top_count, pbar = param
 
     # sample_id_93_trait_id_1_trait_tf_map.txt
@@ -346,12 +346,13 @@ def _form_table_core_(param: Tuple):
     pbar.update(1)
 
 
-def form_table(group_count: int = 100, top_count: int = 10):
+def form_table(group_count: int = 100, top_count: int = 10, multi_threading: bool = True):
     """
     Form a table for trait-tf mapping.
 
     :param group_count: The number of groups to divide the data into.
     :param top_count: The number of top TFs to keep for each interacting pair.
+    :param multi_threading: Whether to use multi-threading.
     """
 
     trait_tf_path: str = os.path.join(base_path, "trait_tf")
@@ -366,6 +367,7 @@ def form_table(group_count: int = 100, top_count: int = 10):
         print("Start executing sample: {}".format(sample_id))
 
         sample_trait_tf_all_file = os.path.join(output_path, f"trait_tf_{sample_id}.txt")
+
         if os.path.exists(sample_trait_tf_all_file):
             continue
 
@@ -381,15 +383,22 @@ def form_table(group_count: int = 100, top_count: int = 10):
         try:
             with tqdm(total=trait_info.shape[0]) as pbar:
 
-                params = []
+                if multi_threading:
 
-                for trait_id, trait_index in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_index"])):
-                    params.append((sample_trait_tf_path, sample_id, trait_id, sample_trait_tf_dict, trait_index, group_count, top_count, pbar))
+                    params = []
 
-                pool = Pool(10)
-                pool.map(_form_table_core_, params)
-                pool.close()
-                pool.join()
+                    for trait_id, trait_index in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_index"])):
+                        params.append((sample_trait_tf_path, sample_id, trait_id, sample_trait_tf_dict, trait_index, group_count, top_count, pbar))
+
+                    pool = Pool(64)
+                    pool.map(_form_table_core_, params)
+                    pool.close()
+                    # pool.join()
+
+                else:
+
+                    for trait_id, trait_index in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_index"])):
+                        _form_table_core_((sample_trait_tf_path, sample_id, trait_id, sample_trait_tf_dict, trait_index, group_count, top_count, pbar))
 
             print("Save files")
             sample_trait_tf_all_data_list: list = []
