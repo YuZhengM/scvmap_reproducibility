@@ -6,7 +6,9 @@ import anndata as ad
 
 import pandas as pd
 from pandas import DataFrame
+import warnings
 
+warnings.filterwarnings("ignore")
 
 def form_sample_cell_anno_file():
     sample_info = pd.read_excel("../data/sample.xlsx", sheet_name="finish")
@@ -26,12 +28,14 @@ def form_sample_cell_anno_file():
 
 
 # noinspection DuplicatedCode
-def add_cell_type_index(info: DataFrame, column: str):
+def add_cell_type_index(info: DataFrame, column: str, add_columns: str = "f_cell_type_index"):
     cell_type_group = info[[column]].groupby([column]).size().reset_index()
     cell_type_group.columns = ["cell_type", "count"]
+
     for ct, count in zip(cell_type_group["cell_type"], cell_type_group["count"]):
-        info.loc[info[column] == ct, "f_cell_type_index"] = range(count)
-    info["f_cell_type_index"] = info["f_cell_type_index"].astype(int)
+        info.loc[info[column] == ct, add_columns] = range(count)
+
+    info[add_columns] = info[add_columns].astype(int)
 
 
 def form_sample_table():
@@ -47,20 +51,20 @@ def form_sample_table():
     cell_type_anno_list: list = []
     # processing sample
     for (
-        sample_id,
-        gse,
-        genome,
-        geo,
-        label,
-        pmid,
-        species,
-        tissue_type,
-        sequencing_type,
-        health_type,
-        health_type_description,
-        description,
-        source,
-        source_url
+            sample_id,
+            gse,
+            genome,
+            geo,
+            label,
+            pmid,
+            species,
+            tissue_type,
+            sequencing_type,
+            health_type,
+            health_type_description,
+            description,
+            source,
+            source_url
     ) in zip(
         sample_info["f_sample_id"],
         sample_info["f_gse_id"],
@@ -148,12 +152,97 @@ def form_sample_table():
     cell_type_anno.to_csv("../data/cell_type_anno.txt", sep="\t", index=False, lineterminator="\n", encoding="utf-8")
 
 
+def add_cell_age_sex_drug():
+    sample_info_add = pd.read_excel("../data/sample.xlsx", sheet_name="finish")
+    sample_info_all = pd.read_table("../data/sample_info.txt")
+    new_sample_info = pd.merge(sample_info_all, sample_info_add[['f_sample_id', 'f_time', 'f_sex', 'f_drug']], on="f_sample_id")
+    new_sample_info.to_csv("../data/new_sample_info.txt", sep="\t", index=False, lineterminator="\n", encoding="utf-8")
+
+    cell_anno = pd.read_table("../data/new_cell_anno.txt")
+    cell_with_asd = pd.read_table("../data/cell_anno_with_age_sex_drug.txt")
+
+    cell_with_asd_gse_ids = cell_with_asd["gse_id"].unique()
+
+    cell_anno_info_with_asd = pd.read_excel("../data/cell_anno_info.xlsx")
+    cell_anno_info_with_asd_gse_gsm_ids = cell_anno_info_with_asd["gse_gsm_id"].unique()
+
+    cell_anno_list: list = []
+
+    for sample_id, gse_id, gsm_id in zip(new_sample_info["f_sample_id"], new_sample_info["f_gse_id"], new_sample_info["f_geo_id"]):
+        print(f"Processing sample - ID: {sample_id}, GSE ID: {gse_id}, GSM ID: {gsm_id}")
+
+        cell_anno_sample_id = cell_anno[cell_anno["f_sample_id"] == sample_id]
+
+        if gse_id in cell_with_asd_gse_ids:
+
+            cell_with_asd_sample = cell_with_asd[cell_with_asd["gse_id"] == gse_id]
+
+            if (gse_id == "GSE165904" or sample_id == "sample_id_70" or sample_id == "sample_id_84"
+                    or sample_id == "sample_id_85"or sample_id == "sample_id_86" or sample_id == "sample_id_87"):
+                cell_with_asd_sample["barcodes"] = cell_with_asd_sample["barcodes"].str.split("-", expand=True)[0]
+
+            if (sample_id == "sample_id_71" or sample_id == "sample_id_82" or sample_id == "sample_id_83"
+                  or sample_id == "sample_id_88" or sample_id == "sample_id_116" or sample_id == "sample_id_148"):
+                f_barcodes_value = cell_anno_sample_id["f_barcodes"]
+                cell_anno_sample_id["f_barcodes"] = cell_anno_sample_id["f_barcodes"].str.split("_", expand=True)[1]
+
+            new_cell_anno = pd.merge(cell_anno_sample_id, cell_with_asd_sample, left_on="f_barcodes", right_on="barcodes")
+            new_cell_anno = new_cell_anno[['f_sample_id', 'f_barcodes', 'f_cell_type', 'f_sample', 'f_umap_x',
+                                           'f_umap_y', 'f_tsse', 'f_index', 'f_cell_type_index', 'time', 'sex', 'drug']]
+            new_cell_anno.columns = ['f_sample_id', 'f_barcodes', 'f_cell_type', 'f_sample', 'f_umap_x',
+                                     'f_umap_y', 'f_tsse', 'f_index', 'f_cell_type_index', 'f_time', 'f_sex', 'f_drug']
+
+            if (sample_id == "sample_id_71" or sample_id == "sample_id_82" or sample_id == "sample_id_83"
+                    or sample_id == "sample_id_88" or sample_id == "sample_id_116" or sample_id == "sample_id_148"):
+                new_cell_anno["f_barcodes"] = f_barcodes_value
+
+        elif gse_id in cell_anno_info_with_asd_gse_gsm_ids or gsm_id in cell_anno_info_with_asd_gse_gsm_ids:
+
+            gse_gsm_id: str = gsm_id if gsm_id in cell_anno_info_with_asd_gse_gsm_ids else gse_id
+            # Get the rows that match gse_gsm_id from cell_anno_info_with_asd
+            matched_row = cell_anno_info_with_asd[cell_anno_info_with_asd["gse_gsm_id"] == gse_gsm_id]
+            # Get the values of sex, time, and drug columns
+            sex_val = matched_row["sex"].values[0]
+            time_val = matched_row["time"].values[0]
+            drug_val = matched_row["drug"].values[0]
+            # Add the obtained values to cell_anno_sample_id
+            cell_anno_sample_id["f_time"] = time_val
+            cell_anno_sample_id["f_sex"] = sex_val
+            cell_anno_sample_id["f_drug"] = drug_val
+
+            new_cell_anno = cell_anno_sample_id
+        else:
+            cell_anno_sample_id["f_time"] = "-"
+            cell_anno_sample_id["f_sex"] = "-"
+            cell_anno_sample_id["f_drug"] = "-"
+
+            new_cell_anno = cell_anno_sample_id
+
+        if new_cell_anno.empty:
+            raise ValueError(f"Sample {sample_id} has no cell annotation information.")
+
+        new_cell_anno[['f_time', 'f_sex', 'f_drug']] = new_cell_anno[['f_time', 'f_sex', 'f_drug']].fillna('-')
+
+        add_cell_type_index(new_cell_anno, "f_time", "f_time_index")
+        add_cell_type_index(new_cell_anno, "f_sex", "f_sex_index")
+        add_cell_type_index(new_cell_anno, "f_drug", "f_drug_index")
+
+        cell_anno_list.append(new_cell_anno)
+
+    # Concatenate all DataFrames in the list
+    final_cell_anno = pd.concat(cell_anno_list, axis=0)
+
+    # Save the final DataFrame to a text file
+    final_cell_anno.to_csv("../data/cell_anno_with_age_sex_drug_all.txt", sep="\t", index=False, lineterminator="\n", encoding="utf-8")
+
+
 if __name__ == '__main__':
     print("run...")
     # path: str = r"H:\scATAC"
     path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC"
     # Obtain annotation information for all sample cells
-    form_sample_cell_anno_file()
-    form_sample_table()
+    # form_sample_cell_anno_file()
+    # form_sample_table()
 
     # gse_id	barcodes	time	sex	drug
+    add_cell_age_sex_drug()

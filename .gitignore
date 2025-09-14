@@ -150,6 +150,4 @@ cython_debug/
 scATAC/data/cell_anno.txt
 scATAC/data/cell_type_anno.txt
 scATAC/data/new_cell_anno.txt
-
-
-
+scATAC/data/cell_anno_with_age_sex_drug_all.txt

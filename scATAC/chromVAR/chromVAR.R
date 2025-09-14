@@ -22,7 +22,7 @@ label <- "GSE139369"
 set_path <- paste0("/public/home/lcq/rgzn/yuzhengmin/keti/scATAC/", label)
 setwd(set_path)
 
-data = readRDS("GSE139369_ATAC.rds")
+data = readRDS(paste0(label, "_ATAC.rds"))
 
 # Load the scATAC-seq dataset
 path <- paste0("/public3/home/scg8271/yzm/topic/data/scATAC_cellranger/", label, "/outs/filtered_peak_bc_matrix")
@@ -63,6 +63,14 @@ dev <- computeDeviations(object = counts_GCBias, annotations = motif_ix)
 write.table(data.frame(dev@assays@data$z), file="chromVAR_activities.txt", sep="\t", row.names = T, col.names = T, quote = F)
 
 # differential gene expression
+da.res = do_DA_motif(dev,
+               clusters = data.table('barcode' = rownames(metaData),
+                                     'cluster' = metaData$active_clusters),topn = 10)
+write.table(da.res, file = paste0(SampleID,'_differential_TF_motif_enriched_in_clusters.tsv'),
+          quote = F, sep = '\t', row.names = F )
+
+
+
 diff_acc <- differentialDeviations(dev, "cell_type")
 write.table(diff_acc, file="chromVAR_differential_tf.txt", sep="\t", row.names = T, col.names = T, quote = F)
 
