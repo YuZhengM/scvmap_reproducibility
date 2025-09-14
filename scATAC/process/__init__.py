@@ -155,3 +155,5 @@ if __name__ == '__main__':
     # Obtain annotation information for all sample cells
     form_sample_cell_anno_file()
     form_sample_table()
+
+    # gse_id	barcodes	time	sex	drug

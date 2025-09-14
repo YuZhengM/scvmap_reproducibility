@@ -64,7 +64,11 @@ class RunGimme:
         for _chr_, _start_, _end_ in zip(peak_df[self.columns[0]], peak_df[self.columns[1]], peak_df[self.columns[2]]):
             seq_content = get_genome_seq(chrom=_chr_, start=_start_, end=_end_)
             # Create SeqRecord object
-            record = SeqRecord(Seq(seq_content), id=f"{_chr_}{self.peak_split_character[0]}{_start_}{self.peak_split_character[1]}{_end_}", description="")
+            record = SeqRecord(
+                Seq(seq_content),
+                id=f"{_chr_}{self.peak_split_character[0]}{_start_}{self.peak_split_character[1]}{_end_}",
+                description=""
+            )
             records.append(record)
 
         # Write file
@@ -151,7 +155,10 @@ class RunGimme:
                         else:
                             data_list.append([seq_chr, seq_start, seq_end, str(motif), tf, score, pos, _strand_, seq_name])
 
-        motif_matches_df = pd.DataFrame(data_list, columns=['chr', 'start', 'end', 'motif', 'tf', 'score', 'position', 'strand', 'seq_name'])
+        motif_matches_df = pd.DataFrame(
+            data_list,
+            columns=['chr', 'start', 'end', 'motif', 'tf', 'score', 'position', 'strand', 'seq_name']
+        )
 
         if os.path.exists(tmp_fa_file):
             os.remove(tmp_fa_file)
@@ -217,7 +224,8 @@ def _trait_tf_map_core_(param: Tuple) -> None:
 
         final_result = pd.concat([merged1, merged2])
         final_result = final_result[['trait_peak', 'seq_name', 'score', 'position', 'rsId', 'pip', 'trait_abbr',
-                                     "tf", "score_mean", "motif_set", "position_set", "strand_set", "count"]].drop_duplicates()
+                                     "tf", "score_mean", "motif_set", "position_set", "strand_set",
+                                     "count"]].drop_duplicates()
 
         final_result['score'] = final_result['score'].astype(float)
 
@@ -320,7 +328,8 @@ def _form_table_core_(param: Tuple):
 
         if not _sample_trait_tf_data_.empty:
             # The amount of data is too large, so let the interacting pairs retain the first 10 TFs and then obtain independent SNP-TF management
-            _sample_trait_tf_data_ = _sample_trait_tf_data_.groupby(['trait_peak', 'seq_name'], group_keys=False).apply(lambda x: x.sort_values('score_mean', ascending=False).head(top_count))
+            _sample_trait_tf_data_ = (_sample_trait_tf_data_.groupby(['trait_peak', 'seq_name'], group_keys=False)
+                                      .apply(lambda x: x.sort_values('score_mean', ascending=False).head(top_count)))
 
             aggregation_rules = {
                 'score': 'sum',  # Sum the 'score' column
@@ -380,38 +389,34 @@ def form_table(group_count: int = 100, top_count: int = 10, multi_threading: boo
         for i in range(group_count):
             sample_trait_tf_dict.update({i: []})
 
-        try:
-            with tqdm(total=trait_info.shape[0]) as pbar:
+        with tqdm(total=trait_info.shape[0]) as pbar:
 
-                if multi_threading:
+            if multi_threading:
 
-                    params = []
+                params = []
 
-                    for trait_id, trait_index in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_index"])):
-                        params.append((sample_trait_tf_path, sample_id, trait_id, sample_trait_tf_dict, trait_index, group_count, top_count, pbar))
+                for trait_id, trait_index in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_index"])):
+                    params.append((sample_trait_tf_path, sample_id, trait_id, sample_trait_tf_dict, trait_index, group_count, top_count, pbar))
 
-                    pool = Pool(64)
-                    pool.map(_form_table_core_, params)
-                    pool.close()
-                    # pool.join()
+                pool = Pool(64)
+                pool.map(_form_table_core_, params)
+                pool.close()
+                # pool.join()
 
-                else:
+            else:
 
-                    for trait_id, trait_index in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_index"])):
-                        _form_table_core_((sample_trait_tf_path, sample_id, trait_id, sample_trait_tf_dict, trait_index, group_count, top_count, pbar))
+                for trait_id, trait_index in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_index"])):
+                    _form_table_core_((sample_trait_tf_path, sample_id, trait_id, sample_trait_tf_dict, trait_index, group_count, top_count, pbar))
 
-            print("Save files")
-            sample_trait_tf_all_data_list: list = []
+        print("Save files")
+        sample_trait_tf_all_data_list: list = []
 
-            for _group_ in tqdm(range(group_count)):
-                _sample_trait_tf_list_ = sample_trait_tf_dict[_group_]
-                group_data = pd.concat(_sample_trait_tf_list_)
-                sample_trait_tf_all_data_list.append(group_data)
-                group_data.to_csv(os.path.join(sample_trait_tf_output_path, f"t_trait_tf_{sample_id}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
-                del group_data
-
-        except Exception as e:
-            print(f"{sample_id}: {e.args}")
+        for _group_ in tqdm(range(group_count)):
+            _sample_trait_tf_list_ = sample_trait_tf_dict[_group_]
+            group_data = pd.concat(_sample_trait_tf_list_)
+            sample_trait_tf_all_data_list.append(group_data)
+            group_data.to_csv(os.path.join(sample_trait_tf_output_path, f"t_trait_tf_{sample_id}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
+            del group_data
 
         del sample_trait_tf_dict
 
@@ -453,18 +458,22 @@ def chunk_tf_file(group_count: int = 100):
             file_path: str = files_dict[filename]
             _data_content_ = pd.read_table(file_path)
             _data_content_["sample_id"] = sample_id
+            _data_content_ = _data_content_[["sample_id", "trait_id", "tf", "score", "score_mean"]]
             all_data_list.append(_data_content_)
+            del _data_content_
 
         print("Concat files")
         all_data = pd.concat(all_data_list)
 
+        del all_data_list
+
         print("Handle files")
-        sample_tf_score: DataFrame = all_data[["sample_id", "tf", "score"]]
-        sample_tf_score = sample_tf_score.groupby(["sample_id", "tf"])["score"].max().reset_index()
+        sample_tf_score: DataFrame = all_data[["sample_id", "tf", "score", "score_mean"]]
+        sample_tf_score = sample_tf_score.groupby(["sample_id", "tf"])[["score", "score_mean"]].max().reset_index()
         sample_tf_score.to_csv(sample_tf_score_file, sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
 
-        trait_tf_score = all_data[["trait_id", "tf", "score"]]
-        trait_tf_score = trait_tf_score.groupby(["trait_id", "tf"])["score"].max().reset_index()
+        trait_tf_score = all_data[["trait_id", "tf", "score", "score_mean"]]
+        trait_tf_score = trait_tf_score.groupby(["trait_id", "tf"])[["score", "score_mean"]].max().reset_index()
         trait_tf_score.to_csv(trait_tf_score_file, sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
 
     print("Start chunk")
@@ -498,16 +507,14 @@ def form_sql_file():
                           f"  `f_position_set` varchar(64) NOT NULL,\n" + \
                           f"  `f_strand_set` varchar(64) NOT NULL,\n" + \
                           f"  `f_count` int NOT NULL,\n" + \
-                          f"  `f_weight` double(26,20) NOT NULL,\n" + \
                           f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
                           f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_tf_index` (`f_trait_id`,`f_tf`) USING BTREE,\n" + \
                           f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_score_index` (`f_trait_id`, `f_score`) USING BTREE,\n" + \
                           f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_score_mean_index` (`f_trait_id`, `f_score_mean`) USING BTREE,\n" + \
                           f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_count_index` (`f_trait_id`, `f_count`) USING BTREE,\n" + \
-                          f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_weight_index` (`f_trait_id`,`f_weight`) USING BTREE,\n" + \
                           f"  KEY `t_gimme_trait_tf_{sample_id}_{i}_trait_id_rs_id_index` (`f_trait_id`,`f_rs_id`) USING BTREE\n" + \
                           f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                          f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_tf_table/{sample_id}/t_trait_tf_{sample_id}_{i}.txt\" INTO TABLE `scvdb`.`t_gimme_trait_tf_{sample_id}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                          f"LOAD DATA LOCAL INFILE \"/root/gimme/trait_tf_table/{sample_id}/t_trait_tf_{sample_id}_{i}.txt\" INTO TABLE `scvdb`.`t_gimme_trait_tf_{sample_id}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
                 f.write(sql_str)
 
@@ -524,7 +531,7 @@ def form_sql_file():
                       f"  KEY `t_gimme_sample_tf_{i}_score_mean_index` (`f_score_mean`) USING BTREE,\n" + \
                       f"  KEY `t_gimme_sample_tf_{i}_score_index` (`f_score`) USING BTREE\n" + \
                       f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                      f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_tf_chunk_table/sample/t_gimme_sample_tf_{i}.txt\" INTO TABLE `scvdb`.`t_gimme_sample_tf_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                      f"LOAD DATA LOCAL INFILE \"/root/gimme/trait_tf_chunk_table/sample/t_gimme_sample_tf_{i}.txt\" INTO TABLE `scvdb`.`t_gimme_sample_tf_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
             f.write(sql_str)
 
@@ -541,7 +548,7 @@ def form_sql_file():
                       f"  KEY `t_gimme_trait_tf_{i}_score_mean_index` (`f_score_mean`) USING BTREE,\n" + \
                       f"  KEY `t_gimme_trait_tf_{i}_score_index` (`f_score`) USING BTREE\n" + \
                       f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                      f"LOAD DATA LOCAL INFILE \"/root/cicero/trait_tf_chunk_table/trait/t_gimme_trait_tf_{i}.txt\" INTO TABLE `scvdb`.`t_gimme_trait_tf_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                      f"LOAD DATA LOCAL INFILE \"/root/gimme/trait_tf_chunk_table/trait/t_gimme_trait_tf_{i}.txt\" INTO TABLE `scvdb`.`t_gimme_trait_tf_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
             f.write(sql_str)
 
@@ -552,7 +559,7 @@ if __name__ == '__main__':
     file = StaticMethod()
 
     tf_data = pd.read_table("../../tf/data/t_tf.txt")
-    sample_info = pd.read_table("../../scATAC/data/sample_info.txt")[int(sys.argv[1]):int(sys.argv[2])]
+    sample_info = pd.read_table("../../scATAC/data/sample_info.txt")
 
     trait_file = "../result/trait_info.xlsx"
     trait_info = pd.read_excel(trait_file)
@@ -565,7 +572,7 @@ if __name__ == '__main__':
 
     # exec_trait_tf_map()
 
-    form_table()
-    # chunk_tf_file()
+    # form_table()
+    chunk_tf_file()
 
     # form_sql_file()
