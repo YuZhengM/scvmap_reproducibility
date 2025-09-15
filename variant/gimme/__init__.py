@@ -490,6 +490,10 @@ def chunk_tf_file(group_count: int = 100):
         _data_trait_tf_.to_csv(f"{trait_output_path}/t_gimme_trait_tf_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
 
+def exec_gene_tf_map():
+    pass
+
+
 def form_sql_file():
     with open("./result/create_gimme.sql", "w", encoding="utf-8", newline="\n") as f:
         for sample_id in sample_info["f_sample_id"]:
@@ -572,7 +576,9 @@ if __name__ == '__main__':
 
     # exec_trait_tf_map()
 
+    exec_gene_tf_map()
+
     # form_table()
-    chunk_tf_file()
+    # chunk_tf_file()
 
     # form_sql_file()

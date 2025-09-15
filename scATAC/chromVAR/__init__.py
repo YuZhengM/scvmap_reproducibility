@@ -31,20 +31,27 @@ def handle_chromvar_result():
         #     print(f"File {difference_tf_file} exists, skip it.")
         #     continue
 
-        if filename.endswith("_differential_TF_motif_enriched_in_clusters.tsv"):
+        if sample_id == "sample_id_2" or sample_id == "sample_id_12" or sample_id == "sample_id_30" or sample_id == "sample_id_31":
 
             chromvar_data = pd.read_table(sample_chromvar_dict[filename])
             chromvar_data.columns = ["f_tf", "f_cell_type", "f_mean1", "f_mean2", "f_p_value", "f_p_value_adjust"]
+            chromvar_data["f_tf"] = chromvar_data["f_tf"].str.split("_", expand=True)[1].str.upper()
+
+        elif filename.endswith("_differential_TF_motif_enriched_in_clusters.tsv"):
+
+            chromvar_data = pd.read_table(sample_chromvar_dict[filename])
+            chromvar_data.columns = ["f_tf", "f_cell_type", "f_mean1", "f_mean2", "f_p_value", "f_p_value_adjust"]
+            chromvar_data["f_tf"] = chromvar_data["f_tf"].str.split("_", expand=True)[2].str.upper()
 
         else:
 
             chromvar_data = pd.read_table(sample_chromvar_dict[filename], header=None)
             chromvar_data.columns = ["_", "f_tf", "_", "f_mean1", "f_mean2", "f_p_value", "f_p_value_adjust", "f_cell_type"]
+            chromvar_data["f_tf"] = chromvar_data["f_tf"].str.split("_", expand=True)[2].str.upper()
 
         chromvar_data.loc[chromvar_data["f_p_value"] == 0.0, "f_p_value"] = chromvar_data.loc[chromvar_data["f_p_value"] > 0.0, "f_p_value"].min()
         chromvar_data.loc[chromvar_data["f_p_value_adjust"] == 0.0, "f_p_value_adjust"] = chromvar_data.loc[chromvar_data["f_p_value_adjust"] > 0.0, "f_p_value_adjust"].min()
 
-        chromvar_data["f_tf"] = chromvar_data["f_tf"].str.split("_", expand=True)[2].str.upper()
         chromvar_data = chromvar_data[["f_tf", "f_cell_type", "f_mean1", "f_mean2", "f_p_value", "f_p_value_adjust"]]
         chromvar_data["f_sample_id"] = sample_id
 
