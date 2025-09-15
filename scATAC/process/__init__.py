@@ -9,6 +9,8 @@ import sciv
 from pandas import DataFrame
 import warnings
 
+from tqdm import tqdm
+
 warnings.filterwarnings("ignore")
 
 
@@ -111,8 +113,7 @@ def form_sample_table():
         cell_anno["f_index"] = range(1, 1 + cell_count)
         add_cell_type_index(cell_anno, "f_cell_type")
         # standard specification file
-        cell_anno.to_csv(os.path.join(path, gse, "data", label, label + "_cell_anno_stdn.txt"), sep="\t", index=False,
-                         lineterminator="\n", encoding="utf-8")
+        cell_anno.to_csv(os.path.join(path, gse, "data", label, label + "_cell_anno_stdn.txt"), sep="\t", index=False, lineterminator="\n", encoding="utf-8")
 
         cell_anno_list.append(cell_anno)
 
@@ -136,8 +137,7 @@ def form_sample_table():
         cell_type_count["f_description"] = description
         cell_type_count["f_source"] = source
         cell_type_count["f_source_url"] = source_url
-        cell_type_count.to_csv(os.path.join(path, gse, "data", label, label + "_cell_type_stdn.txt"), sep="\t",
-                               index=False, lineterminator="\n", encoding="utf-8")
+        cell_type_count.to_csv(os.path.join(path, gse, "data", label, label + "_cell_type_stdn.txt"), sep="\t", index=False, lineterminator="\n", encoding="utf-8")
 
         cell_type_count_list.append(cell_type_count.shape[0])
         cell_type_anno_list.append(cell_type_count)
@@ -195,7 +195,7 @@ def add_cell_age_sex_drug():
                 cell_with_asd_sample["barcodes"] = cell_with_asd_sample["gsm"].map(gse165906_dict) + "_" + cell_with_asd_sample["new_barcodes"]
 
             if sample_id == "sample_id_72" or sample_id == "sample_id_73" or sample_id == "sample_id_74" or sample_id == "sample_id_75":
-                cell_anno_sample_id["f_barcodes"] = cell_anno_sample_id["f_barcodes"] + "_" + cell_anno_sample_id["f_sample"]
+                cell_with_asd_sample["barcodes"] = cell_with_asd_sample["barcodes"].str.split("_", expand=True)[0]
 
             if (sample_id == "sample_id_82" or sample_id == "sample_id_83"
                     or sample_id == "sample_id_88" or sample_id == "sample_id_116" or sample_id == "sample_id_148"):
@@ -229,9 +229,35 @@ def add_cell_age_sex_drug():
 
             new_cell_anno = cell_anno_sample_id
         else:
-            cell_anno_sample_id["f_time"] = "unknown"
-            cell_anno_sample_id["f_sex"] = "unknown"
-            cell_anno_sample_id["f_drug"] = "unknown"
+            gsm_id_list: list = gsm_id.split(",")
+
+            if len(gsm_id_list) > 1:
+
+                is_include_all: bool = True
+
+                for _gsm_id_ in gsm_id_list:
+                    is_include_all = is_include_all and _gsm_id_ in cell_anno_info_with_asd_gse_gsm_ids
+
+                if is_include_all:
+                    for _gsm_id_ in gsm_id_list:
+                        matched_row = cell_anno_info_with_asd[cell_anno_info_with_asd["gse_gsm_id"] == _gsm_id_]
+                        # Get the values of sex, time, and drug columns
+                        sex_val = matched_row["sex"].values[0]
+                        time_val = matched_row["time"].values[0]
+                        drug_val = matched_row["drug"].values[0]
+
+                        cell_anno_sample_id.loc[cell_anno_sample_id["f_sample"] == _gsm_id_, "f_time"] = sex_val
+                        cell_anno_sample_id.loc[cell_anno_sample_id["f_sample"] == _gsm_id_, "f_sex"] = time_val
+                        cell_anno_sample_id.loc[cell_anno_sample_id["f_sample"] == _gsm_id_, "f_drug"] = drug_val
+                else:
+                    cell_anno_sample_id["f_time"] = "unknown"
+                    cell_anno_sample_id["f_sex"] = "unknown"
+                    cell_anno_sample_id["f_drug"] = "unknown"
+
+            else:
+                cell_anno_sample_id["f_time"] = "unknown"
+                cell_anno_sample_id["f_sex"] = "unknown"
+                cell_anno_sample_id["f_drug"] = "unknown"
 
             new_cell_anno = cell_anno_sample_id
 
@@ -260,20 +286,68 @@ def add_cell_age_sex_drug():
 
 def adata_add_cell_anno():
     sample_info = pd.read_table("../data/new_sample_info.txt")
+    cell_anno = pd.read_table("../data/cell_anno_with_age_sex_drug_all.txt")
 
-    for sample_id, gse_id, label in zip(sample_info["f_sample_id"], sample_info["f_gse_id"], sample_info["f_label"]):
+    for sample_id, gse_id, label, f_time, f_sex, f_drug in zip(sample_info["f_sample_id"], sample_info["f_gse_id"],
+                                                               sample_info["f_label"], sample_info["f_time"],
+                                                               sample_info["f_sex"], sample_info["f_drug"]):
+
         print(f"Processing sample - ID: {sample_id}, GSE ID: {gse_id}, Label: {label}")
 
-        for i in range(100):
-            trs_file: str = f"/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/trs/{label}/chunk/{label}_{i}_trs_gchromvar.h5ad"
-            trs_adata = sciv.fl.read_h5ad(trs_file)
-            trs_adata.obs
+        if f_time == 1 or f_sex == 1 or f_drug == 1:
+
+            cell_anno_sample_id = cell_anno[cell_anno["f_sample_id"] == sample_id]
+            cell_anno_sample_id = cell_anno_sample_id[["f_barcodes", "f_time", "f_sex", "f_drug", "f_time_index", "f_sex_index", "f_drug_index"]]
+
+            for i in tqdm(range(100)):
+
+                def _set_cell_anno_(_method_: str):
+                    _trs_method_file_: str = f"{database_path}/sc_variant/table/trs/{label}/chunk/{label}_{i}_trs_{_method_}.h5ad"
+                    _trs_method_adata_ = sciv.fl.read_h5ad(_trs_method_file_)
+
+                    if "f_sex" not in _trs_method_adata_.obs:
+                        _trs_method_cell_anno_ = pd.merge(_trs_method_adata_.obs, cell_anno_sample_id, on="f_barcodes")
+                        _trs_method_cell_anno_.index = _trs_method_cell_anno_["f_barcodes"].astype(str)
+                        _trs_method_adata_.obs = _trs_method_cell_anno_
+                        sciv.fl.save_h5ad(_trs_method_adata_, _trs_method_file_)
+                        del _trs_method_adata_
+
+                for method in ["gchromvar", "scavenge"]:
+                    _set_cell_anno_(method)
+
+            del cell_anno_sample_id
+
+
+def form_age_sex_drug_anno():
+    cell_anno = pd.read_table("../data/cell_anno_with_age_sex_drug_all.txt")
+
+    print(f"Start `form_age_sex_drug_anno`...")
+
+    cell_time_count = cell_anno[["f_sample_id", "f_time"]].groupby(["f_sample_id", "f_time"], as_index=False).size()
+    cell_time_count.columns = ["f_sample_id", "f_type_value", "f_type_count"]
+    cell_time_count["f_type"] = "time"
+
+    cell_sex_count = cell_anno[["f_sample_id", "f_sex"]].groupby(["f_sample_id", "f_sex"], as_index=False).size()
+    cell_sex_count.columns = ["f_sample_id", "f_type_value", "f_type_count"]
+    cell_sex_count["f_type"] = "sex"
+
+    cell_drug_count = cell_anno[["f_sample_id", "f_drug"]].groupby(["f_sample_id", "f_drug"], as_index=False).size()
+    cell_drug_count.columns = ["f_sample_id", "f_type_value", "f_type_count"]
+    cell_drug_count["f_type"] = "drug"
+
+    age_sex_drug_anno = pd.concat([cell_time_count, cell_sex_count, cell_drug_count], axis=0)
+    age_sex_drug_anno["f_index"] = age_sex_drug_anno["f_sample_id"].str.split("_", expand=True)[2].astype(int)
+    age_sex_drug_anno.sort_values(["f_index", "f_type"], inplace=True)
+    age_sex_drug_anno.to_csv("../data/age_sex_drug_anno.txt", sep="\t", index=False, lineterminator="\n", encoding="utf-8")
+
 
 
 if __name__ == '__main__':
     print("run...")
     # path: str = r"H:\scATAC"
     path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC"
+    database_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database"
+
     # Obtain annotation information for all sample cells
     # form_sample_cell_anno_file()
     # form_sample_table()
@@ -300,5 +374,7 @@ if __name__ == '__main__':
 
     # gse_id	barcodes	time	sex	drug
     add_cell_age_sex_drug()
+
+    form_age_sex_drug_anno()
 
     # adata_add_cell_anno()

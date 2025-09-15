@@ -84,21 +84,3 @@ for (i in c(153:167)) {
 for (i in c(168:183)) {
     core_process(paste0(path, "/", sample_info[["f_gse_id"]][i]), base_path, sample_info[["f_label"]][i], sample_info[["f_genome"]][i], sample_info[["f_counts_layer"]][i])
 }
-
-# Verify TRS distribution
-
-library_path <- "/public/home/lcq/rgzn/yuzhengmin/keti/database/code/yiyuan_chaosuan"
-source(paste0(library_path, "/library.R"))
-source(paste0(library_path, "/static_function.R"))
-source(paste0(library_path, "/integration_distribution.R"))
-path <- "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC"
-base_path <- "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant_distribution"
-
-core_process_distribution(
-    paste0(path, "/GSE129785"),
-    base_path,
-    "GSE129785_TME-All",
-    "hg19",
-    "data",
-    "/public/home/lcq/rgzn/yuzhengmin/keti/variant/output/BBJ/finemap_susie"
-)

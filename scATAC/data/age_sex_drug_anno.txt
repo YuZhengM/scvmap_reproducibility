@@ -1,0 +1,663 @@
+f_sample_id	f_type_value	f_type_count	f_type	f_index
+sample_id_1	unknown	36721	drug	1
+sample_id_1	unknown	36721	sex	1
+sample_id_1	unknown	36721	time	1
+sample_id_2	unknown	28774	drug	2
+sample_id_2	unknown	28774	sex	2
+sample_id_2	unknown	28774	time	2
+sample_id_3	unknown	32457	drug	3
+sample_id_3	unknown	32457	sex	3
+sample_id_3	unknown	32457	time	3
+sample_id_4	unknown	66303	drug	4
+sample_id_4	unknown	66303	sex	4
+sample_id_4	unknown	66303	time	4
+sample_id_5	unknown	50658	drug	5
+sample_id_5	female	39396	sex	5
+sample_id_5	male	11262	sex	5
+sample_id_5	110 days	9413	time	5
+sample_id_5	113 days	21186	time	5
+sample_id_5	120 days	11262	time	5
+sample_id_5	122 days	8797	time	5
+sample_id_6	unknown	1200	drug	6
+sample_id_6	female	1200	sex	6
+sample_id_6	108 days	1200	time	6
+sample_id_7	unknown	20855	drug	7
+sample_id_7	female	12957	sex	7
+sample_id_7	male	7898	sex	7
+sample_id_7	110 days	7530	time	7
+sample_id_7	115 days	13325	time	7
+sample_id_8	unknown	7812	drug	8
+sample_id_8	female	7266	sex	8
+sample_id_8	male	546	sex	8
+sample_id_8	122 days	546	time	8
+sample_id_8	91 days	1166	time	8
+sample_id_8	94 days	6100	time	8
+sample_id_9	unknown	57029	drug	9
+sample_id_9	female	736	sex	9
+sample_id_9	male	56293	sex	9
+sample_id_9	110 days	12297	time	9
+sample_id_9	115 days	14336	time	9
+sample_id_9	120 days	10114	time	9
+sample_id_9	122 days	19546	time	9
+sample_id_9	94 days	736	time	9
+sample_id_10	unknown	30251	drug	10
+sample_id_10	female	15569	sex	10
+sample_id_10	male	14682	sex	10
+sample_id_10	113 days	4065	time	10
+sample_id_10	125 days	14682	time	10
+sample_id_10	94 days	11504	time	10
+sample_id_11	unknown	58117	drug	11
+sample_id_11	female	46707	sex	11
+sample_id_11	male	11410	sex	11
+sample_id_11	113 days	17140	time	11
+sample_id_11	115 days	11391	time	11
+sample_id_11	120 days	11221	time	11
+sample_id_11	122 days	11385	time	11
+sample_id_11	125 days	189	time	11
+sample_id_11	94 days	6791	time	11
+sample_id_12	unknown	99834	drug	12
+sample_id_12	female	29896	sex	12
+sample_id_12	male	69938	sex	12
+sample_id_12	110 days	10948	time	12
+sample_id_12	115 days	42276	time	12
+sample_id_12	120 days	25169	time	12
+sample_id_12	122 days	8200	time	12
+sample_id_12	94 days	13241	time	12
+sample_id_13	unknown	52932	drug	13
+sample_id_13	female	23952	sex	13
+sample_id_13	male	28980	sex	13
+sample_id_13	110 days	7395	time	13
+sample_id_13	113 days	8742	time	13
+sample_id_13	115 days	3714	time	13
+sample_id_13	120 days	21585	time	13
+sample_id_13	94 days	11496	time	13
+sample_id_14	unknown	22254	drug	14
+sample_id_14	male	22254	sex	14
+sample_id_14	120 days	13793	time	14
+sample_id_14	125 days	8461	time	14
+sample_id_15	unknown	2725	drug	15
+sample_id_15	female	2725	sex	15
+sample_id_15	105 days	2725	time	15
+sample_id_16	unknown	33006	drug	16
+sample_id_16	female	17725	sex	16
+sample_id_16	male	15281	sex	16
+sample_id_16	110 days	10126	time	16
+sample_id_16	113 days	8335	time	16
+sample_id_16	115 days	6666	time	16
+sample_id_16	122 days	7879	time	16
+sample_id_17	unknown	2621	drug	17
+sample_id_17	female	1638	sex	17
+sample_id_17	male	983	sex	17
+sample_id_17	102 days	1638	time	17
+sample_id_17	91 days	983	time	17
+sample_id_18	unknown	17551	drug	18
+sample_id_18	female	16473	sex	18
+sample_id_18	male	1078	sex	18
+sample_id_18	102 days	1078	time	18
+sample_id_18	103 days	641	time	18
+sample_id_18	110 days	4127	time	18
+sample_id_18	122 days	11705	time	18
+sample_id_19	unknown	8356	drug	19
+sample_id_19	unknown	8356	sex	19
+sample_id_19	unknown	8356	time	19
+sample_id_20	unknown	7079	drug	20
+sample_id_20	Female	3075	sex	20
+sample_id_20	Male	4004	sex	20
+sample_id_20	74 years old	452	time	20
+sample_id_20	79 years old	1561	time	20
+sample_id_20	80 years old	315	time	20
+sample_id_20	81 years old	186	time	20
+sample_id_20	83 years old	415	time	20
+sample_id_20	86 years old	328	time	20
+sample_id_20	87 years old	274	time	20
+sample_id_20	89 years old	685	time	20
+sample_id_20	90 years old	2863	time	20
+sample_id_21	unknown	18123	drug	21
+sample_id_21	unknown	18123	sex	21
+sample_id_21	unknown	18123	time	21
+sample_id_22	unknown	5196	drug	22
+sample_id_22	unknown	5196	sex	22
+sample_id_22	unknown	5196	time	22
+sample_id_23	unknown	7546	drug	23
+sample_id_23	unknown	7546	sex	23
+sample_id_23	unknown	7546	time	23
+sample_id_24	unknown	5894	drug	24
+sample_id_24	unknown	5894	sex	24
+sample_id_24	unknown	5894	time	24
+sample_id_25	unknown	4067	drug	25
+sample_id_25	unknown	4067	sex	25
+sample_id_25	unknown	4067	time	25
+sample_id_26	unknown	5851	drug	26
+sample_id_26	unknown	5851	sex	26
+sample_id_26	unknown	5851	time	26
+sample_id_27	unknown	5293	drug	27
+sample_id_27	unknown	5293	sex	27
+sample_id_27	unknown	5293	time	27
+sample_id_28	unknown	279	drug	28
+sample_id_28	unknown	279	sex	28
+sample_id_28	unknown	279	time	28
+sample_id_29	unknown	1785	drug	29
+sample_id_29	unknown	1785	sex	29
+sample_id_29	unknown	1785	time	29
+sample_id_30	unknown	64554	drug	30
+sample_id_30	unknown	64554	sex	30
+sample_id_30	unknown	64554	time	30
+sample_id_31	unknown	27271	drug	31
+sample_id_31	unknown	27271	sex	31
+sample_id_31	unknown	27271	time	31
+sample_id_32	unknown	2521	drug	32
+sample_id_32	unknown	2521	sex	32
+sample_id_32	unknown	2521	time	32
+sample_id_33	unknown	1503	drug	33
+sample_id_33	unknown	1503	sex	33
+sample_id_33	unknown	1503	time	33
+sample_id_34	unknown	726	drug	34
+sample_id_34	unknown	726	sex	34
+sample_id_34	unknown	726	time	34
+sample_id_35	unknown	14798	drug	35
+sample_id_35	54 years old	3986	sex	35
+sample_id_35	61 years old	6820	sex	35
+sample_id_35	62 years old	3992	sex	35
+sample_id_35	female	6820	time	35
+sample_id_35	male	7978	time	35
+sample_id_36	unknown	3564	drug	36
+sample_id_36	male	3564	sex	36
+sample_id_36	54 years old	3564	time	36
+sample_id_37	unknown	3659	drug	37
+sample_id_37	male	3659	sex	37
+sample_id_37	62 years old	3659	time	37
+sample_id_38	unknown	6017	drug	38
+sample_id_38	female	6017	sex	38
+sample_id_38	61 years old	6017	time	38
+sample_id_39	unknown	8881	drug	39
+sample_id_39	unknown	8881	sex	39
+sample_id_39	unknown	8881	time	39
+sample_id_40	unknown	3957	drug	40
+sample_id_40	unknown	3957	sex	40
+sample_id_40	unknown	3957	time	40
+sample_id_41	unknown	4930	drug	41
+sample_id_41	unknown	4930	sex	41
+sample_id_41	unknown	4930	time	41
+sample_id_42	unknown	7491	drug	42
+sample_id_42	unknown	7491	sex	42
+sample_id_42	unknown	7491	time	42
+sample_id_43	unknown	8742	drug	43
+sample_id_43	unknown	8742	sex	43
+sample_id_43	unknown	8742	time	43
+sample_id_44	unknown	3993	drug	44
+sample_id_44	unknown	3993	sex	44
+sample_id_44	unknown	3993	time	44
+sample_id_45	unknown	884	drug	45
+sample_id_45	unknown	884	sex	45
+sample_id_45	unknown	884	time	45
+sample_id_46	unknown	3341	drug	46
+sample_id_46	unknown	3341	sex	46
+sample_id_46	unknown	3341	time	46
+sample_id_47	unknown	770	drug	47
+sample_id_47	unknown	770	sex	47
+sample_id_47	unknown	770	time	47
+sample_id_48	unknown	2239	drug	48
+sample_id_48	unknown	2239	sex	48
+sample_id_48	unknown	2239	time	48
+sample_id_49	unknown	1113	drug	49
+sample_id_49	unknown	1113	sex	49
+sample_id_49	unknown	1113	time	49
+sample_id_50	unknown	1104	drug	50
+sample_id_50	unknown	1104	sex	50
+sample_id_50	unknown	1104	time	50
+sample_id_51	unknown	2210	drug	51
+sample_id_51	unknown	2210	sex	51
+sample_id_51	unknown	2210	time	51
+sample_id_52	unknown	1707	drug	52
+sample_id_52	unknown	1707	sex	52
+sample_id_52	unknown	1707	time	52
+sample_id_53	unknown	32041	drug	53
+sample_id_53	unknown	32041	sex	53
+sample_id_53	unknown	32041	time	53
+sample_id_54	Watchful waiting	5642	drug	54
+sample_id_54	male	5642	sex	54
+sample_id_54	37 years old	5642	time	54
+sample_id_55	Relapse post-FCR	3959	drug	55
+sample_id_55	male	3959	sex	55
+sample_id_55	58 years old	3959	time	55
+sample_id_56	Relapse post-RIC	2487	drug	56
+sample_id_56	female	2487	sex	56
+sample_id_56	54 years old	2487	time	56
+sample_id_57	Relapse post-RIC	3915	drug	57
+sample_id_57	female	3915	sex	57
+sample_id_57	59 years old	3915	time	57
+sample_id_58	Relapse post-RIC	6115	drug	58
+sample_id_58	male	6115	sex	58
+sample_id_58	40 years old	6115	time	58
+sample_id_59	Ibrutinib 1 month	8143	drug	59
+sample_id_59	male	8143	sex	59
+sample_id_59	40 years old	8143	time	59
+sample_id_60	Ibrutinib 21 months	8778	drug	60
+sample_id_60	male	8778	sex	60
+sample_id_60	40 years old	8778	time	60
+sample_id_61	Pretreatment Ibrutinib CD19- cells	3808	drug	61
+sample_id_61	female	3808	sex	61
+sample_id_61	52 years old	3808	time	61
+sample_id_62	Ibrutinib 6 months CD19- cells	4642	drug	62
+sample_id_62	female	4642	sex	62
+sample_id_62	52 years old	4642	time	62
+sample_id_63	Ibrutinib 16 months	2296	drug	63
+sample_id_63	female	2296	sex	63
+sample_id_63	52 years old	2296	time	63
+sample_id_64	Bone marrow Richter's phase	5909	drug	64
+sample_id_64	male	5909	sex	64
+sample_id_64	56 years old	5909	time	64
+sample_id_65	Bone marrow Richter's phase	4325	drug	65
+sample_id_65	male	4325	sex	65
+sample_id_65	56 years old	4325	time	65
+sample_id_66	Lymph node Richter's phase CD19+ cells	4382	drug	66
+sample_id_66	male	4382	sex	66
+sample_id_66	56 years old	4382	time	66
+sample_id_67	Lymph node Richter's phase CD19+ cells	4702	drug	67
+sample_id_67	male	4702	sex	67
+sample_id_67	56 years old	4702	time	67
+sample_id_68	Lymph node Richter's phase CD19+ cells	4500	drug	68
+sample_id_68	male	4500	sex	68
+sample_id_68	56 years old	4500	time	68
+sample_id_69	pre-pandemic influenza vaccines H5N1	272	drug	69
+sample_id_69	unknown	3536	drug	69
+sample_id_69	Female	92	sex	69
+sample_id_69	Male	180	sex	69
+sample_id_69	unknown	3536	sex	69
+sample_id_69	d0	134	time	69
+sample_id_69	d21	79	time	69
+sample_id_69	d42	59	time	69
+sample_id_69	unknown	3536	time	69
+sample_id_70	pre-pandemic influenza vaccines H5N1	360	drug	70
+sample_id_70	unknown	4100	drug	70
+sample_id_70	Female	135	sex	70
+sample_id_70	Male	225	sex	70
+sample_id_70	unknown	4100	sex	70
+sample_id_70	d0	187	time	70
+sample_id_70	d21	113	time	70
+sample_id_70	d42	60	time	70
+sample_id_70	unknown	4100	time	70
+sample_id_71	unknown	14053	drug	71
+sample_id_71	unknown	14053	sex	71
+sample_id_71	d0	2733	time	71
+sample_id_71	d1	2597	time	71
+sample_id_71	d30	1687	time	71
+sample_id_71	unknown	7036	time	71
+sample_id_72	unknown	4857	drug	72
+sample_id_72	unknown	4857	sex	72
+sample_id_72	d0	44	time	72
+sample_id_72	d1	4813	time	72
+sample_id_73	unknown	5742	drug	73
+sample_id_73	unknown	5742	sex	73
+sample_id_73	d0	25	time	73
+sample_id_73	d1	5669	time	73
+sample_id_73	d30	48	time	73
+sample_id_74	unknown	6844	drug	74
+sample_id_74	unknown	6844	sex	74
+sample_id_74	d0	6506	time	74
+sample_id_74	d1	118	time	74
+sample_id_74	d30	220	time	74
+sample_id_75	unknown	3961	drug	75
+sample_id_75	unknown	3961	sex	75
+sample_id_75	d0	3961	time	75
+sample_id_76	unknown	1608	drug	76
+sample_id_76	unknown	1608	sex	76
+sample_id_76	unknown	1608	time	76
+sample_id_77	unknown	1466	drug	77
+sample_id_77	unknown	1466	sex	77
+sample_id_77	unknown	1466	time	77
+sample_id_78	Transfection using 4µg EGFP-GPI-encoding plasmid or 4µg SARS-CoV-2 spike protein encoding plasmid for HEK293T	11327	drug	78
+sample_id_78	unknown	11327	sex	78
+sample_id_78	unknown	11327	time	78
+sample_id_79	Transfection using 4µg EGFP-GPI-encoding plasmid or 4µg SARS-CoV-2 spike protein encoding plasmid for HEK293T	4229	drug	79
+sample_id_79	unknown	4229	sex	79
+sample_id_79	unknown	4229	time	79
+sample_id_80	Transfection using 4µg EGFP-GPI-encoding plasmid or 4µg SARS-CoV-2 spike protein encoding plasmid for HEK293T	5130	drug	80
+sample_id_80	unknown	5130	sex	80
+sample_id_80	unknown	5130	time	80
+sample_id_81	Transfection using 4µg EGFP-GPI-encoding plasmid or 4µg SARS-CoV-2 spike protein encoding plasmid for HEK293T	1284	drug	81
+sample_id_81	unknown	1284	sex	81
+sample_id_81	unknown	1284	time	81
+sample_id_82	unknown	4030	drug	82
+sample_id_82	unknown	4030	sex	82
+sample_id_82	unknown	4030	time	82
+sample_id_83	unknown	22218	drug	83
+sample_id_83	unknown	22218	sex	83
+sample_id_83	unknown	22218	time	83
+sample_id_84	unknown	3947	drug	84
+sample_id_84	Female	3782	sex	84
+sample_id_84	Male	116	sex	84
+sample_id_84	unknown	49	sex	84
+sample_id_84	74 years old	53	time	84
+sample_id_84	79 years old	87	time	84
+sample_id_84	80 years old	1	time	84
+sample_id_84	83 years old	2	time	84
+sample_id_84	86 years old	1	time	84
+sample_id_84	89 years old	58	time	84
+sample_id_84	90 years old	3696	time	84
+sample_id_84	unknown	49	time	84
+sample_id_85	unknown	623	drug	85
+sample_id_85	Female	581	sex	85
+sample_id_85	Male	40	sex	85
+sample_id_85	unknown	2	sex	85
+sample_id_85	74 years old	11	time	85
+sample_id_85	79 years old	22	time	85
+sample_id_85	80 years old	1	time	85
+sample_id_85	81 years old	1	time	85
+sample_id_85	83 years old	3	time	85
+sample_id_85	86 years old	6	time	85
+sample_id_85	87 years old	543	time	85
+sample_id_85	89 years old	12	time	85
+sample_id_85	90 years old	22	time	85
+sample_id_85	unknown	2	time	85
+sample_id_86	unknown	1617	drug	86
+sample_id_86	Female	112	sex	86
+sample_id_86	Male	1474	sex	86
+sample_id_86	unknown	31	sex	86
+sample_id_86	74 years old	19	time	86
+sample_id_86	79 years old	65	time	86
+sample_id_86	80 years old	8	time	86
+sample_id_86	81 years old	6	time	86
+sample_id_86	83 years old	21	time	86
+sample_id_86	86 years old	9	time	86
+sample_id_86	87 years old	12	time	86
+sample_id_86	89 years old	27	time	86
+sample_id_86	90 years old	1419	time	86
+sample_id_86	unknown	31	time	86
+sample_id_87	unknown	1458	drug	87
+sample_id_87	Female	1412	sex	87
+sample_id_87	Male	36	sex	87
+sample_id_87	unknown	10	sex	87
+sample_id_87	74 years old	24	time	87
+sample_id_87	79 years old	34	time	87
+sample_id_87	89 years old	1378	time	87
+sample_id_87	90 years old	12	time	87
+sample_id_87	unknown	10	time	87
+sample_id_88	unknown	17193	drug	88
+sample_id_88	unknown	17193	sex	88
+sample_id_88	unknown	17193	time	88
+sample_id_89	unknown	477	drug	89
+sample_id_89	male	477	sex	89
+sample_id_89	61 years old	477	time	89
+sample_id_90	unknown	288	drug	90
+sample_id_90	male	288	sex	90
+sample_id_90	63 years old	288	time	90
+sample_id_91	unknown	671	drug	91
+sample_id_91	male	671	sex	91
+sample_id_91	60 years old	671	time	91
+sample_id_92	unknown	494	drug	92
+sample_id_92	male	494	sex	92
+sample_id_92	60 years old	494	time	92
+sample_id_93	unknown	672	drug	93
+sample_id_93	male	672	sex	93
+sample_id_93	60 years old	672	time	93
+sample_id_94	unknown	362	drug	94
+sample_id_94	male	362	sex	94
+sample_id_94	49 years old	362	time	94
+sample_id_95	unknown	1031	drug	95
+sample_id_95	male	1031	sex	95
+sample_id_95	60 years old	1031	time	95
+sample_id_96	unknown	388	drug	96
+sample_id_96	female	388	sex	96
+sample_id_96	68 years old	388	time	96
+sample_id_97	unknown	1136	drug	97
+sample_id_97	male	1136	sex	97
+sample_id_97	49 years old	1136	time	97
+sample_id_98	unknown	549	drug	98
+sample_id_98	female	549	sex	98
+sample_id_98	49 years old	549	time	98
+sample_id_99	unknown	515	drug	99
+sample_id_99	male	515	sex	99
+sample_id_99	43 years old	515	time	99
+sample_id_100	unknown	414	drug	100
+sample_id_100	female	414	sex	100
+sample_id_100	55 years old	414	time	100
+sample_id_101	unknown	336	drug	101
+sample_id_101	male	336	sex	101
+sample_id_101	30 years old	336	time	101
+sample_id_102	unknown	683	drug	102
+sample_id_102	female	683	sex	102
+sample_id_102	54 years old	683	time	102
+sample_id_103	unknown	757	drug	103
+sample_id_103	female	757	sex	103
+sample_id_103	56 years old	757	time	103
+sample_id_104	unknown	811	drug	104
+sample_id_104	female	811	sex	104
+sample_id_104	54 years old	811	time	104
+sample_id_105	unknown	312	drug	105
+sample_id_105	female	312	sex	105
+sample_id_105	62 years old	312	time	105
+sample_id_106	unknown	670	drug	106
+sample_id_106	female	670	sex	106
+sample_id_106	21 years old	670	time	106
+sample_id_107	unknown	424	drug	107
+sample_id_107	male	424	sex	107
+sample_id_107	35 years old	424	time	107
+sample_id_108	unknown	692	drug	108
+sample_id_108	male	692	sex	108
+sample_id_108	66 years old	692	time	108
+sample_id_109	unknown	456	drug	109
+sample_id_109	female	456	sex	109
+sample_id_109	47 years old	456	time	109
+sample_id_110	unknown	302	drug	110
+sample_id_110	female	302	sex	110
+sample_id_110	35 years old	302	time	110
+sample_id_111	unknown	789	drug	111
+sample_id_111	female	789	sex	111
+sample_id_111	57 years old	789	time	111
+sample_id_112	unknown	1087	drug	112
+sample_id_112	female	1087	sex	112
+sample_id_112	55 years old	1087	time	112
+sample_id_113	unknown	230	drug	113
+sample_id_113	male	230	sex	113
+sample_id_113	63 years old	230	time	113
+sample_id_114	unknown	1142	drug	114
+sample_id_114	female	1142	sex	114
+sample_id_114	49 years old	1142	time	114
+sample_id_115	unknown	970	drug	115
+sample_id_115	male	970	sex	115
+sample_id_115	61 years old	970	time	115
+sample_id_116	unknown	12859	drug	116
+sample_id_116	unknown	12859	sex	116
+sample_id_116	unknown	12859	time	116
+sample_id_117	unknown	1902	drug	117
+sample_id_117	unknown	1902	sex	117
+sample_id_117	unknown	1902	time	117
+sample_id_118	unknown	4503	drug	118
+sample_id_118	unknown	4503	sex	118
+sample_id_118	unknown	4503	time	118
+sample_id_119	unknown	4242	drug	119
+sample_id_119	unknown	4242	sex	119
+sample_id_119	unknown	4242	time	119
+sample_id_120	unknown	2250	drug	120
+sample_id_120	unknown	2250	sex	120
+sample_id_120	unknown	2250	time	120
+sample_id_121	unknown	2957	drug	121
+sample_id_121	unknown	2957	sex	121
+sample_id_121	unknown	2957	time	121
+sample_id_122	unknown	5159	drug	122
+sample_id_122	unknown	5159	sex	122
+sample_id_122	unknown	5159	time	122
+sample_id_123	unknown	3735	drug	123
+sample_id_123	unknown	3735	sex	123
+sample_id_123	unknown	3735	time	123
+sample_id_124	unknown	8768	drug	124
+sample_id_124	unknown	8768	sex	124
+sample_id_124	unknown	8768	time	124
+sample_id_125	unknown	6588	drug	125
+sample_id_125	unknown	6588	sex	125
+sample_id_125	unknown	6588	time	125
+sample_id_126	unknown	5008	drug	126
+sample_id_126	unknown	5008	sex	126
+sample_id_126	unknown	5008	time	126
+sample_id_127	unknown	1958	drug	127
+sample_id_127	unknown	1958	sex	127
+sample_id_127	unknown	1958	time	127
+sample_id_128	unknown	2038	drug	128
+sample_id_128	unknown	2038	sex	128
+sample_id_128	unknown	2038	time	128
+sample_id_129	unknown	2711	drug	129
+sample_id_129	unknown	2711	sex	129
+sample_id_129	unknown	2711	time	129
+sample_id_130	unknown	2380	drug	130
+sample_id_130	unknown	2380	sex	130
+sample_id_130	unknown	2380	time	130
+sample_id_131	unknown	2409	drug	131
+sample_id_131	unknown	2409	sex	131
+sample_id_131	unknown	2409	time	131
+sample_id_132	unknown	685	drug	132
+sample_id_132	unknown	685	sex	132
+sample_id_132	unknown	685	time	132
+sample_id_133	unknown	1707	drug	133
+sample_id_133	unknown	1707	sex	133
+sample_id_133	unknown	1707	time	133
+sample_id_134	unknown	2758	drug	134
+sample_id_134	unknown	2758	sex	134
+sample_id_134	unknown	2758	time	134
+sample_id_135	unknown	2986	drug	135
+sample_id_135	unknown	2986	sex	135
+sample_id_135	unknown	2986	time	135
+sample_id_136	unknown	250	drug	136
+sample_id_136	unknown	250	sex	136
+sample_id_136	unknown	250	time	136
+sample_id_137	unknown	1269	drug	137
+sample_id_137	unknown	1269	sex	137
+sample_id_137	unknown	1269	time	137
+sample_id_138	unknown	699	drug	138
+sample_id_138	unknown	699	sex	138
+sample_id_138	unknown	699	time	138
+sample_id_139	unknown	4948	drug	139
+sample_id_139	unknown	4948	sex	139
+sample_id_139	unknown	4948	time	139
+sample_id_140	unknown	5271	drug	140
+sample_id_140	unknown	5271	sex	140
+sample_id_140	unknown	5271	time	140
+sample_id_141	unknown	3433	drug	141
+sample_id_141	unknown	3433	sex	141
+sample_id_141	unknown	3433	time	141
+sample_id_142	unknown	2827	drug	142
+sample_id_142	unknown	2827	sex	142
+sample_id_142	unknown	2827	time	142
+sample_id_143	unknown	4460	drug	143
+sample_id_143	unknown	4460	sex	143
+sample_id_143	unknown	4460	time	143
+sample_id_144	unknown	2880	drug	144
+sample_id_144	unknown	2880	sex	144
+sample_id_144	unknown	2880	time	144
+sample_id_145	unknown	2658	drug	145
+sample_id_145	unknown	2658	sex	145
+sample_id_145	unknown	2658	time	145
+sample_id_146	unknown	5123	drug	146
+sample_id_146	unknown	5123	sex	146
+sample_id_146	unknown	5123	time	146
+sample_id_147	unknown	3593	drug	147
+sample_id_147	unknown	3593	sex	147
+sample_id_147	unknown	3593	time	147
+sample_id_148	unknown	24868	drug	148
+sample_id_148	unknown	24868	sex	148
+sample_id_148	unknown	24868	time	148
+sample_id_149	unknown	601	drug	149
+sample_id_149	unknown	601	sex	149
+sample_id_149	unknown	601	time	149
+sample_id_150	unknown	603	drug	150
+sample_id_150	unknown	603	sex	150
+sample_id_150	unknown	603	time	150
+sample_id_151	unknown	770	drug	151
+sample_id_151	unknown	770	sex	151
+sample_id_151	unknown	770	time	151
+sample_id_152	unknown	1097	drug	152
+sample_id_152	unknown	1097	sex	152
+sample_id_152	unknown	1097	time	152
+sample_id_153	unknown	544	drug	153
+sample_id_153	unknown	544	sex	153
+sample_id_153	unknown	544	time	153
+sample_id_154	unknown	751	drug	154
+sample_id_154	unknown	751	sex	154
+sample_id_154	unknown	751	time	154
+sample_id_155	unknown	8284	drug	155
+sample_id_155	unknown	8284	sex	155
+sample_id_155	unknown	8284	time	155
+sample_id_156	unknown	333	drug	156
+sample_id_156	unknown	333	sex	156
+sample_id_156	unknown	333	time	156
+sample_id_157	unknown	2090	drug	157
+sample_id_157	unknown	2090	sex	157
+sample_id_157	unknown	2090	time	157
+sample_id_158	unknown	1784	drug	158
+sample_id_158	unknown	1784	sex	158
+sample_id_158	unknown	1784	time	158
+sample_id_159	unknown	2667	drug	159
+sample_id_159	unknown	2667	sex	159
+sample_id_159	unknown	2667	time	159
+sample_id_160	unknown	5157	drug	160
+sample_id_160	unknown	5157	sex	160
+sample_id_160	unknown	5157	time	160
+sample_id_161	unknown	2146	drug	161
+sample_id_161	unknown	2146	sex	161
+sample_id_161	unknown	2146	time	161
+sample_id_162	unknown	401	drug	162
+sample_id_162	unknown	401	sex	162
+sample_id_162	unknown	401	time	162
+sample_id_163	unknown	6053	drug	163
+sample_id_163	unknown	6053	sex	163
+sample_id_163	unknown	6053	time	163
+sample_id_164	unknown	2491	drug	164
+sample_id_164	unknown	2491	sex	164
+sample_id_164	unknown	2491	time	164
+sample_id_165	unknown	3740	drug	165
+sample_id_165	unknown	3740	sex	165
+sample_id_165	unknown	3740	time	165
+sample_id_166	unknown	5794	drug	166
+sample_id_166	unknown	5794	sex	166
+sample_id_166	unknown	5794	time	166
+sample_id_167	unknown	6147	drug	167
+sample_id_167	unknown	6147	sex	167
+sample_id_167	unknown	6147	time	167
+sample_id_168	unknown	3106	drug	168
+sample_id_168	unknown	3106	sex	168
+sample_id_168	unknown	3106	time	168
+sample_id_169	unknown	2141	drug	169
+sample_id_169	unknown	2141	sex	169
+sample_id_169	unknown	2141	time	169
+sample_id_170	unknown	1837	drug	170
+sample_id_170	unknown	1837	sex	170
+sample_id_170	unknown	1837	time	170
+sample_id_171	unknown	5081	drug	171
+sample_id_171	unknown	5081	sex	171
+sample_id_171	unknown	5081	time	171
+sample_id_172	unknown	3591	drug	172
+sample_id_172	unknown	3591	sex	172
+sample_id_172	unknown	3591	time	172
+sample_id_173	unknown	2976	drug	173
+sample_id_173	unknown	2976	sex	173
+sample_id_173	unknown	2976	time	173
+sample_id_174	unknown	2336	drug	174
+sample_id_174	unknown	2336	sex	174
+sample_id_174	unknown	2336	time	174
+sample_id_175	unknown	4358	drug	175
+sample_id_175	unknown	4358	sex	175
+sample_id_175	unknown	4358	time	175
+sample_id_176	unknown	4135	drug	176
+sample_id_176	unknown	4135	sex	176
+sample_id_176	unknown	4135	time	176
+sample_id_177	unknown	2392	drug	177
+sample_id_177	unknown	2392	sex	177
+sample_id_177	unknown	2392	time	177
+sample_id_178	unknown	749	drug	178
+sample_id_178	unknown	749	sex	178
+sample_id_178	unknown	749	time	178
+sample_id_179	unknown	387	drug	179
+sample_id_179	unknown	387	sex	179
+sample_id_179	unknown	387	time	179
+sample_id_180	unknown	5323	drug	180
+sample_id_180	unknown	5323	sex	180
+sample_id_180	unknown	5323	time	180
+sample_id_181	unknown	1019	drug	181
+sample_id_181	unknown	1019	sex	181
+sample_id_181	unknown	1019	time	181
+sample_id_182	unknown	1628	drug	182
+sample_id_182	unknown	1628	sex	182
+sample_id_182	unknown	1628	time	182
+sample_id_183	unknown	401	drug	183
+sample_id_183	unknown	401	sex	183
+sample_id_183	unknown	401	time	183

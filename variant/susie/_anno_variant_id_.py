@@ -157,7 +157,7 @@ if __name__ == '__main__':
 
     genomes = ["hg19", "hg38"]
 
-    trait_info = pd.read_excel("../result/trait_info.xlsx")
+    trait_info = pd.read_excel("../result/trait_info_susie.xlsx")
 
     base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant/filter_susie"
     output_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant/finish_susie"
@@ -166,7 +166,7 @@ if __name__ == '__main__':
 
     file.makedirs(f"{output_path}/trait")
 
-    variant_id_summary()
+    # variant_id_summary()
 
     is_mutil = True
     is_try = True
