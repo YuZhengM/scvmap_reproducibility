@@ -60,7 +60,7 @@ def set_rs_id_value(trait_code: str):
             if rs_id.startswith("rs"):
                 rs_id_list.append(rs_id)
             else:
-                new_rs_id = get_rs_id_value(chromosome=_chr_, position=pos)
+                new_rs_id = get_rs_id_value(chromosome=_chr_, position=pos) if is_entrez else None
                 rs_id_list.append(new_rs_id if new_rs_id else rs_id)
 
         trait_content["rsId"] = rs_id_list
@@ -170,6 +170,7 @@ if __name__ == '__main__':
 
     is_mutil = True
     is_try = True
+    is_entrez = False
 
     print("Read reference file")
     variant_id_data = pd.read_table(f"{output_path}/variant_id.txt")

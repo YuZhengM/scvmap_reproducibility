@@ -563,7 +563,7 @@ if __name__ == '__main__':
     file = StaticMethod()
 
     tf_data = pd.read_table("../../tf/data/t_tf.txt")
-    sample_info = pd.read_table("../../scATAC/data/sample_info.txt")
+    sample_info = pd.read_table("../../scATAC/data/new_sample_info.txt")
 
     trait_file = "../result/trait_info.xlsx"
     trait_info = pd.read_excel(trait_file)

@@ -3,7 +3,7 @@ source(paste0(library_path, "/library.R"))
 source(paste0(library_path, "/static_function.R"))
 source(paste0(library_path, "/integration_susie.R"))
 path <- "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC"
-base_path <- "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant_susie"
+base_path <- "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant"
 
 ###################################################################
 # path: scATAC 输入路径
@@ -21,7 +21,7 @@ base_path <- "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant_susie"
 # 循环执行
 ###################################################################
 
-sample_file <- "/public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_handler/scATAC/data/new_sample_info.txt"
+sample_file <- "/public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_reproducibility/scATAC/data/new_sample_info.txt"
 sample_info <- read.table(sample_file, sep="\t", quote = "", header=TRUE)
 
 sample_count <- nrow(sample_info)

@@ -436,6 +436,31 @@ def process_distribution_plot():
     )
 
 
+def process_sc_variant_save_susie():
+
+    for label in identifier_list:
+        label_data = sample_info[sample_info["f_label"] == label]
+        gse_id = list(label_data["f_gse_id"])[0]
+
+        print(f"Obtain {gse_id}-{label} g-chromVAR and SCAVENGE results information")
+        output_file = Path(rf"{database_path}/sc_variant/scATAC/{label}/{label}_trs_scavenge_susie_data.h5ad")
+
+        if os.path.exists(output_file):
+            print(f"finish {output_file}")
+            continue
+
+        process = ScVariantSave(input_path=rf"{database_path}/sc_variant/result_susie/{label}",
+                                anno_file=rf"{scatac_path}/{gse_id}/data/{label}/{label}_cell_anno_stdn.txt",
+                                is_error=False)
+
+        del label_data
+        del gse_id
+
+        trs = process.get_trs()
+        trs = trs[~pd.isna(trs.obs["f_umap_x"]) & ~pd.isna(trs.obs["f_umap_y"])]
+        print(trs)
+        sciv.fl.save_h5ad(trs, output_file)
+
 if __name__ == '__main__':
     print("run...")
 
@@ -451,6 +476,7 @@ if __name__ == '__main__':
 
     identifier_list: list = list(sample_info["f_label"])
 
+    # FINEMAP
     # process_sc_variant_save()
     # process_sc_variant_data()
     # process_enriched_sample_trait()
@@ -459,5 +485,8 @@ if __name__ == '__main__':
     # enriched_data_chunk()
     # create_enrich_sql()
 
-    process_distribution()
-    process_distribution_plot()
+    # SuSiE
+    process_sc_variant_save_susie()
+
+    # process_distribution()
+    # process_distribution_plot()

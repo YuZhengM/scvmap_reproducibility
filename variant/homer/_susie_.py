@@ -30,7 +30,7 @@ def exec_homer(expand_size: int = 1000):
 
             input_file: str = f"{base_path}/{genome}/{trait_code}.bed"
 
-            exec_str: str = f"{homer_path}/bin/findMotifsGenome.pl {input_file} {homer_path}/data/genomes/{genome} {output_directory} -nomotif -p {cpu_count} -size {expand_size}"
+            exec_str: str = f"findMotifsGenome.pl {input_file} {homer_path}/data/genomes/{genome} {output_directory} -nomotif -p {cpu_count} -size {expand_size}"
             exec_str_list.append(exec_str)
 
     pool = Pool(3)
@@ -185,17 +185,16 @@ if __name__ == '__main__':
     print("run...")
 
     file = StaticMethod('HOMER')
-    util = Util('HOMER')
+    util = Util('HOMER', is_verbose=True)
 
     genomes: list = ["hg19", "hg38"]
-    base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant/finish"
-    output_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant/homer"
+    base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant/finish_susie"
+    output_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant/homer_susie"
     file.makedirs(output_path)
 
-    result_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/homer"
+    result_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/homer_susie"
 
-    trait_info = pd.read_excel("../result/trait_info.xlsx")
-    trait_info = trait_info[trait_info["f_filter"] == 1]
+    trait_info = pd.read_excel("../result/trait_info_susie.xlsx")
 
     motif_tf = pd.read_table("./data/motif_tf_map.txt")
     motif_tf_map: dict = dict(zip(motif_tf["motif_name"], motif_tf["tf"]))

@@ -4,6 +4,7 @@
 
 ```shell
 conda create -n yzm_homer
+conda activate yzm_homer
 ```
 
 ## Install HOMER

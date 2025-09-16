@@ -2,6 +2,8 @@
 # -*- coding: UTF-8 -*-
 
 import os
+import time
+
 import anndata as ad
 
 import pandas as pd
@@ -305,15 +307,20 @@ def adata_add_cell_anno():
                     _trs_method_file_: str = f"{database_path}/sc_variant/table/trs/{label}/chunk/{label}_{i}_trs_{_method_}.h5ad"
                     _trs_method_adata_ = sciv.fl.read_h5ad(_trs_method_file_)
 
-                    if "f_sex" not in _trs_method_adata_.obs:
-                        _trs_method_cell_anno_ = pd.merge(_trs_method_adata_.obs, cell_anno_sample_id, on="f_barcodes")
-                        _trs_method_cell_anno_.index = _trs_method_cell_anno_["f_barcodes"].astype(str)
-                        _trs_method_adata_.obs = _trs_method_cell_anno_
-                        sciv.fl.save_h5ad(_trs_method_adata_, _trs_method_file_)
-                        del _trs_method_adata_
+                    _trs_method_adata_.obs = _trs_method_adata_.obs[['f_sample_id', 'f_barcodes', 'f_cell_type', 'f_sample', 'f_umap_x', 'f_umap_y', 'f_tsse', 'f_index', 'f_cell_type_index']]
+                    _trs_method_adata_.obs = _trs_method_adata_.obs.rename_axis("barcodes_index")
+                    _trs_method_cell_anno_ = pd.merge(_trs_method_adata_.obs, cell_anno_sample_id, on="f_barcodes")
+                    _trs_method_cell_anno_.index = _trs_method_cell_anno_["f_barcodes"].astype(str)
+                    _trs_method_adata_.obs = _trs_method_cell_anno_
+                    sciv.fl.save_h5ad(_trs_method_adata_, _trs_method_file_)
+                    del _trs_method_adata_
 
                 for method in ["gchromvar", "scavenge"]:
                     _set_cell_anno_(method)
+
+                print("Start sleep...")
+                time.sleep(5000)
+                print("end sleep...")
 
             del cell_anno_sample_id
 
@@ -373,8 +380,8 @@ if __name__ == '__main__':
     }
 
     # gse_id	barcodes	time	sex	drug
-    add_cell_age_sex_drug()
+    # add_cell_age_sex_drug()
 
-    form_age_sex_drug_anno()
+    # form_age_sex_drug_anno()
 
-    # adata_add_cell_anno()
+    adata_add_cell_anno()
