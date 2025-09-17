@@ -46,7 +46,9 @@ def obtain_bjj_susie_finemap():
 def handle_bjj_susie_finemap():
     finemap_path = os.path.join(base_path, "source", "BBJ", "finemap_susie")
     finemap_ouput_path = os.path.join(base_path, "output", "BBJ", "finemap_susie")
+    traits_ouput_path = os.path.join(base_path, "output", "BBJ", "trait_susie")
     file.makedirs(finemap_ouput_path)
+    file.makedirs(traits_ouput_path)
 
     # Read trait mapping file
     BBJ_trait_map = pd.read_table("../data/BBJ/BJJ_fine_mapping_trait.txt")
@@ -102,5 +104,5 @@ if __name__ == '__main__':
     base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant"
 
     # obtain_bjj_susie_finemap()
-    handle_bjj_susie_finemap()
-
+    # handle_bjj_susie_finemap()
+    # _liftOver_.py

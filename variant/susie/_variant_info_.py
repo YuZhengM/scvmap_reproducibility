@@ -32,7 +32,7 @@ def get_variant_info(param: Tuple) -> None:
         need_hg38 = trait_hg38[["chr", "bp", "index"]]
 
         need_info = trait_description[[
-            "trait_code", "variant", "rsId", "allele1", "allele2", "maf", "af", "beta", "se", "p_value",
+            "trait_code", "variant", "rsId", "allele1", "allele2", "maf", "af", "beta_marginal", "se_marginal", "p_value",
             "chisq", "z_score", "pp", "beta_posterior", "sd_posterior", "trait_abbr", "trait", "index"
         ]]
         hg19_info = pd.merge(need_hg19, need_info, on="index", how="inner")
@@ -48,7 +48,7 @@ def get_variant_info(param: Tuple) -> None:
             trait_hg19_chr.columns = ["f_chr", "f_count"]
             trait_hg19_chr.insert(0, "f_trait_id", f_trait_id)
             trait_hg19_chr["f_genome"] = "hg19"
-            trait_hg38_chr = trait_hg38.groupby("chr").size().reset_index()
+            trait_hg38_chr: DataFrame = trait_hg38.groupby("chr").size().reset_index()
             trait_hg38_chr.columns = ["f_chr", "f_count"]
             trait_hg38_chr.insert(0, "f_trait_id", f_trait_id)
             trait_hg38_chr["f_genome"] = "hg38"
@@ -64,7 +64,8 @@ def get_variant_info(param: Tuple) -> None:
 
 
 def get_trait_info(group_count: int = 100):
-    is_skip_chr_count: bool = not os.path.exists(f"{output_path}/t_trait_chr_count_susie.txt")
+
+    is_skip_chr_count: bool = not os.path.exists(f"{output_path}/t_trait_chr_count.txt")
 
     # The result of creating 100 groups (Distinguish based on `index` remainder)
     trait_info_dict: dict = {}
@@ -93,7 +94,7 @@ def get_trait_info(group_count: int = 100):
 
     file.makedirs(output_path)
 
-    if not is_skip_chr_count:
+    if is_skip_chr_count:
         trait_chr_info_data = pd.concat(trait_chr_info_list, axis=0)
         trait_chr_info_data.to_csv(f"{output_path}/t_trait_chr_count.txt", sep="\t", index=False, header=False, lineterminator="\n", encoding="utf-8")
 
@@ -116,10 +117,12 @@ def get_trait_info(group_count: int = 100):
             genome: str
 
             genome_trait: list = trait_info_dict[i][genome]
-            genome_i_info = pd.concat(genome_trait, axis=0)
-            genome_i_info.columns = columns
-            genome_i_info = genome_i_info[need_columns]
-            genome_i_info.to_csv(f"{output_path}/{genome}/t_variant_{i}_{genome}.txt", sep="\t", index=False, header=False, lineterminator="\n", encoding="utf-8")
+
+            if len(genome_trait) >= 1:
+                genome_i_info = pd.concat(genome_trait, axis=0)
+                genome_i_info.columns = columns
+                genome_i_info = genome_i_info[need_columns]
+                genome_i_info.to_csv(f"{output_path}/{genome}/t_variant_{i}_{genome}.txt", sep="\t", index=False, header=False, lineterminator="\n", encoding="utf-8")
 
 
 def word_to_number(word: str) -> int:
@@ -163,8 +166,8 @@ def create_table_sql(group_count: int = 100):
         for h in genomes:
             for i in range(group_count):
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_variant_{h}_{i}`; \n" + \
-                          f"CREATE TABLE `scvdb`.`t_variant_{h}_{i}` (\n" + \
+                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_variant_{h}_{i}_susie`; \n" + \
+                          f"CREATE TABLE `scvdb`.`t_variant_{h}_{i}_susie` (\n" + \
                           f"  `f_trait_id` varchar(16) NOT NULL,\n" + \
                           f"  `f_source_id` varchar(16) NOT NULL,\n" + \
                           f"  `f_chr` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
@@ -184,9 +187,9 @@ def create_table_sql(group_count: int = 100):
                           f"  `f_pp` double(25,20) NOT NULL,\n" + \
                           f"  `f_beta_posterior` varchar(128) DEFAULT NULL,\n" + \
                           f"  `f_sd_posterior` varchar(128) DEFAULT NULL,\n" + \
-                          f"  KEY `t_variant_{h}_{i}_trait_id_index` (`f_trait_id`)\n" + \
+                          f"  KEY `t_variant_{h}_{i}_susie_trait_id_index` (`f_trait_id`)\n" + \
                           f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                          f"LOAD DATA LOCAL INFILE \"/root/variant/{h}/t_variant_{i}_{h}.txt\" INTO TABLE `scvdb`.`t_variant_{h}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                          f"LOAD DATA LOCAL INFILE \"/root/variant/{h}_susie/t_variant_{i}_{h}.txt\" INTO TABLE `scvdb`.`t_variant_{h}_{i}_susie` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
                 f.write(sql_str)
 
@@ -194,14 +197,14 @@ def create_table_sql(group_count: int = 100):
         for h in genomes:
             for i in range(group_count):
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_variant_trait_map_{h}_{i}`; \n" + \
-                          f"CREATE TABLE `scvdb`.`t_variant_trait_map_{h}_{i}` (\n" + \
+                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_variant_trait_map_{h}_{i}_susie`; \n" + \
+                          f"CREATE TABLE `scvdb`.`t_variant_trait_map_{h}_{i}_susie` (\n" + \
                           f"  `f_trait_id` varchar(16) NOT NULL,\n" + \
                           f"  `f_rs_id` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
                           f"  `f_pp` double(25,20) NOT NULL,\n" + \
-                          f"  KEY `t_variant_trait_map_{h}_{i}_rs_id_index` (`f_rs_id`)\n" + \
+                          f"  KEY `t_variant_trait_map_{h}_{i}_susie_rs_id_index` (`f_rs_id`)\n" + \
                           f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                          f"LOAD DATA LOCAL INFILE \"/root/variant/{h}_mapping/t_variant_trait_map_{h}_{i}.txt\" INTO TABLE `scvdb`.`t_variant_trait_map_{h}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                          f"LOAD DATA LOCAL INFILE \"/root/variant/{h}_mapping_susie/t_variant_trait_map_{h}_{i}.txt\" INTO TABLE `scvdb`.`t_variant_trait_map_{h}_{i}_susie` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
                 f.write(sql_str)
 
@@ -209,12 +212,15 @@ def create_table_sql(group_count: int = 100):
 if __name__ == '__main__':
     print("run...")
 
+    file = StaticMethod()
+    log = Logger()
+
     """
     Grouping is done according to the rule of remainder.
     """
 
-    base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant/finish"
-    output_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/variant"
+    base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant/finish_susie"
+    output_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/variant_susie"
 
     genomes: list = ["hg19", "hg38"]
 
@@ -223,13 +229,10 @@ if __name__ == '__main__':
                     'f_beta', 'f_se', 'f_p_value', 'f_chisq', 'f_z_score',
                     'f_pp', 'f_beta_posterior', 'f_sd_posterior']
 
-    file = StaticMethod()
-    log = Logger()
+    trait_info = pd.read_excel("../result/trait_info_susie.xlsx")
 
-    trait_info = pd.read_table("./result/trait_info.txt")
+    # get_trait_info(group_count=1)
 
-    get_trait_info(group_count=100)
-
-    get_trait_variant_map(group_count=100)
+    # get_trait_variant_map(group_count=1)
 
     create_table_sql()
