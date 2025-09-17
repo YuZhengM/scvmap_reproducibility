@@ -491,7 +491,51 @@ def chunk_tf_file(group_count: int = 100):
 
 
 def exec_gene_tf_map():
-    pass
+    gene_peak_cols = ["chr", "start", "end", "gene_name", "col1", "col2", "col3", "gene_peak"]
+
+    output_path = os.path.join(base_path, "tf_gene")
+    file.makedirs(output_path)
+
+    for sample_id, _genome_ in zip(sample_info["f_sample_id"], sample_info["f_genome"]):
+        print(f"Start exec {sample_id}...")
+
+        filename = f"{sample_id}_{_genome_}"
+
+        peak_pair_data = pd.read_table(f"{base_path}/pair/{sample_id}_cicero_interactions.txt")
+
+        gene_peak_data = pd.read_table(f"{base_path}/gene_peak/{filename}_gene_peak_map.txt", header=None, names=gene_peak_cols)
+
+        tf_peak_data = pd.read_table(f"{base_path}/tf_peak/{filename}_tf_peak_map.txt")
+
+        # === 筛选：每个 seq_name 按 score_mean 排序后取 top10 ===
+        tf_peak_data = (
+            tf_peak_data
+            .sort_values(["seq_name", "score_mean"], ascending=[True, False])
+            .groupby("seq_name")
+            .head(10)
+            .reset_index(drop=True)
+        )
+
+        # Merge data - Case 1
+        merged1 = pd.merge(peak_pair_data, gene_peak_data, left_on="Peak1", right_on="gene_peak", how='inner')
+        merged1 = pd.merge(merged1, tf_peak_data, left_on="Peak2", right_on="seq_name", how='inner')
+
+        # Merge data - Case 2
+        merged2 = pd.merge(peak_pair_data, gene_peak_data, left_on="Peak2", right_on="gene_peak", how='inner')
+        merged2 = pd.merge(merged2, tf_peak_data, left_on="Peak1", right_on="seq_name", how='inner')
+
+        final_result = pd.concat([merged1, merged2])
+        final_result = final_result[["tf", "score_mean", "count", 'gene_name', 'seq_name', 'gene_peak', 'coaccess']].drop_duplicates()
+
+        final_result['score_mean'] = final_result['score_mean'].astype(float)
+
+        final_result.to_csv(
+            os.path.join(output_path, f"{sample_id}_tf_gene_map.txt"),
+            sep="\t",
+            header=False,
+            index=False,
+            encoding="utf-8"
+        )
 
 
 def form_sql_file():
@@ -556,6 +600,26 @@ def form_sql_file():
 
             f.write(sql_str)
 
+    with open("./result/create_sample_tf_gene.sql", "w", encoding="utf-8", newline="\n") as f:
+        for sample_id in sample_info["f_sample_id"]:
+            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_tf_gene_{sample_id}`; \n" + \
+                      f"CREATE TABLE `scvdb`.`t_tf_gene_{sample_id}` (\n" + \
+                      f"  `f_tf` varchar(128) NOT NULL,\n" + \
+                      f"  `f_score_mean` double(26,20) NOT NULL,\n" + \
+                      f"  `f_count` int NOT NULL,\n" + \
+                      f"  `f_gene` varchar(32) NOT NULL,\n" + \
+                      f"  `f_tf_peak` varchar(128) NOT NULL,\n" + \
+                      f"  `f_gene_peak` varchar(128) NOT NULL,\n" + \
+                      f"  `f_score` double(26,20) NOT NULL,\n" + \
+                      f"  KEY `t_tf_gene_{sample_id}_tf_index` (`f_tf`) USING BTREE,\n" + \
+                      f"  KEY `t_tf_gene_{sample_id}_gene_index` (`f_gene`) USING BTREE,\n" + \
+                      f"  KEY `t_tf_gene_{sample_id}_score_mean_index` (`f_score_mean`) USING BTREE,\n" + \
+                      f"  KEY `t_tf_gene_{sample_id}_score_index` (`f_score`) USING BTREE\n" + \
+                      f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                      f"LOAD DATA LOCAL INFILE \"/root/gimme/tf_gene/{sample_id}_tf_gene_map.txt\" INTO TABLE `scvdb`.`t_tf_gene_{sample_id}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+
+            f.write(sql_str)
+
 
 if __name__ == '__main__':
     print("run ...")
@@ -576,9 +640,9 @@ if __name__ == '__main__':
 
     # exec_trait_tf_map()
 
-    exec_gene_tf_map()
+    # exec_gene_tf_map()
 
     # form_table()
     # chunk_tf_file()
 
-    # form_sql_file()
+    form_sql_file()

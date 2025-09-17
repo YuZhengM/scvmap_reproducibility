@@ -489,8 +489,8 @@ if __name__ == '__main__':
 
     genomes: list = ["hg19", "hg38"]
 
-    # base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant"
-    base_path: str = "/mnt/m/keti/variant"
+    base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/variant"
+    # base_path: str = "/mnt/m/keti/variant"
     gene_anno_path: str = f"{base_path}/magma/gene"
     ref_path: str = f"{base_path}/magma/magma_input"
     output_path: str = f"{base_path}/magma_susie"
@@ -499,17 +499,17 @@ if __name__ == '__main__':
 
     magma_file: str = "/mnt/h/software/magma/magma_v1.10/magma"
 
-    # result_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/magma_susie"
-    result_path: str = "/mnt/m/keti/database/sc_variant/table/magma_susie"
+    result_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/magma_susie"
+    # result_path: str = "/mnt/m/keti/database/sc_variant/table/magma_susie"
 
     trait_info = pd.read_excel("../result/trait_info_susie.xlsx")
 
     # get_variant_anno()
     # exec_magma_anno()
-    exec_magma_gene()
-    # form_magma_variant_result_file()
-    # form_magma_result_file()
-    # gene_enrichment_analysis()
+    # exec_magma_gene()
+    # form_magma_variant_result_file(1)
+    # form_magma_result_file(1)
+    gene_enrichment_analysis(1)
     # gene_enrichment_file()
     # form_gene_count_file()
     # merge_trait_gene()

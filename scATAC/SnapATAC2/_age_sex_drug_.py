@@ -38,7 +38,7 @@ def form_difference_gene():
         fragment_file: str = os.path.join(sample_path, f"{label}_fragments.tsv.gz")
         h5ad_file: str = os.path.join(sample_path, f"{label}_sc_atac_snapATAC2.h5ad")
 
-        def _core_(_type_: str):
+        def _core_(_type_: str, _gene_data_: AnnData):
 
             print(f"Processing sample - ID: {sample_id}, GSE ID: {gse_id}, Label: {label}, Type: {_type_}")
 
@@ -47,10 +47,17 @@ def form_difference_gene():
             if is_exist_skip and os.path.exists(diff_genes_file):
                 print(f"The {diff_genes_file} file already exists, skip this process.")
             else:
+                cell_anno_sample_id_group = cell_anno_sample_id.groupby(f"f_{_type_}", as_index=False).size()
+                cell_anno_sample_id_group.columns = ["f_type", "f_type_count"]
+
+                cell_anno_sample_id_group = cell_anno_sample_id_group[cell_anno_sample_id_group["f_type_count"] == 1]
+
+                if not cell_anno_sample_id_group.empty:
+                    _gene_data_ = _gene_data_[_gene_data_.obs[~_gene_data_.obs[f"f_{_type_}"].isin(cell_anno_sample_id_group["f_type"])].index, :]
 
                 # Difference genes
                 sciv.pp.get_difference_genes(
-                    adata=gene_adata,
+                    adata=_gene_data_,
                     cluster=f"f_{_type_}",
                     cell_anno=cell_anno_sample_id,
                     diff_genes_file=diff_genes_file
@@ -76,13 +83,13 @@ def form_difference_gene():
                     print(e)
 
         if f_time == 1:
-            _core_("time")
+            _core_("time", gene_adata)
 
         if f_sex == 1:
-            _core_("sex")
+            _core_("sex", gene_adata)
 
         if f_drug == 1:
-            _core_("drug")
+            _core_("drug", gene_adata)
 
 
 if __name__ == '__main__':
