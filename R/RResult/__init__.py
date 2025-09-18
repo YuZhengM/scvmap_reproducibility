@@ -552,18 +552,11 @@ def form_enriched_sample_file_susie():
         method_data = sciv.fl.read_h5ad(method_enrich_file)
         method_content = sciv.pp.adata_map_df(method_data)
         method_content["f_trait_index"] = method_content["f_trait_id"].str.split("_", expand=True)[2]
-        method_content = method_content[
-            ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_label',
-             'f_tissue_type', 'f_trait_index', 'f_index_y', "value"]]
+        method_content = method_content[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_label', 'f_tissue_type', 'f_trait_index', 'f_index_y', "value"]]
         method_content_have = method_content[method_content["value"] == 1]
-        method_content_have = method_content_have[
-            ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type',
-             'f_label', 'f_trait_index', 'f_index_y']]
-        method_content_have.columns = ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait',
-                                       'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_sample_index']
-        method_content_have.to_csv(
-            f"{database_path}/sc_variant/table/trait_variant_overlap/{_method_}_sample_enrichment.txt", sep="\t",
-            header=False, index=False, lineterminator="\n", encoding="utf-8")
+        method_content_have = method_content_have[["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_index_y']]
+        method_content_have.columns = ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_sample_index']
+        method_content_have.to_csv(f"{database_path}/sc_variant/table/trait_variant_overlap_susie/{_method_}_sample_enrichment.txt", sep="\t", header=True, index=False, lineterminator="\n", encoding="utf-8")
 
 
 def get_statistics_count_susie():
@@ -648,7 +641,7 @@ if __name__ == '__main__':
     # process_sc_variant_data_susie()
     # process_enriched_sample_trait_susie()
     form_enriched_sample_file_susie()
-    get_statistics_count_susie()
+    # get_statistics_count_susie()
 
     # distribution
     # process_distribution()
