@@ -17,7 +17,7 @@ from yzm_file import StaticMethod, Read, Create
 
 class ScVariantSave:
 
-    def __init__(self, input_path: str, anno_file: str, is_error: bool = True):
+    def __init__(self, input_path: str, anno_file: str, is_error: bool = True, trait_info: DataFrame = None):
         self.log = Logger("RResult")
         self.file = StaticMethod()
         self.read = Read(header=None)
@@ -28,7 +28,7 @@ class ScVariantSave:
         self.is_error = is_error
         self.input_path = input_path
         self.anno_info = self.read_header.get_content(anno_file)
-        self.trait_info = self.read_header.get_content(trait_info_file)
+        self.trait_info = self.read_header.get_content(trait_info_file) if trait_info is None else trait_info
         self.trait_info = self.trait_info[self.trait_info["f_filter"] == 1]
         self.trait_size = self.trait_info.shape[0]
 
@@ -438,6 +438,8 @@ def process_distribution_plot():
 
 def process_sc_variant_save_susie():
 
+    trait_info: DataFrame = pd.read_excel(trait_info_file_susie)
+
     for label in identifier_list:
         label_data = sample_info[sample_info["f_label"] == label]
         gse_id = list(label_data["f_gse_id"])[0]
@@ -451,7 +453,8 @@ def process_sc_variant_save_susie():
 
         process = ScVariantSave(input_path=rf"{database_path}/sc_variant/result_susie/{label}",
                                 anno_file=rf"{scatac_path}/{gse_id}/data/{label}/{label}_cell_anno_stdn.txt",
-                                is_error=False)
+                                is_error=False,
+                                trait_info=trait_info)
 
         del label_data
         del gse_id
@@ -460,6 +463,159 @@ def process_sc_variant_save_susie():
         trs = trs[~pd.isna(trs.obs["f_umap_x"]) & ~pd.isna(trs.obs["f_umap_y"])]
         print(trs)
         sciv.fl.save_h5ad(trs, output_file)
+
+
+def process_sc_variant_data_susie():
+    for label in identifier_list:
+
+        trs_big_path = f"{database_path}/sc_variant/table/trs_big_susie/{label}"
+        util.makedirs(trs_big_path)
+
+        # View result file
+        big_scavenge_file = os.path.join(trs_big_path, f"{label}_trs_scavenge.h5ad")
+        big_gchromvar_file = os.path.join(trs_big_path, f"{label}_trs_gchromvar.h5ad")
+
+        if os.path.exists(big_scavenge_file) and os.path.exists(big_gchromvar_file):
+            print(f"{label} has been processed and completed")
+            continue
+
+        print("Handling sc_variant_data for {}".format(label))
+        # process data
+        label_adata = ad.read_h5ad(rf"{database_path}/sc_variant/scATAC/{label}/{label}_trs_scavenge_susie_data.h5ad")
+        # add `cell_type` index
+        add_cell_type_index(label_adata.obs, "f_cell_type")
+        label_adata = label_adata[:, label_adata.var[label_adata.var['f_filter'] == 1].index.values]
+        label_adata.var = label_adata.var[["f_trait_id", "f_trait_code", "f_source_genome", "f_trait_abbr", "f_trait", "f_variant_count"]]
+        label_adata.var.index = label_adata.var["f_trait_id"].astype(str)
+
+        label_adata_scavenge = AnnData(sciv.ul.to_sparse(label_adata.X), obs=label_adata.obs, var=label_adata.var)
+        label_adata_gchromvar = AnnData(sciv.ul.to_sparse(label_adata.layers["g_chromVAR"]), obs=label_adata.obs, var=label_adata.var)
+
+        if not os.path.exists(big_scavenge_file):
+            sciv.fl.save_h5ad(label_adata_scavenge, big_scavenge_file)
+
+        if not os.path.exists(big_gchromvar_file):
+            sciv.fl.save_h5ad(label_adata_gchromvar, big_gchromvar_file)
+
+
+def process_enriched_sample_trait_susie():
+
+    sample_info.index = sample_info["f_sample_id"].astype(str)
+
+    sample_id_list = list(sample_info["f_sample_id"])
+
+    trait_info: DataFrame = pd.read_excel(trait_info_file_susie)
+    trait_info = trait_info.loc[trait_info["f_filter"] == 1]
+    trait_info.index = trait_info["f_trait_id"].astype(str)
+
+    matrix_scavenge = np.zeros((len(identifier_list), trait_info.shape[0]), dtype=int)
+    matrix_gchromvar = np.zeros((len(identifier_list), trait_info.shape[0]), dtype=int)
+
+    label_adata_scavenge_dict: dict = {}
+    label_adata_gchromvar_dict: dict = {}
+
+    for label in identifier_list:
+        label_adata_scavenge = sciv.fl.read_h5ad(rf"{database_path}/sc_variant/table/trs_big_susie/{label}/{label}_trs_scavenge.h5ad")
+        label_adata_gchromvar = sciv.fl.read_h5ad(rf"{database_path}/sc_variant/table/trs_big_susie/{label}/{label}_trs_gchromvar.h5ad")
+        label_adata_scavenge_dict.update({label: label_adata_scavenge})
+        label_adata_gchromvar_dict.update({label: label_adata_gchromvar})
+
+    for label in tqdm(identifier_list):
+        sample_id = list(sample_info[sample_info["f_label"] == label]["f_sample_id"])[0]
+        index = sample_id_list.index(sample_id)
+
+        label_adata_scavenge = label_adata_scavenge_dict[label]
+        label_adata_scavenge = label_adata_scavenge[:, trait_info["f_trait_id"].values]
+
+        label_adata_gchromvar = label_adata_gchromvar_dict[label]
+        label_adata_gchromvar = label_adata_gchromvar[:, trait_info["f_trait_id"].values]
+        # count
+        label_scavenge_sum = sciv.ul.to_dense(np.abs(label_adata_scavenge.X), is_array=True).sum(axis=0).flatten()
+        label_scavenge_sum[label_scavenge_sum != 0] = 1
+
+        label_gchromvar_sum = sciv.ul.to_dense(np.abs(label_adata_gchromvar.X), is_array=True).sum(axis=0).flatten()
+        label_gchromvar_sum[label_gchromvar_sum != 0] = 1
+
+        matrix_scavenge[index, :] = label_scavenge_sum.astype(int)
+        matrix_gchromvar[index, :] = label_gchromvar_sum.astype(int)
+
+    overlap_scavenge_label = AnnData(matrix_scavenge, obs=sample_info, var=trait_info)
+    overlap_gchromvar_label = AnnData(matrix_gchromvar, obs=sample_info, var=trait_info)
+    overlap_scavenge_label.write_h5ad(Path(f"{database_path}/sc_variant/table/trait_variant_overlap_susie/trs_overlap_scavenge.h5ad"), compression="gzip")
+    overlap_gchromvar_label.write_h5ad(Path(f"{database_path}/sc_variant/table/trait_variant_overlap_susie/trs_overlap_gchromvar.h5ad"), compression="gzip")
+
+
+def form_enriched_sample_file_susie():
+    for _method_ in ["gchromvar", "scavenge"]:
+        print(f"Start {_method_}...")
+        method_enrich_file = f"{database_path}/sc_variant/table/trait_variant_overlap_susie/trs_overlap_{_method_}.h5ad"
+        method_data = sciv.fl.read_h5ad(method_enrich_file)
+        method_content = sciv.pp.adata_map_df(method_data)
+        method_content["f_trait_index"] = method_content["f_trait_id"].str.split("_", expand=True)[2]
+        method_content = method_content[
+            ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_label',
+             'f_tissue_type', 'f_trait_index', 'f_index_y', "value"]]
+        method_content_have = method_content[method_content["value"] == 1]
+        method_content_have = method_content_have[
+            ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait', 'f_source_name', 'f_tissue_type',
+             'f_label', 'f_trait_index', 'f_index_y']]
+        method_content_have.columns = ["f_trait_id", "f_sample_id", 'f_trait_code', 'f_trait_abbr', 'f_trait',
+                                       'f_source_name', 'f_tissue_type', 'f_label', 'f_trait_index', 'f_sample_index']
+        method_content_have.to_csv(
+            f"{database_path}/sc_variant/table/trait_variant_overlap/{_method_}_sample_enrichment.txt", sep="\t",
+            header=False, index=False, lineterminator="\n", encoding="utf-8")
+
+
+def get_statistics_count_susie():
+    columns = ["method", "item", "count"]
+
+    data_dict: list[dict] = []
+
+    for _method_ in ["gchromvar", "scavenge"]:
+        print(f"Start {_method_}...")
+        method_enrich_file = f"{database_path}/sc_variant/table/trait_variant_overlap_susie/trs_overlap_{_method_}.h5ad"
+        method_data = sciv.fl.read_h5ad(method_enrich_file)
+        method_enrich_count = method_data.X[method_data.X != 0].size
+        data_dict.append(
+            {
+                "method": _method_,
+                "item": "sample_enrich",
+                "count": method_enrich_count
+            }
+        )
+
+        cell_count: int = 0
+        cell_type_count: int = 0
+
+        for _label_ in tqdm(identifier_list):
+            label_method_data = sciv.fl.read_h5ad(
+                f"{database_path}/sc_variant/table/trs_big_susie/{_label_}/{_label_}_trs_{_method_}.h5ad", is_verbose=False)
+            cell_count += label_method_data.X[label_method_data.X != 0].size
+
+            label_cell_type_method_data = sciv.pp.adata_group(label_method_data, "f_cell_type", axis=1)
+            cell_type_count += label_cell_type_method_data.layers["sum"][
+                label_cell_type_method_data.layers["sum"] != 0].size
+
+        data_dict.append(
+            {
+                "method": _method_,
+                "item": "cell_enrich",
+                "count": cell_count
+            }
+        )
+        data_dict.append(
+            {
+                "method": _method_,
+                "item": "cell_type_enrich",
+                "count": cell_type_count
+            }
+        )
+
+    print(data_dict)
+    enrich_data = pd.DataFrame(data_dict, columns=columns)
+    enrich_data.to_csv(f"{database_path}/sc_variant/table/statistics_count_susie.txt", sep="\t", header=True, index=False,
+                       lineterminator="\n", encoding="utf-8")
+
 
 if __name__ == '__main__':
     print("run...")
@@ -485,8 +641,15 @@ if __name__ == '__main__':
     # enriched_data_chunk()
     # create_enrich_sql()
 
-    # SuSiE
-    process_sc_variant_save_susie()
+    trait_info_file_susie: str = "../../variant/result/trait_info_susie.xlsx"
 
+    # SuSiE
+    # process_sc_variant_save_susie()
+    # process_sc_variant_data_susie()
+    # process_enriched_sample_trait_susie()
+    form_enriched_sample_file_susie()
+    get_statistics_count_susie()
+
+    # distribution
     # process_distribution()
     # process_distribution_plot()

@@ -10,7 +10,7 @@
 ## Process flow
 
 [__init__.py](SnapATAC2/__init__.py): Code for processing single-cell data, including differential genes and differential TFs.
-[form_file.py](SnapATAC2/form_file.py): Convert the results into data in a database storage format.
+[form_file.py](SnapATAC2/_form_file_.py): Convert the results into data in a database storage format.
 [__init__.py](process/__init__.py): Perform statistics on the processed single-cell data.
 
 > Note:

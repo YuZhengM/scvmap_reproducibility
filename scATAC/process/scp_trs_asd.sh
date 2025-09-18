@@ -20,6 +20,6 @@ scp /public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/trs/GSM50578
 scp /public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/trs/GSM5057812/chunk/* root@bio.liclab.net:/mnt/data3/workspace/SCVdb/data/data/trs/GSM5057812/chunk/
 scp /public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/trs/GSM5057816/chunk/* root@bio.liclab.net:/mnt/data3/workspace/SCVdb/data/data/trs/GSM5057816/chunk/
 scp /public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/trs/GSM5292858/chunk/* root@bio.liclab.net:/mnt/data3/workspace/SCVdb/data/data/trs/GSM5292858/chunk/
-#scp /public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/trs/GSM5292863/chunk/* root@bio.liclab.net:/mnt/data3/workspace/SCVdb/data/data/trs/GSM5292863/chunk/
-#scp /public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/trs/GSM5292866/chunk/* root@bio.liclab.net:/mnt/data3/workspace/SCVdb/data/data/trs/GSM5292866/chunk/
-#scp /public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/trs/GSM5292875/chunk/* root@bio.liclab.net:/mnt/data3/workspace/SCVdb/data/data/trs/GSM5292875/chunk/
+scp /public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/trs/GSM5292863/chunk/* root@bio.liclab.net:/mnt/data3/workspace/SCVdb/data/data/trs/GSM5292863/chunk/
+scp /public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/trs/GSM5292866/chunk/* root@bio.liclab.net:/mnt/data3/workspace/SCVdb/data/data/trs/GSM5292866/chunk/
+scp /public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/trs/GSM5292875/chunk/* root@bio.liclab.net:/mnt/data3/workspace/SCVdb/data/data/trs/GSM5292875/chunk/

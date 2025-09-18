@@ -33,10 +33,21 @@ def form_difference_gene():
 
         gene_file: str = os.path.join(sample_path, f"{label}_gene_expression_data.h5ad")
 
-        gene_adata: AnnData = sciv.fl.read_h5ad(gene_file)
+        is_skip: bool = True
 
-        fragment_file: str = os.path.join(sample_path, f"{label}_fragments.tsv.gz")
-        h5ad_file: str = os.path.join(sample_path, f"{label}_sc_atac_snapATAC2.h5ad")
+        if f_time == 1:
+            is_skip = is_skip and os.path.exists(os.path.join(sample_path, f"{label}_time_difference_gene.h5ad"))
+
+        if f_sex == 1:
+            is_skip = is_skip and os.path.exists(os.path.join(sample_path, f"{label}_sex_difference_gene.h5ad"))
+
+        if f_drug == 1:
+            is_skip = is_skip and os.path.exists(os.path.join(sample_path, f"{label}_drug_difference_gene.h5ad"))
+
+        if is_skip:
+            continue
+
+        gene_adata: AnnData = sciv.fl.read_h5ad(gene_file)
 
         def _core_(_type_: str, _gene_data_: AnnData):
 
@@ -47,40 +58,27 @@ def form_difference_gene():
             if is_exist_skip and os.path.exists(diff_genes_file):
                 print(f"The {diff_genes_file} file already exists, skip this process.")
             else:
+
                 cell_anno_sample_id_group = cell_anno_sample_id.groupby(f"f_{_type_}", as_index=False).size()
                 cell_anno_sample_id_group.columns = ["f_type", "f_type_count"]
 
                 cell_anno_sample_id_group = cell_anno_sample_id_group[cell_anno_sample_id_group["f_type_count"] == 1]
 
+                is_add_cluster: bool = False
+
                 if not cell_anno_sample_id_group.empty:
+                    is_add_cluster = True
+                    _gene_data_.obs = sciv.ul.add_cluster_info(_gene_data_.obs, cell_anno_sample_id, f"f_{_type_}")
+
                     _gene_data_ = _gene_data_[_gene_data_.obs[~_gene_data_.obs[f"f_{_type_}"].isin(cell_anno_sample_id_group["f_type"])].index, :]
 
                 # Difference genes
                 sciv.pp.get_difference_genes(
                     adata=_gene_data_,
                     cluster=f"f_{_type_}",
-                    cell_anno=cell_anno_sample_id,
+                    cell_anno=None if is_add_cluster else cell_anno_sample_id,
                     diff_genes_file=diff_genes_file
                 )
-
-            tf_file: str = os.path.join(sample_path, f"{label}_{_type_}_tf_activity_data.h5ad")
-
-            if is_exist_skip and os.path.exists(tf_file):
-                print(f"The {tf_file} file already exists, skip this process.")
-            else:
-
-                try:
-                    # TF activity
-                    sciv.pp.get_tf_data(
-                        fragment_file=fragment_file,
-                        h5ad_file=h5ad_file,
-                        genome_anno=get_genome(genome),
-                        cluster=f"f_{_type_}",
-                        cell_anno=cell_anno_sample_id,
-                        tf_save_file=tf_file
-                    )
-                except Exception as e:
-                    print(e)
 
         if f_time == 1:
             _core_("time", gene_adata)
