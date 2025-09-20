@@ -204,6 +204,6 @@ if __name__ == '__main__':
 
     exec_homer()
     form_homer_result_file()
-    # form_tf_count_file()
-    # trait_tf_chunk()
-    # form_sql_file()
+    form_tf_count_file()
+    trait_tf_chunk()
+    form_sql_file()

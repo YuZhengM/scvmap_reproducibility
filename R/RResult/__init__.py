@@ -391,51 +391,6 @@ def create_enrich_sql(group_count: int = 100):
                 f.write(sql_str)
 
 
-def process_distribution():
-    process = ScVariantSave(
-        input_path=f"{database_path}/sc_variant_distribution/result/GSE129785_TME-All",
-        anno_file=f"{scatac_path}/GSE129785/data/GSE129785_TME-All/GSE129785_TME-All_cell_anno_stdn.txt",
-        is_error=False
-    )
-    output_file = Path(f"{database_path}/sc_variant_distribution/scATAC/GSE129785_TME-All/GSE129785_TME-All_trs_scavenge_data.h5ad")
-
-    trs = process.get_trs()
-    trs = trs[~pd.isna(trs.obs["f_umap_x"]) & ~pd.isna(trs.obs["f_umap_y"])]
-    print(trs)
-    sciv.fl.save_h5ad(trs, output_file)
-
-
-def process_distribution_plot():
-    trs_finemap_data = sciv.fl.read_h5ad(f"{database_path}/sc_variant/scATAC/GSE129785_TME-All/GSE129785_TME-All_trs_scavenge_data.h5ad")
-    trs_sisue_data = sciv.fl.read_h5ad(f"{database_path}/sc_variant_distribution/scATAC/GSE129785_TME-All/GSE129785_TME-All_trs_scavenge_data.h5ad")
-    trs_finemap_data = trs_finemap_data[:, trs_sisue_data.var[trs_sisue_data.var["f_source_name"] == "BBJ"].index]
-    trs_sisue_data = trs_sisue_data[:, trs_sisue_data.var[trs_sisue_data.var["f_source_name"] == "BBJ"].index]
-
-    trait_index = trs_sisue_data.X.sum(axis=0) != 0
-    trs_finemap_matrix = sciv.ul.to_dense(trs_finemap_data[:, trait_index].X)
-    trs_sisue_matrix = sciv.ul.to_dense(trs_sisue_data[:, trait_index].X)
-
-    trait_list = trs_sisue_data[:, trait_index].var.index
-    kl_score_list = []
-
-    for i in range(trs_sisue_matrix.shape[1]):
-        divergence = sciv.tl.kl_divergence(trs_finemap_matrix[:, i].astype(float).flatten(), trs_sisue_matrix[:, i].astype(float).flatten())
-        kl_score_list.append(divergence)
-
-    # 0.07573787618637001
-    print(f"The maximum KL divergence of TRS result distribution: {np.mean(kl_score_list)}.")
-
-    sciv.pl.bar(
-        trait_list,
-        kl_score_list,
-        width=15,
-        height=4,
-        x_name="Trait",
-        y_name="KL Divergence",
-        output=f"{database_path}/sc_variant_distribution/scATAC/GSE129785_TME-All/trs_distribution_kl.pdf"
-    )
-
-
 def process_sc_variant_save_susie():
 
     trait_info: DataFrame = pd.read_excel(trait_info_file_susie)
@@ -606,8 +561,57 @@ def get_statistics_count_susie():
 
     print(data_dict)
     enrich_data = pd.DataFrame(data_dict, columns=columns)
-    enrich_data.to_csv(f"{database_path}/sc_variant/table/statistics_count_susie.txt", sep="\t", header=True, index=False,
-                       lineterminator="\n", encoding="utf-8")
+    enrich_data.to_csv(f"{database_path}/sc_variant/table/statistics_count_susie.txt", sep="\t", header=True, index=False, lineterminator="\n", encoding="utf-8")
+
+
+def process_distribution():
+
+    all_kl_score_list: list = []
+
+    trait_info: DataFrame = None
+
+    for sample_id, label in zip(sample_info["f_sample_id"], sample_info["f_label"]):
+        print(f"Start read {sample_id} - {label}")
+
+        trs_sisue_data = sciv.fl.read_h5ad(f"{database_path}/sc_variant/scATAC/{label}/{label}_trs_scavenge_susie_data.h5ad")
+
+        if trait_info is None:
+            trait_info = trs_sisue_data.var.index
+
+        trs_finemap_data = sciv.fl.read_h5ad(f"{database_path}/sc_variant/scATAC/{label}/{label}_trs_scavenge_data.h5ad")
+        trs_finemap_data = trs_finemap_data[:, trs_finemap_data.var[trs_finemap_data.var["f_source_name"] == "BBJ"].index]
+
+        # trait_index = trs_sisue_data.X.sum(axis=0) != 0
+        # trs_finemap_matrix = sciv.ul.to_dense(trs_finemap_data[:, trait_index].X)
+        # trs_sisue_matrix = sciv.ul.to_dense(trs_sisue_data[:, trait_index].X)
+        trs_finemap_matrix = sciv.ul.to_dense(trs_finemap_data.X)
+        trs_sisue_matrix = sciv.ul.to_dense(trs_sisue_data.X)
+
+        # trait_list = trs_sisue_data[:, trait_index].var.index
+        trait_list = trs_sisue_data.var.index
+        kl_score_list = []
+
+        for i in range(trs_sisue_matrix.shape[1]):
+            divergence = sciv.tl.kl_divergence(trs_finemap_matrix[:, i].astype(float).flatten(), trs_sisue_matrix[:, i].astype(float).flatten())
+            kl_score_list.append(divergence)
+
+        all_kl_score_list.append(kl_score_list)
+
+    kl_adata = AnnData(np.array(all_kl_score_list), var=trait_info.index, obs=sample_info.index)
+    kl_adata.
+
+    # # 0.07573787618637001
+    # print(f"The maximum KL divergence of TRS result distribution: {np.mean(kl_score_list)}.")
+    #
+    # sciv.pl.bar(
+    #     trait_list,
+    #     kl_score_list,
+    #     width=15,
+    #     height=4,
+    #     x_name="Trait",
+    #     y_name="KL Divergence",
+    #     output=f"{database_path}/sc_variant_distribution/scATAC/GSE129785_TME-All/trs_distribution_kl.pdf"
+    # )
 
 
 if __name__ == '__main__':
@@ -640,9 +644,8 @@ if __name__ == '__main__':
     # process_sc_variant_save_susie()
     # process_sc_variant_data_susie()
     # process_enriched_sample_trait_susie()
-    form_enriched_sample_file_susie()
+    # form_enriched_sample_file_susie()
     # get_statistics_count_susie()
 
     # distribution
-    # process_distribution()
-    # process_distribution_plot()
+    process_distribution()

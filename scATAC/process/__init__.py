@@ -286,7 +286,30 @@ def add_cell_age_sex_drug():
     final_cell_anno.to_csv("../data/cell_anno_with_age_sex_drug_all.txt", sep="\t", index=False, lineterminator="\n", encoding="utf-8")
 
 
-def adata_add_cell_anno():
+def form_age_sex_drug_anno():
+    cell_anno = pd.read_table("../data/cell_anno_with_age_sex_drug_all.txt")
+
+    print(f"Start `form_age_sex_drug_anno`...")
+
+    cell_time_count = cell_anno[["f_sample_id", "f_time"]].groupby(["f_sample_id", "f_time"], as_index=False).size()
+    cell_time_count.columns = ["f_sample_id", "f_type_value", "f_type_count"]
+    cell_time_count["f_type"] = "time"
+
+    cell_sex_count = cell_anno[["f_sample_id", "f_sex"]].groupby(["f_sample_id", "f_sex"], as_index=False).size()
+    cell_sex_count.columns = ["f_sample_id", "f_type_value", "f_type_count"]
+    cell_sex_count["f_type"] = "sex"
+
+    cell_drug_count = cell_anno[["f_sample_id", "f_drug"]].groupby(["f_sample_id", "f_drug"], as_index=False).size()
+    cell_drug_count.columns = ["f_sample_id", "f_type_value", "f_type_count"]
+    cell_drug_count["f_type"] = "drug"
+
+    age_sex_drug_anno = pd.concat([cell_time_count, cell_sex_count, cell_drug_count], axis=0)
+    age_sex_drug_anno["f_index"] = age_sex_drug_anno["f_sample_id"].str.split("_", expand=True)[2].astype(int)
+    age_sex_drug_anno.sort_values(["f_index", "f_type"], inplace=True)
+    age_sex_drug_anno.to_csv("../data/age_sex_drug_anno.txt", sep="\t", index=False, lineterminator="\n", encoding="utf-8")
+
+
+def finemap_trs_add_cell_anno():
     sample_info = pd.read_table("../data/new_sample_info.txt")
     cell_anno = pd.read_table("../data/cell_anno_with_age_sex_drug_all.txt")
 
@@ -318,34 +341,48 @@ def adata_add_cell_anno():
                 for method in ["gchromvar", "scavenge"]:
                     _set_cell_anno_(method)
 
-                print("Start sleep...")
-                time.sleep(5000)
-                print("end sleep...")
+                # print("Start sleep...")
+                # time.sleep(5000)
+                # print("end sleep...")
 
             del cell_anno_sample_id
 
 
-def form_age_sex_drug_anno():
+def susie_trs_add_cell_anno():
+    sample_info = pd.read_table("../data/new_sample_info.txt")
     cell_anno = pd.read_table("../data/cell_anno_with_age_sex_drug_all.txt")
 
-    print(f"Start `form_age_sex_drug_anno`...")
+    for sample_id, gse_id, label, f_time, f_sex, f_drug in zip(sample_info["f_sample_id"], sample_info["f_gse_id"],
+                                                               sample_info["f_label"], sample_info["f_time"],
+                                                               sample_info["f_sex"], sample_info["f_drug"]):
 
-    cell_time_count = cell_anno[["f_sample_id", "f_time"]].groupby(["f_sample_id", "f_time"], as_index=False).size()
-    cell_time_count.columns = ["f_sample_id", "f_type_value", "f_type_count"]
-    cell_time_count["f_type"] = "time"
+        print(f"Processing sample - ID: {sample_id}, GSE ID: {gse_id}, Label: {label}")
 
-    cell_sex_count = cell_anno[["f_sample_id", "f_sex"]].groupby(["f_sample_id", "f_sex"], as_index=False).size()
-    cell_sex_count.columns = ["f_sample_id", "f_type_value", "f_type_count"]
-    cell_sex_count["f_type"] = "sex"
+        if f_time == 1 or f_sex == 1 or f_drug == 1:
 
-    cell_drug_count = cell_anno[["f_sample_id", "f_drug"]].groupby(["f_sample_id", "f_drug"], as_index=False).size()
-    cell_drug_count.columns = ["f_sample_id", "f_type_value", "f_type_count"]
-    cell_drug_count["f_type"] = "drug"
+            cell_anno_sample_id = cell_anno[cell_anno["f_sample_id"] == sample_id]
+            cell_anno_sample_id = cell_anno_sample_id[["f_barcodes", "f_time", "f_sex", "f_drug", "f_time_index", "f_sex_index", "f_drug_index"]]
 
-    age_sex_drug_anno = pd.concat([cell_time_count, cell_sex_count, cell_drug_count], axis=0)
-    age_sex_drug_anno["f_index"] = age_sex_drug_anno["f_sample_id"].str.split("_", expand=True)[2].astype(int)
-    age_sex_drug_anno.sort_values(["f_index", "f_type"], inplace=True)
-    age_sex_drug_anno.to_csv("../data/age_sex_drug_anno.txt", sep="\t", index=False, lineterminator="\n", encoding="utf-8")
+            def _set_cell_anno_(_method_: str):
+                _trs_method_file_: str = f"{database_path}/sc_variant/table/trs_big_susie/{label}/{label}_trs_{_method_}.h5ad"
+                _trs_method_adata_ = sciv.fl.read_h5ad(_trs_method_file_)
+
+                _trs_method_adata_.obs = _trs_method_adata_.obs[['f_sample_id', 'f_barcodes', 'f_cell_type', 'f_sample', 'f_umap_x', 'f_umap_y', 'f_tsse', 'f_index', 'f_cell_type_index']]
+                _trs_method_adata_.obs = _trs_method_adata_.obs.rename_axis("barcodes_index")
+                _trs_method_cell_anno_ = pd.merge(_trs_method_adata_.obs, cell_anno_sample_id, on="f_barcodes")
+                _trs_method_cell_anno_.index = _trs_method_cell_anno_["f_barcodes"].astype(str)
+                _trs_method_adata_.obs = _trs_method_cell_anno_
+                sciv.fl.save_h5ad(_trs_method_adata_, _trs_method_file_)
+                del _trs_method_adata_
+
+            for method in ["gchromvar", "scavenge"]:
+                _set_cell_anno_(method)
+
+            # print("Start sleep...")
+            # time.sleep(5000)
+            # print("end sleep...")
+
+            del cell_anno_sample_id
 
 
 
@@ -384,4 +421,5 @@ if __name__ == '__main__':
 
     # form_age_sex_drug_anno()
 
-    adata_add_cell_anno()
+    # finemap_trs_add_cell_anno()
+    susie_trs_add_cell_anno()
