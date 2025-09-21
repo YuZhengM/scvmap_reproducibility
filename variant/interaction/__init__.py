@@ -82,15 +82,14 @@ def form_table(group_count: int = 100):
         for _group_ in tqdm(range(group_count)):
             _interaction_trait_gene_list_ = interaction_trait_gene_dict[_group_]
             group_data = pd.concat(_interaction_trait_gene_list_)
-            group_data.columns = ["trait_id", "chr", "position", "rs_id", "pp", "trait_abbr", "gene",
+            group_data.columns = ["chr", "position", "rs_id", "pp", "trait_abbr", "gene",
                                  "interaction1_chr", "interaction1_start", "interaction1_end",
                                  "interaction2_chr", "interaction2_start", "interaction2_end",
-                                 "source_interaction_id", "method", "tissue_cell_type", "cell_line"]
+                                 "source_interaction_id", "method", "tissue_cell_type", "cell_line", "trait_id"]
 
             group_data["interaction1"] = group_data["interaction1_chr"].astype(str) + ":" + group_data["interaction1_start"].astype(str) + "-" + group_data["interaction1_end"].astype(str)
             group_data["interaction2"] = group_data["interaction2_chr"].astype(str) + ":" + group_data["interaction2_start"].astype(str) + "-" + group_data["interaction2_end"].astype(str)
-            group_data = group_data[["trait_id", "rs_id", "pp", "gene", "interaction1", "interaction2",
-                                     "source_interaction_id", "method", "tissue_cell_type", "cell_line"]]
+            group_data = group_data[["trait_id", "rs_id", "pp", "gene", "interaction1", "interaction2", "source_interaction_id", "method", "tissue_cell_type", "cell_line"]]
             interaction_trait_gene_all_data_list.append(group_data)
             group_data.to_csv(os.path.join(interaction_trait_gene_output_path, f"t_trait_gene_interaction_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
             del group_data
@@ -104,26 +103,27 @@ def form_table(group_count: int = 100):
 
 def form_sql_file():
     with open("./result/create_interaction.sql", "w", encoding="utf-8", newline="\n") as f:
-        for i in range(20):
-            # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-            sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_trait_gene_interaction_{i}`; \n" + \
-                      f"CREATE TABLE `scvdb`.`t_trait_gene_interaction_{i}` (\n" + \
-                      f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
-                      f"  `f_rs_id` varchar(128) NOT NULL,\n" + \
-                      f"  `f_pp` double(26,20) NOT NULL,\n" + \
-                      f"  `f_gene` varchar(128) NOT NULL,\n" + \
-                      f"  `f_interaction1` varchar(128) NOT NULL,\n" + \
-                      f"  `f_interaction2` varchar(128) NOT NULL,\n" + \
-                      f"  `f_source_interaction_id` varchar(128) NOT NULL,\n" + \
-                      f"  `f_method` varchar(128) NOT NULL,\n" + \
-                      f"  `f_tissue_cell_type` varchar(128) NOT NULL,\n" + \
-                      f"  `f_cell_line` varchar(128) NOT NULL,\n" + \
-                      f"  KEY `t_trait_gene_interaction_{i}_trait_id_gene_index` (`f_trait_id`) USING BTREE,\n" + \
-                      f"  KEY `t_trait_gene_interaction_{i}_trait_id_rs_id_index` (`f_trait_id`,`f_rs_id`) USING BTREE\n" + \
-                      f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                      f"LOAD DATA LOCAL INFILE \"/root/interaction/trait_gene_table/t_trait_gene_interaction_{i}.txt\" INTO TABLE `scvdb`.`t_trait_gene_interaction_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+        for genome in genomes:
+            for i in range(100):
+                # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+                sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_trait_gene_interaction_{genome}_{i}`; \n" + \
+                          f"CREATE TABLE `scvdb`.`t_trait_gene_interaction_{genome}_{i}` (\n" + \
+                          f"  `f_trait_id` varchar(32) NOT NULL,\n" + \
+                          f"  `f_rs_id` varchar(128) NOT NULL,\n" + \
+                          f"  `f_pp` double(26,20) NOT NULL,\n" + \
+                          f"  `f_gene` varchar(128) NOT NULL,\n" + \
+                          f"  `f_interaction1` varchar(128) NOT NULL,\n" + \
+                          f"  `f_interaction2` varchar(128) NOT NULL,\n" + \
+                          f"  `f_source_interaction_id` varchar(128) NOT NULL,\n" + \
+                          f"  `f_method` varchar(128) NOT NULL,\n" + \
+                          f"  `f_tissue_cell_type` varchar(128) NOT NULL,\n" + \
+                          f"  `f_cell_line` varchar(128) NOT NULL,\n" + \
+                          f"  KEY `t_trait_gene_interaction_{genome}_{i}_trait_id_gene_index` (`f_trait_id`) USING BTREE,\n" + \
+                          f"  KEY `t_trait_gene_interaction_{genome}_{i}_trait_id_rs_id_index` (`f_trait_id`,`f_rs_id`) USING BTREE\n" + \
+                          f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
+                          f"LOAD DATA LOCAL INFILE \"/root/interaction/trait_gene_table/{genome}/t_trait_gene_interaction_{i}.txt\" INTO TABLE `scvdb`.`t_trait_gene_interaction_{genome}_{i}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
-            f.write(sql_str)
+                f.write(sql_str)
 
 
 if __name__ == '__main__':
@@ -148,6 +148,6 @@ if __name__ == '__main__':
 
     exec_interaction_gene_map()
 
-    form_table()
+    # form_table()
 
     form_sql_file()
