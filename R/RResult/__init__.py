@@ -576,19 +576,16 @@ def process_distribution():
         trs_sisue_data = sciv.fl.read_h5ad(f"{database_path}/sc_variant/scATAC/{label}/{label}_trs_scavenge_susie_data.h5ad")
 
         if trait_info is None:
-            trait_info = trs_sisue_data.var.index
+            trait_info = trs_sisue_data.var
 
         trs_finemap_data = sciv.fl.read_h5ad(f"{database_path}/sc_variant/scATAC/{label}/{label}_trs_scavenge_data.h5ad")
         trs_finemap_data = trs_finemap_data[:, trs_finemap_data.var[trs_finemap_data.var["f_source_name"] == "BBJ"].index]
 
-        # trait_index = trs_sisue_data.X.sum(axis=0) != 0
-        # trs_finemap_matrix = sciv.ul.to_dense(trs_finemap_data[:, trait_index].X)
-        # trs_sisue_matrix = sciv.ul.to_dense(trs_sisue_data[:, trait_index].X)
         trs_finemap_matrix = sciv.ul.to_dense(trs_finemap_data.X)
         trs_sisue_matrix = sciv.ul.to_dense(trs_sisue_data.X)
 
-        # trait_list = trs_sisue_data[:, trait_index].var.index
-        trait_list = trs_sisue_data.var.index
+        del trs_sisue_data, trs_finemap_data
+
         kl_score_list = []
 
         for i in range(trs_sisue_matrix.shape[1]):
@@ -597,8 +594,8 @@ def process_distribution():
 
         all_kl_score_list.append(kl_score_list)
 
-    kl_adata = AnnData(np.array(all_kl_score_list), var=trait_info.index, obs=sample_info.index)
-    kl_adata.
+    kl_adata = AnnData(np.array(all_kl_score_list), var=trait_info, obs=sample_info)
+    sciv.fl.save_h5ad(kl_adata, f"{database_path}/sc_variant/scATAC/trs_fine_mapping_kl_score.h5ad")
 
     # # 0.07573787618637001
     # print(f"The maximum KL divergence of TRS result distribution: {np.mean(kl_score_list)}.")

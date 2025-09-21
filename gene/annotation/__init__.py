@@ -4,8 +4,8 @@
 import os
 import re
 
-import cyvcf2
-import pyarrow.parquet as pq
+# import cyvcf2
+# import pyarrow.parquet as pq
 import pandas as pd
 from pandas import DataFrame
 from tqdm import tqdm
@@ -176,7 +176,7 @@ class ProcessAnnotation:
     def word_to_number(word: str) -> int:
         return sum(ord(char) for char in word)
 
-    def gtex_eqtl_chunk(self, group_count: int = 100):
+    def gtex_eqtl_chunk_by_gene(self, group_count: int = 100):
 
         output_path: str = os.path.join(self.gtex_eqtl_path, "eqtl_chunk")
 
@@ -197,16 +197,37 @@ class ProcessAnnotation:
                 data_chr = data_chr.drop(columns="group", axis=0)
                 data_chr.to_csv(f"{genome_output_path}/gtex_v10_eqtl_{genome}_{group}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
 
-    def gtex_eqtl_sql(self, group_count: int = 100):
+    def gtex_eqtl_chunk_by_chr(self, group_count: int = 100):
 
-        with open("./result/gtex_eqtl_sql.sql", "w", encoding="utf-8", newline="\n") as f:
+        output_path: str = os.path.join(self.gtex_eqtl_path, "eqtl_chunk_chr_position")
+
+        for genome in self.genomes:
+            input_filename = os.path.join(self.gtex_eqtl_path, f"gtex_v10_eqtl_{genome}.txt")
+            self.log.info(f"processing {input_filename}")
+            genome_output_path = os.path.join(output_path, genome)
+
+            self.file.makedirs(genome_output_path)
+
+            # Read file
+            data = pd.read_table(input_filename, low_memory=False)
+            data["group"] = (data["chr"].astype(str) + data["position"].astype(str)).apply(self.word_to_number) % group_count
+            group_list = data["group"].unique().tolist()
+
+            for group in tqdm(group_list):
+                data_chr = data[data["group"] == group]
+                data_chr = data_chr.drop(columns="group", axis=0)
+                data_chr.to_csv(f"{genome_output_path}/gtex_v10_eqtl_{genome}_{group}_chr_position.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+
+    def gtex_eqtl_sql(self, group_count: int = 100, suffix: str = ""):
+
+        with open(f"./result/gtex_eqtl_sql{suffix}.sql", "w", encoding="utf-8", newline="\n") as f:
             for genome in self.genomes:
 
                 for group in range(group_count):
                     # chr position        ref     alt     gene_name       tss_distance    af      pval_nominal    tissue_type
                     # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-                    sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_eqtl_{genome}_{group}`; \n" + \
-                              f"CREATE TABLE `scvdb`.`t_eqtl_{genome}_{group}` (\n" + \
+                    sql_str = f"DROP TABLE IF EXISTS `scvdb`.`t_eqtl_{genome}_{group}{suffix}`; \n" + \
+                              f"CREATE TABLE `scvdb`.`t_eqtl_{genome}_{group}{suffix}` (\n" + \
                               f"  `f_chr` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
                               f"  `f_position` int NOT NULL,\n" + \
                               f"  `f_ref` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
@@ -216,9 +237,9 @@ class ProcessAnnotation:
                               f"  `f_af` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
                               f"  `f_p_value_nominal` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
                               f"  `f_tissue_type` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,\n" + \
-                              f"  KEY `t_eqtl_{genome}_{group}_gene_name` (`f_gene_name`) USING BTREE\n" + \
+                              f"  KEY `t_eqtl_{genome}_{group}{suffix}_gene_name` (`f_gene_name`) USING BTREE\n" + \
                               f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;\n" + \
-                              f"LOAD DATA LOCAL INFILE \"/root/gene/annotation/GTEx/eqtl_chunk/{genome}/gtex_v10_eqtl_{genome}_{group}.txt\" INTO TABLE `scvdb`.`t_eqtl_{genome}_{group}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
+                              f"LOAD DATA LOCAL INFILE \"/root/gene/annotation/GTEx/eqtl_chunk{suffix}/{genome}/gtex_v10_eqtl_{genome}_{group}{suffix}.txt\" INTO TABLE `scvdb`.`t_eqtl_{genome}_{group}{suffix}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n';\n\n"
 
                     f.write(sql_str)
 
@@ -516,20 +537,22 @@ if __name__ == '__main__':
 
     base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/gene/annotation"
     annotation = ProcessAnnotation(base_path, lift_over="/public/home/lcq/rgzn/yuzhengmin/software/liftOver")
-    annotation.dbsnp_common_snp()
-    annotation.dbsnp_common_snp_chunk()
-    annotation.dbsnp_common_snp_sql()
-    annotation.gtex_eqtl()
-    annotation.gtex_eqtl_lift_over()
-    annotation.gtex_eqtl_chunk()
-    annotation.gtex_eqtl_sql()
-    annotation.gwasatlas_risk_snp()
-    annotation.gwasatlas_risk_snp_lift_over()
-    annotation.sea_super_enhancer()
-    annotation.sea_super_enhancer_lift_over()
-    annotation.dbsuper_super_enhancer()
-    annotation.dbsuper_super_enhancer_lift_over()
-    annotation.sedb_super_enhancer()
-    annotation.sedb_super_enhancer_lift_over()
-    annotation.sedb_super_enhancer_chunk()
-    annotation.sedb_super_enhancer_sql()
+    # annotation.dbsnp_common_snp()
+    # annotation.dbsnp_common_snp_chunk()
+    # annotation.dbsnp_common_snp_sql()
+    # annotation.gtex_eqtl()
+    # annotation.gtex_eqtl_lift_over()
+    # annotation.gtex_eqtl_chunk_by_gene()
+    # annotation.gtex_eqtl_chunk_by_chr()
+    # annotation.gtex_eqtl_sql()
+    annotation.gtex_eqtl_sql(suffix="_chr_position")
+    # annotation.gwasatlas_risk_snp()
+    # annotation.gwasatlas_risk_snp_lift_over()
+    # annotation.sea_super_enhancer()
+    # annotation.sea_super_enhancer_lift_over()
+    # annotation.dbsuper_super_enhancer()
+    # annotation.dbsuper_super_enhancer_lift_over()
+    # annotation.sedb_super_enhancer()
+    # annotation.sedb_super_enhancer_lift_over()
+    # annotation.sedb_super_enhancer_chunk()
+    # annotation.sedb_super_enhancer_sql()

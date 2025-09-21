@@ -312,7 +312,7 @@ class TraitGeneMapModel(ParallelModel):
         pool = Pool(group_size)
         pool.map(self._single_core_, params)
         pool.close()
-        # pool.join()
+        pool.join()
 
 
 def exec_trait_gene_map():
@@ -442,6 +442,7 @@ def form_table(group_count: int = 20):
             pool = Pool(group_size)
             pool.map(_form_table_core_, params)
             pool.close()
+            pool.join()
 
         print("Save files")
         sample_trait_gene_all_data_list: list = []

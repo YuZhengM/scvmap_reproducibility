@@ -401,7 +401,7 @@ def form_table(group_count: int = 100, top_count: int = 10, multi_threading: boo
                 pool = Pool(64)
                 pool.map(_form_table_core_, params)
                 pool.close()
-                # pool.join()
+                pool.join()
 
             else:
 
