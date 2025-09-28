@@ -597,6 +597,10 @@ def process_distribution():
     kl_adata = AnnData(np.array(all_kl_score_list), var=trait_info, obs=sample_info)
     sciv.fl.save_h5ad(kl_adata, f"{database_path}/sc_variant/scATAC/trs_fine_mapping_kl_score.h5ad")
 
+    kl_data = sciv.pp.adata_map_df(kl_adata, "f_kl_score")
+    kl_data = kl_data[["f_trait_id", "f_trait_code", "f_trait_name", "f_sample_id", "f_label", "f_sample_name", "f_kl_score"]]
+    kl_data.to_csv("./result/t_trs_kl_data.txt", sep="\t", header=True, index=False, encoding="utf-8")
+
     # # 0.07573787618637001
     # print(f"The maximum KL divergence of TRS result distribution: {np.mean(kl_score_list)}.")
     #

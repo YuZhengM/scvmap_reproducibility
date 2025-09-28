@@ -148,6 +148,6 @@ if __name__ == '__main__':
 
     exec_interaction_gene_map()
 
-    # form_table()
+    form_table()
 
     form_sql_file()

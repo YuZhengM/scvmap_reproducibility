@@ -348,6 +348,12 @@ scp -r "$source_path/database/sc_variant/table/trait_variant_overlap/trs_overlap
 
 # variant
 scp -r "$source_path/database/sc_variant/table/variant" "$username@$ip:$target_path/mysql/mysqlfile/"
+scp -r "$source_path/variant/finish/hg19" "$username@$ip:$target_path/data/data/download/variant/"
+scp -r "$source_path/variant/finish/hg19" "$username@$ip:$target_path/data/data/download/variant/"
+scp -r "$source_path/variant/finish/hg19" "$username@$ip:$target_path/data/data/download/variant/"
+scp -r "$source_path/variant/finish_susie/hg19" "$username@$ip:$target_path/data/data/download/variant_susie/"
+scp -r "$source_path/variant/finish_susie/hg38" "$username@$ip:$target_path/data/data/download/variant_susie/"
+scp -r "$source_path/variant/finish_susie/trait" "$username@$ip:$target_path/data/data/download/variant_susie/"
 
 # TRS
 scp -r "$source_path/database/sc_variant/table/trs" "$username@$ip:$target_path/data/data/"
