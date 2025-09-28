@@ -163,9 +163,9 @@ def add_cell_age_sex_drug():
     sample_info_add = pd.read_excel("../data/sample.xlsx", sheet_name="finish")
     sample_info_all = pd.read_table("../data/sample_info.txt")
     new_sample_info = pd.merge(sample_info_all, sample_info_add[['f_sample_id', 'f_time', 'f_sex', 'f_drug']], on="f_sample_id")
-    new_sample_info.to_csv("../data/new_sample_info.txt", sep="\t", index=False, lineterminator="\n", encoding="utf-8")
+    new_sample_info.to_csv("../data/sample_info_with_age_sex_drug.txt", sep="\t", index=False, lineterminator="\n", encoding="utf-8")
 
-    cell_anno = pd.read_table("../data/new_cell_anno.txt")
+    cell_anno = pd.read_table("../data/cell_anno_reset_AD.txt")
     cell_with_asd = pd.read_table("../data/cell_anno_with_age_sex_drug.txt")
 
     cell_with_asd_gse_ids = cell_with_asd["gse_id"].unique()
@@ -310,7 +310,7 @@ def form_age_sex_drug_anno():
 
 
 def finemap_trs_add_cell_anno():
-    sample_info = pd.read_table("../data/new_sample_info.txt")
+    sample_info = pd.read_table("../data/sample_info_with_age_sex_drug.txt")
     cell_anno = pd.read_table("../data/cell_anno_with_age_sex_drug_all.txt")
 
     for sample_id, gse_id, label, f_time, f_sex, f_drug in zip(sample_info["f_sample_id"], sample_info["f_gse_id"],
@@ -349,7 +349,7 @@ def finemap_trs_add_cell_anno():
 
 
 def susie_trs_add_cell_anno():
-    sample_info = pd.read_table("../data/new_sample_info.txt")
+    sample_info = pd.read_table("../data/sample_info_with_age_sex_drug.txt")
     cell_anno = pd.read_table("../data/cell_anno_with_age_sex_drug_all.txt")
 
     for sample_id, gse_id, label, f_time, f_sex, f_drug in zip(sample_info["f_sample_id"], sample_info["f_gse_id"],

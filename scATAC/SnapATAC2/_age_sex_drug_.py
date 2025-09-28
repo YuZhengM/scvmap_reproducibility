@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     is_exist_skip: bool = True
 
-    sample_info = pd.read_table("../data/new_sample_info.txt")
+    sample_info = pd.read_table("../data/sample_info_with_age_sex_drug.txt")
     sample_info = sample_info[(sample_info["f_time"] == 1) | (sample_info["f_sex"] == 1) | (sample_info["f_drug"] == 1)]
 
     cell_anno = pd.read_table("../data/cell_anno_with_age_sex_drug_all.txt")

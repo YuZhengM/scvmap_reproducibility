@@ -128,7 +128,7 @@ if __name__ == '__main__':
 
     file = StaticMethod("file")
 
-    sample_info_file: str = "../data/new_sample_info.txt"
+    sample_info_file: str = "../data/sample_info_with_age_sex_drug.txt"
     base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC/"
     output_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/scatac_susie"
 
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     adjusted_p_value_value = 0.05
     p_value_value = 0.05
 
-    sample_info = pd.read_table("../data/new_sample_info.txt")
+    sample_info = pd.read_table("../data/sample_info_with_age_sex_drug.txt")
     sample_info = sample_info[(sample_info["f_time"] == 1) | (sample_info["f_sex"] == 1) | (sample_info["f_drug"] == 1)]
 
     form_difference_gene_file()

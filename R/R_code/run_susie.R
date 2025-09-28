@@ -21,7 +21,7 @@ base_path <- "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant"
 # 循环执行
 ###################################################################
 
-sample_file <- "/public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_reproducibility/scATAC/data/new_sample_info.txt"
+sample_file <- "/public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_reproducibility/scATAC/data/sample_info_with_age_sex_drug.txt"
 sample_info <- read.table(sample_file, sep="\t", quote = "", header=TRUE)
 
 sample_count <- nrow(sample_info)

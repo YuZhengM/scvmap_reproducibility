@@ -46,8 +46,8 @@ if __name__ == '__main__':
     all_cell_anno_info = pd.read_table("../data/cell_anno.txt")
     new_all_cell_anno_info = all_cell_anno_info[~(all_cell_anno_info["f_sample_id"] == list(new_anno_info["f_sample_id"])[0])]
     new_all_cell_anno_info = pd.concat([new_all_cell_anno_info, new_anno_info])
-    # new_all_cell_anno_info.to_csv("/public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_reproducibility/scATAC/data/new_cell_anno.txt", sep="\t", header=True, index=False, lineterminator="\n", encoding="utf-8")
-    new_all_cell_anno_info.to_csv("../data/new_cell_anno.txt", sep="\t", header=True, index=False, lineterminator="\n", encoding="utf-8")
+    # new_all_cell_anno_info.to_csv("/public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_reproducibility/scATAC/data/cell_anno_reset_AD.txt", sep="\t", header=True, index=False, lineterminator="\n", encoding="utf-8")
+    new_all_cell_anno_info.to_csv("../data/cell_anno_reset_AD.txt", sep="\t", header=True, index=False, lineterminator="\n", encoding="utf-8")
 
     """
     cp /public/home/lcq/rgzn/yuzhengmin/keti/scATAC/GSE174367/data/GSE174367_scATAC_Ref/GSE174367_scATAC_Ref_sc_atac_snapATAC2.h5ad /public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/download/scatac/
