@@ -38,6 +38,3 @@
 | arcOGEN Consortium                                                     |
 | International Multiple Sclerosis Genetics Consortium                   |
 | The Genetics of Personality Consortium                                 |
-
-
-
