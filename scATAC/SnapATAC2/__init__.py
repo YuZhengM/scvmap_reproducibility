@@ -26,10 +26,8 @@ class SnapATAC2Handler:
         self.cluster = "cell_type"
         self.max_features = 500000
         # Customized on a case-by-case basis
-        # self.min_tsse = 0
-        # self.min_tsse = 0.25
-        # self.min_tsse = 1
-        self.min_tsse = 5
+        self.min_tsse = 8
+        # self.min_tsse = 5
         self.is_exist_skip = True
 
     @property
