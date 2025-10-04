@@ -40,10 +40,14 @@
 8. [__init__.py](homer/__init__.py): Run the HOMER process on the data to obtain trait-relevant TF data.
 
 
+> Fine-mapping methods supported by different data sources.
 
-CAUSALdb: abf, finemap, paintor, caviarbf, susie, polyfun_finemap, polyfun_susie
-BBJ: FINEMAP, SuSiE
-FinnGen: FINEMAP, SUSIE
-UKBB: FINEMAP, SUSIE
+> **CAUSALdb2**: ABF, FINEMAP, PAINTOR, CAVIARBF, SuSiE, PloyFun_FINEMAP, PloyFun_SuSiE
+> 
+> **BBJ**: FINEMAP, SuSiE
+> 
+> **FinnGen**: FINEMAP, SUSIE
+> 
+> **UKBB**: FINEMAP, SUSIE
 
 
