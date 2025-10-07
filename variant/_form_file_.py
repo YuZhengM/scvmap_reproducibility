@@ -245,6 +245,7 @@ def form_trait_anno(
     # Export Data
     source_file.columns = ["f_id", "f_name", "f_source", "f_description", "f_pmid", "f_link", "f_genome", "f_version", "f_trait_count", "f_filter_count"]
     source_file = source_file[["f_id", "f_name", "f_source", "f_description", "f_pmid", "f_genome", "f_trait_count", "f_filter_count", "f_link", "f_version"]]
+    # Preliminary statistical results
     source_file.to_csv(os.path.join(result_path, "source_info.txt"), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
 
 
