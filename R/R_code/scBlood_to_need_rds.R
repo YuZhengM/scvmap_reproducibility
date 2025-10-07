@@ -29,24 +29,24 @@ gse_datas <- c(
   "GSE231380"
 )
 
-# 读取样本信息
+# Read sample information
 sample_data <- read_excel("K:/data1/workspace/scBlood/web/static/download/sample/download_human_with_type.xlsx")
-# 抽取样本整合信息
+# Extract sample integration information
 gse_sample_data <- sample_data[sample_data$symbal == 1,]
-# 抽取单个样本信息
+# Extract single sample information
 gsm_sample_data <- sample_data[sample_data$symbal == 0,]
 
-# 循环整合样本信息
+# Loop through each GSE dataset
 for (gse in gse_datas) {
   message(gse)
 
-  # 获取单个整合样本信息
+  # Get single integrated sample information
   gse_info <- gse_sample_data[gse_sample_data$`Integrated Dataset ID` == gse,]
-  # 单样本信息
+  # Get single sample information
   gsm_info <- gsm_sample_data[gsm_sample_data$`Integrated Dataset ID` == gse,]
   gsm_count <- nrow(gsm_info)
 
-  # 生成文件的路径
+  # Generate file path
   gse_path <- paste0("H:/scATAC/", gse)
 
   if (!dir.exists(gse_path)) {
@@ -55,15 +55,15 @@ for (gse in gse_datas) {
 
   if (gsm_count > 1) {
 
-    # 得到样本 ID
+    # Get sample ID
     sample_id <- gse_info$`Sample ID`
 
-    # 读取 scATAC-seq data
+    # Read scATAC-seq data
     rds_file <- paste0("K:/data1/workspace/scBlood/service/data/peak/data/", gse,"_seurat_obj.rds")
     data <- readRDS(rds_file)
     head(data@assays[["ATAC"]]@counts)
 
-    # 得到细胞注释信息
+    # Get cell annotation information
     metadata <- data@meta.data
     metadata$barcodes <- rownames(metadata)
 
@@ -86,16 +86,16 @@ for (gse in gse_datas) {
     gsm <- gsm_index$`GEO ID`
     message(gsm)
 
-    # 读取 scATAC-seq data
+    # Read scATAC-seq data
     gsm_rds_file <- paste0("K:/data1/workspace/scBlood/service/data/peak/data/", gsm,"_seurat_obj.rds")
     gsm_data <- readRDS(gsm_rds_file)
     head(gsm_data@assays[["ATAC"]]@counts)
 
-    # 得到细胞注释信息
+    # Get cell annotation information
     gsm_metadata <- gsm_data@meta.data
     gsm_metadata$barcodes <- rownames(gsm_metadata)
 
-    # 得到带有细胞类型的注释信息
+    # Get cell type annotation information
     gsm_anno_file <- paste0("K:/data1/workspace/scBlood/web/static/download/all_sample/celltype/", gsm_sample_id, "_celltype_UMAP.txt")
     gsm_anno_data <- read.table(gsm_anno_file, header = FALSE, sep="\t")
     colnames(gsm_anno_data) <- c("sample_id", "barcodes", "cluster", "cell_type", "UMAP1", "UMAP2")
@@ -112,20 +112,20 @@ library(Seurat)
 library(Matrix)
 library(tidyverse)
 
-# 读取样本信息
+# Read sample information
 sample_data <- read_excel("K:/data1/workspace/scBlood/web/static/download/sample/download_human_with_type.xlsx")
-# 抽取样本整合信息
+# Extract sample integration information
 gse_sample_data <- sample_data[sample_data$symbal == 1,]
-# 抽取单个样本信息
+# Extract single sample information
 gsm_sample_data <- sample_data[sample_data$symbal == 0,]
 
-# 循环整合样本信息
+# Loop through each GSE dataset
 for (gse in gse_datas) {
   message(gse)
 
-  # 获取单个整合样本信息
+  # Get single integrated sample information
   gse_info <- gse_sample_data[gse_sample_data$`Integrated Dataset ID` == gse,]
-  # 单样本信息
+  # Get single sample information
   gsm_info <- gsm_sample_data[gsm_sample_data$`Integrated Dataset ID` == gse,]
   gsm_count <- nrow(gsm_info)
 

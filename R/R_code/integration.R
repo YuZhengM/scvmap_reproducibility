@@ -57,13 +57,13 @@ core_process <- function(path, base_path, identifier, genome, layer) {
     result_file_path <- paste0(result_path, "/", identifier, "__", genome, "__", basename(trait_file), "__mat.txt")
     # If the result file already exists, execute the next one
     if (file.exists(result_file_path)) {
-      print0("已经执行完", identifier, genome, trait_file, "文件")
+      print0("The file", identifier, genome, trait_file, "has been processed.")
       next
     }
 
     fit <- try(integration_process(identifier, genome, trait_file, result_path, SE_gvar, SE_gvar_bg, mutualknn30, counts_mat, expectation, fragments_per_sample, result_file_path), silent=TRUE)
     if ('try-error' %in% class(fit)) {
-      print0("执行", identifier, genome, trait_file, "出现错误, 执行下一个")
+      print0("The file", identifier, genome, trait_file, "has an error. The next file will be processed.")
       next
     }
   }

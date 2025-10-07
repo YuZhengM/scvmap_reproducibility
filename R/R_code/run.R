@@ -6,19 +6,19 @@ path <- "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC"
 base_path <- "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant"
 
 ###################################################################
-# path: scATAC 输入路径
+# path: scATAC input path
 #    {path}/{identifier}_ATAC.rds
-# base_path: 整合的基本路径
+# base_path: integration basic path
 #    {base_path}/scATAC
 #    {base_path}/variant
 #    {base_path}/result
-# identifier: 数据的标识符
-# genome: scATAC 的参考基因组
-# layer: RDS 文件中是 counts 数据的层
+# identifier: data identifier
+# genome: scATAC reference genome
+# layer: RDS file layer that contains counts data
 ###################################################################
 
 ###################################################################
-# 循环执行
+# Loop through each sample
 ###################################################################
 
 sample_file <- "/public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_reproducibility/scATAC/data/sample_info.txt"

@@ -1,5 +1,5 @@
 ##########################################################
-# 加载所需要的包
+# Load the required packages
 ##########################################################
 
 library(Matrix)
@@ -50,9 +50,16 @@ main_version <- version_parts[1]
 
 integration_process <- function(identifier, genome, trait_file, integration_path, SE_gvar, background_peaks, mutualknn30, counts_mat, expectation, fragments_per_sample, result_file_path) {
 
-  # 突变数据
+  # Mutation data
   print0(identifier, genome, trait_file, "start gchromVAR")
-  # 执行 gchromVAR, 没有 Overlap 上的默认值为 PIP 的阈值 0.001 / 10
+  # Run gchromVAR
+  SE_gvar <- gchromVAR::runChromVAR(
+    object = SE_gvar,
+    background_peaks = background_peaks,
+    mutualknn30 = mutualknn30,
+    BPPARAM = BiocParallel::MulticoreParam(workers = 20)
+  )
+
   trait_import <- gchromVAR::importBedScore(
     ranges = SummarizedExperiment::rowRanges(SE_gvar),
     files = trait_file,
@@ -63,12 +70,12 @@ integration_process <- function(identifier, genome, trait_file, integration_path
 
   print0(identifier, genome, trait_file, "start computeWeightedDeviations")
   # https://caleblareau.github.io/gchromVAR/articles/gchromVAR_vignette.html
-  ######################### gchromVAR computeWeightedDeviations 方法在 CentOS 中偶尔执行不动, 原因由于服务器本身负载高且用 BiocParallel::bplapply 进行并行运算, 故将其中方法执行的每一步拿出来执行 ########################################
+  ######################### The gchromVAR computeWeightedDeviations method occasionally hangs on CentOS. This is because the server load is high and BiocParallel::bplapply is used for parallel operations. Therefore, each step of the method is executed separately. ########################################
   #SE_gvar_DEV <- computeWeightedDeviations(object = SE_gvar, weights = trait_import, background_peaks = SE_gvar_bg)
   colData <- colData(SE_gvar)
   sample_names <- colnames(counts_mat)
   weights <- assays(trait_import)$weights
-  # 将并行方法 BiocParallel::bplapply 改成 lapply, 由于文件输入只是一个所以直接可以去掉
+  # Change the parallel method BiocParallel::bplapply to lapply. Since there is only one file input, it can be removed directly.
   #results <- lapply(1:dim(weights)[2], function(i) { ...... })
   quant <- as.numeric(weights[, 1])
   vec <- Matrix(matrix(quant, ncol = length(quant)))
@@ -87,11 +94,11 @@ integration_process <- function(identifier, genome, trait_file, integration_path
   print0(identifier, genome, trait_file, "end computeWeightedDeviations")
 
   print0(identifier, genome, trait_file, "start process NA, NaN, Inf/-Inf")
-  # 判断是否为 NA, NaN, Inf/-Inf 此处含有是由于 gchromVAR::importBedScore 默认值为 0, computeWeightedDeviations 方法中的 normdev/sd_sampled_deviation 有 0/0 等情况, getBackgroundPeaks 方法 niterations 的值小, 设置为 default.val = 1E-10, niterations = 200
+  # Check for NA, NaN, Inf/-Inf values. These values appear because the default value of gchromVAR::importBedScore is 0, and there are cases like 0/0 in the normdev/sd_sampled_deviation calculation of the computeWeightedDeviations method. Also, the niterations value in the getBackgroundPeaks method is small. Set default.val = 1E-10 and niterations = 200.
   #SE_gvar_DEV_z <- SummarizedExperiment::assays(SE_gvar_DEV)[["z"]]
   isNaIdx <- is.na(z) | is.nan(z)
   z[isNaIdx] <- -Inf
-  # 判断是否为 Inf 值, 其中 Inf 值为无穷大, 后面计算将其中设置为除 Inf/-Inf 中的最大值
+  # Check if the value is Inf, where Inf represents positive infinity. In the subsequent calculations, set these values to the maximum value excluding Inf/-Inf.
   z_inf_dix <- is.infinite(z) & z > 0
   z_max_finite <- max(z[!z_inf_dix])
   if (is.infinite(max(z[!z_inf_dix]))) {
@@ -100,7 +107,7 @@ integration_process <- function(identifier, genome, trait_file, integration_path
     z_max_finite <- max(z[!z_inf_dix])
   }
   z[z_inf_dix] <- z_max_finite
-  # 判断是否为 -Inf 值, 其中 -Inf 值为无穷小, 后面计算将其中设置为除 Inf/-Inf 中的最小值
+  # Check if the value is -Inf, where -Inf represents negative infinity. In the subsequent calculations, set these values to the minimum value excluding Inf/-Inf.
   z_inf_dix <- is.infinite(z) & z < 0
   if (is.infinite(min(z[!z_inf_dix]))) {
     z_min_finite <- 0
@@ -109,7 +116,7 @@ integration_process <- function(identifier, genome, trait_file, integration_path
   }
   z[z_inf_dix] <- z_min_finite
   print0(identifier, genome, trait_file, "end process NA, NaN, Inf/-Inf")
-  # Reformat results
+  # Reformat results. Convert the z-score matrix to a data frame with columns for cell metadata and z-score.
   z_score_mat <- data.frame(colData, z_score=t(z) |> c())
   #head(z_score_mat)
 

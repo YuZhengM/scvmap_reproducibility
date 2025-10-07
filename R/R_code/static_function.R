@@ -19,11 +19,11 @@ chrs = c(
 )
 
 ###################################################################
-# path: scATAC 输入路径
-# identifier: 数据的标识符，如 GSE
-# genome: scATAC 的参考基因组
-# id_path: SE_gvar, SE_gvar_bg 输出路径
-# layer: layer: RDS 文件中是 counts 数据的层
+# path: scATAC input path
+# identifier: Data identifier, e.g., GSE
+# genome: Reference genome for scATAC
+# id_path: Output path for SE_gvar and SE_gvar_bg
+# layer: The layer in the RDS file containing count data
 ###################################################################
 scATAC_process <- function(path, identifier, genome, id_path, layer = "counts") {
 
@@ -106,7 +106,7 @@ scATAC_process <- function(path, identifier, genome, id_path, layer = "counts") 
   } else {
     genome_packages = BSgenome.Hsapiens.UCSC.hg38
   }
-  # 计算 SC 含量 bias
+  # Calculate SC content bias
   print0(identifier, genome, "start addGCBias, getBackgroundPeaks")
   SE_gvar <- addGCBias(SE_gvar, genome = genome_packages)
   rowData(SE_gvar)$bias[which(is.na(rowData(SE_gvar)$bias))] = 1e-5
@@ -114,11 +114,11 @@ scATAC_process <- function(path, identifier, genome, id_path, layer = "counts") 
 
   colData$identifier = identifier
   colData$genome = genome
-  # 保存信息
+  # Save information
   write.table(colData, file = paste0(id_path, "/", identifier, ".txt"), sep="\t", row.names = F, col.names = T, quote = F)
   save(SE_gvar, SE_gvar_bg, file=paste0(id_path, "/", identifier, "_SE_gvar_SE_gvar_bg.rda"))
 
-  # 加载数据
+  # Load data
   peak_by_cell_mat <- SummarizedExperiment::assay(SE_gvar)
 
   print0(identifier, genome, id_path, "start tfidf")
@@ -153,9 +153,9 @@ scATAC_process <- function(path, identifier, genome, id_path, layer = "counts") 
 
 integration_process <- function(identifier, genome, trait_file, integration_path, SE_gvar, background_peaks, mutualknn30, counts_mat, expectation, fragments_per_sample, result_file_path) {
 
-  # 突变数据
+  # Load mutation data
   print0(identifier, genome, trait_file, "start gchromVAR")
-  # 执行 gchromVAR, 没有 Overlap 上的默认值为 PIP 的阈值 0.001 / 10
+  # Execute gchromVAR
   trait_import <- gchromVAR::importBedScore(
     ranges = SummarizedExperiment::rowRanges(SE_gvar),
     files = trait_file,
@@ -166,12 +166,12 @@ integration_process <- function(identifier, genome, trait_file, integration_path
 
   print0(identifier, genome, trait_file, "start computeWeightedDeviations")
   # https://caleblareau.github.io/gchromVAR/articles/gchromVAR_vignette.html
-  ######################### gchromVAR computeWeightedDeviations 方法在 CentOS 中偶尔执行不动, 原因由于服务器本身负载高且用 BiocParallel::bplapply 进行并行运算, 故将其中方法执行的每一步拿出来执行 ########################################
+  ######################### The gchromVAR computeWeightedDeviations method occasionally hangs on CentOS. This is because the server load is high and BiocParallel::bplapply is used for parallel computation. Therefore, we will execute each step of the method separately. ########################################
   #SE_gvar_DEV <- computeWeightedDeviations(object = SE_gvar, weights = trait_import, background_peaks = SE_gvar_bg)
   colData <- colData(SE_gvar)
   sample_names <- colnames(counts_mat)
   weights <- assays(trait_import)$weights
-  # 将并行方法 BiocParallel::bplapply 改成 lapply, 由于文件输入只是一个所以直接可以去掉
+  # Change the parallel method BiocParallel::bplapply to lapply. Since there is only one file input, it can be removed directly.
   #results <- lapply(1:dim(weights)[2], function(i) { ...... })
   quant <- as.numeric(weights[, 1])
   vec <- Matrix(matrix(quant, ncol = length(quant)))
@@ -190,20 +190,19 @@ integration_process <- function(identifier, genome, trait_file, integration_path
   print0(identifier, genome, trait_file, "end computeWeightedDeviations")
 
   print0(identifier, genome, trait_file, "start process NA, NaN, Inf/-Inf")
-  # 判断是否为 NA, NaN, Inf/-Inf 此处含有是由于 gchromVAR::importBedScore 默认值为 0, computeWeightedDeviations 方法中的 normdev/sd_sampled_deviation 有 0/0 等情况, getBackgroundPeaks 方法 niterations 的值小, 设置为 default.val = 1E-10, niterations = 200
+  # Check if there are any NA, NaN, Inf/-Inf values. Here, it is due to the default value of 0 in gchromVAR::importBedScore, which may cause 0/0 in the computeWeightedDeviations method. We set default.val = 1E-10 and niterations = 200 in getBackgroundPeaks.
   #SE_gvar_DEV_z <- SummarizedExperiment::assays(SE_gvar_DEV)[["z"]]
   isNaIdx <- is.na(z) | is.nan(z)
   z[isNaIdx] <- -Inf
-  # 判断是否为 Inf 值, 其中 Inf 值为无穷大, 后面计算将其中设置为除 Inf/-Inf 中的最大值
+  # Check if there are any Inf values. Here, Inf values are set to the maximum finite value in z.
   z_inf_dix <- is.infinite(z) & z > 0
-  z_max_finite <- max(z[!z_inf_dix])
   if (is.infinite(max(z[!z_inf_dix]))) {
     z_max_finite <- 0
   } else {
     z_max_finite <- max(z[!z_inf_dix])
   }
   z[z_inf_dix] <- z_max_finite
-  # 判断是否为 -Inf 值, 其中 -Inf 值为无穷小, 后面计算将其中设置为除 Inf/-Inf 中的最小值
+  # Check if there are any -Inf values. Here, -Inf values are set to the minimum finite value in z.
   z_inf_dix <- is.infinite(z) & z < 0
   if (is.infinite(min(z[!z_inf_dix]))) {
     z_min_finite <- 0
