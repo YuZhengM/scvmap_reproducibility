@@ -53,13 +53,6 @@ integration_process <- function(identifier, genome, trait_file, integration_path
   # Mutation data
   print0(identifier, genome, trait_file, "start gchromVAR")
   # Run gchromVAR
-  SE_gvar <- gchromVAR::runChromVAR(
-    object = SE_gvar,
-    background_peaks = background_peaks,
-    mutualknn30 = mutualknn30,
-    BPPARAM = BiocParallel::MulticoreParam(workers = 20)
-  )
-
   trait_import <- gchromVAR::importBedScore(
     ranges = SummarizedExperiment::rowRanges(SE_gvar),
     files = trait_file,
