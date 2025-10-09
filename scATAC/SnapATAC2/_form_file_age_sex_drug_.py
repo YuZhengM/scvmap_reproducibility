@@ -118,7 +118,7 @@ def create_table_sql():
                               f"  KEY `t_difference_gene_{sample_id}_log2_fold_change_index` (`f_log2_fold_change`),\n" + \
                               f"  KEY `t_difference_gene_{sample_id}_p_value_index` (`f_p_value`)\n" + \
                               f") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;\n" + \
-                              f"LOAD DATA LOCAL INFILE \"/root/scatac_susie/difference_gene/{sample_id}_{_type_}_difference_gene_data.txt\" INTO TABLE `scvdb`.`t_difference_gene_{sample_id}_{_type_}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n' IGNORE 1 LINES;\n\n"
+                              f"LOAD DATA LOCAL INFILE \"/root/scatac_age_sex_drug/difference_gene/{sample_id}_{_type_}_difference_gene_data.txt\" INTO TABLE `scvdb`.`t_difference_gene_{sample_id}_{_type_}` fields terminated by '\\t' optionally enclosed by '\"' lines terminated by '\\n' IGNORE 1 LINES;\n\n"
 
                     f.write(sql_str)
 
@@ -130,7 +130,7 @@ if __name__ == '__main__':
 
     sample_info_file: str = "../data/sample_info_with_age_sex_drug.txt"
     base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC/"
-    output_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/scatac_susie"
+    output_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/table/scatac_age_sex_drug"
 
     log2_fold_change_value = 1
     adjusted_p_value_value = 0.05
