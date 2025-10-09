@@ -31,7 +31,7 @@ if __name__ == '__main__':
     time.sleep(3)
     print("----------------------------------------------------------------------------------")
 
-    # Variant information https://bio.liclab.net/scvmap_service/swagger-ui/index.html#/Detail-API/listTraitInfoData
+    # Variant information https://bio.liclab.net/scvmap_service/scvmap.html#/Detail-API/listTraitInfoData
     response = requests.post(
         f"{base_url}/detail/trait_info/{trait_id}/{genome}/{fine_mapping_method}",
         json={
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     time.sleep(3)
     print("----------------------------------------------------------------------------------")
 
-    # MAGMA https://bio.liclab.net/scvmap_service/swagger-ui/index.html#/Detail-API/listMagmaGeneByTraitId
+    # MAGMA https://bio.liclab.net/scvmap_service/scvmap.html#/Detail-API/listMagmaGeneByTraitId
     response = requests.get(f"{base_url}/detail/magma_gene/{trait_id}/{genome}")
     magma_data = get_result_data(response)
     magma_df = pd.DataFrame(magma_data)
