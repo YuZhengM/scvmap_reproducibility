@@ -156,12 +156,12 @@ integration_process <- function(identifier, genome, trait_file, integration_path
 
 core_process <- function(base_path, identifier, scFileId, variantFileId, genome, layer = "counts") {
 
-  # 处理路径
+  # Store the scATAC-seq path.
   scATAC_path <- paste0(base_path, "/scATAC")
 
-  # 存放结果路径
+  # Save the result path.
   result_path <- paste0(base_path, "/result/", identifier)
-  # 读取突变文件的路径
+  # Trait file path.
   trait_file <- paste0(base_path, "/variant/", variantFileId)
 
   if (!dir.exists(result_path)) {
@@ -238,7 +238,7 @@ core_process <- function(base_path, identifier, scFileId, variantFileId, genome,
     genome_packages = BSgenome.Hsapiens.UCSC.hg38
   }
 
-  # 计算 SC 含量 bias
+  # Calculate GC bias.
   print0(identifier, genome, "Start addGCBias, getBackgroundPeaks")
   SE_gvar <- addGCBias(SE_gvar, genome = genome_packages)
   rowData(SE_gvar)$bias[which(is.na(rowData(SE_gvar)$bias))] = 1e-5
@@ -248,7 +248,7 @@ core_process <- function(base_path, identifier, scFileId, variantFileId, genome,
   colData$identifier = identifier
   colData$genome = genome
 
-  # 加载数据
+  # counts data
   peak_by_cell_mat <- SummarizedExperiment::assay(SE_gvar)
 
   print0(identifier, genome, "Start TF-IDF")
