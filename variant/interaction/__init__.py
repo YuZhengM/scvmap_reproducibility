@@ -12,18 +12,34 @@ from yzm_util import Util
 
 
 def interaction_files():
+    """
+    Please check the "./code" folder.
+    :return:
+    """
     pass
 
 
 def exec_bedtools_gene():
+    """
+    Please check the "./code" folder.
+    :return:
+    """
     pass
 
 
 def exec_bedtools_interaction():
+    """
+    Please check the "./code" folder.
+    :return:
+    """
     pass
 
 
 def exec_interaction_gene_map():
+    """
+    Please check the "./code" folder.
+    :return:
+    """
     pass
 
 
