@@ -107,4 +107,4 @@ if __name__ == '__main__':
 
     run_sciv_trs()
 
-    run_sciv_variant()
+    # run_sciv_variant()
