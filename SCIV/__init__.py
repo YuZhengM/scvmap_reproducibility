@@ -29,6 +29,19 @@ def run_sciv_trs():
         _cache_path_: str = os.path.join(_label_path_, "cache")
         _log_path_: str = os.path.join(_label_path_, "log")
 
+        _is_skip_: bool = True
+
+        for _method_ in ["finemap", "susie"]:
+
+            # result data
+            trs_filename = f"{label}_trs_sciv_{_method_}_data.h5ad"
+            trs_file = os.path.join(_label_path_, trs_filename)
+
+            _is_skip_ = _is_skip_ and os.path.exists(trs_file)
+
+        if _is_skip_:
+            continue
+
         # Read scATAC-seq data
         sc_atac_file = os.path.join(sc_atac_path, gse, "data", label, label + "_sc_atac_snapATAC2.h5ad")
         sc_atac_data = sciv.fl.read_h5ad(sc_atac_file)
@@ -61,14 +74,12 @@ def run_sciv_trs():
                 trait_info=trait_info,
                 save_path=_label_path_,
                 model_dir=os.path.join(_label_path_, "poisson_vi"),
-                single_chunk_size=1000,
                 is_file_exist_loading=True,
                 filename_dict={
                     "atac_overlap": f"atac_overlap_{_method_}.h5ad",
                     "init_score": f"init_score_{_method_}.h5ad",
                     "trs": trs_filename
-                },
-                block_size=10000
+                }
             )
 
             print(trs)
