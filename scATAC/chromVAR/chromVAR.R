@@ -61,7 +61,7 @@ motif_ix <- matchMotifs(motifs, counts_filtered, genome = genome_packages)
 
 # computing deviations
 dev <- computeDeviations(object = counts_GCBias, annotations = motif_ix)
-write.table(data.frame(dev@assays@data$z), file="chromVAR_activities.txt", sep="\t", row.names = T, col.names = T, quote = F)
+write.table(data.frame(dev@assays@data$z), file=paste0(label, '_chromVAR_activities.txt'), sep="\t", row.names = T, col.names = T, quote = F)
 
 # differential gene expression
 da.res = do_DA_motif(dev, clusters = data.table('barcode' = rownames(metaData),
