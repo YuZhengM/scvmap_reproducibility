@@ -5,6 +5,15 @@
 ```shell
 conda create -n yzm_homer
 conda activate yzm_homer
+conda list homer
+```
+
+```shell
+(yzm_homer) [rgzn@cu04 yzm_homer]$ conda list homer
+# packages in environment at /public/home/lcq/rgzn/anaconda3/envs/yzm_homer:
+#
+# Name                    Version                   Build  Channel
+homer                     5.1             pl5262h9948957_0    https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda
 ```
 
 ## Install HOMER
