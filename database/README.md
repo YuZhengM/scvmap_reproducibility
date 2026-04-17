@@ -64,12 +64,26 @@
           - 📁tf_peak: 存储 TF 和 peak 关系对
             - 📄`{scATAC-seq ID}`_`{genome}`_tf_peak_map.txt: 对于某个单细胞样本的 TF 和 peak 关系对
           - 📁trait_gene:
+            - 📁
+            - 📄
           - 📁trait_gene_chunk_table:
+            - 📁
+            - 📄
           - 📁trait_gene_table:
+            - 📁
+            - 📄
           - 📁trait_peak:
+            - 📁
+            - 📄
           - 📁trait_tf:
+            - 📁
+            - 📄
           - 📁trait_tf_chunk_table:
+            - 📁
+            - 📄
           - 📁trait_tf_table:
+            - 📁
+            - 📄
         - 📁download: Store scATAC-seq data processed by SnapATAC2
           - 📁scatac: Store scATAC-seq data processed by SnapATAC2
             - 📄`{scATAC-seq}_snapATAC2.h5ad`: Data downloaded from the download page on the website
@@ -484,3 +498,7 @@ tar -xzvf /mnt/data3/workspace/SCVdb/data/data/download/trait/fine_mapping_hg38.
 tar -xzvf /mnt/data3/workspace/SCVdb/data/data/download/trait/fine_mapping_trait.tar.gz -C /mnt/data3/workspace/SCVdb/data/data/download/variant/
 
 ```
+
+## 3. Data backup records
+
+> [record](record)

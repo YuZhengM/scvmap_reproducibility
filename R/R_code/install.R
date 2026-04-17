@@ -30,6 +30,8 @@ library(devtools)
 devtools::install_github("caleblareau/BuenColors")
 devtools::install_github("GreenleafLab/chromVARmotifs")
 devtools::install_github("GreenleafLab/ArchR", ref="master", repos = BiocManager::repositories())
+library(ArchR)
+ArchR::installExtraPackages()
 
 library(Matrix)
 library(SCAVENGE)
