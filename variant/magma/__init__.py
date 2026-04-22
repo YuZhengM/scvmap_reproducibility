@@ -7,7 +7,7 @@ from typing import Tuple
 
 import numpy as np
 import pandas as pd
-import sciv
+import sciv # 0.0.1
 from pandas import DataFrame
 from scipy.stats import norm
 from tqdm import tqdm
