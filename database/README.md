@@ -11,25 +11,79 @@
 > `path` is the root path
 
 - 📁`{path}`
-  - 📁database: Store `SCVdb` database data
+  - 📁database: Store `scVMAP` database data
     - 📁code: Store the code for running database data
       - 📁`{server}`: Represent different servers and store the code for executing g-chromVAR and SCAVENGE methods
         - 📄library.R: Referenced R packages
         - 📄static_function.R: Processing of single-cell and integration code
-        - 📄integration.R: Run data for multiple traits or diseases in a loop
-        - 📄run.R: The main execution code
+        - 📄integration.R: Run data for multiple traits or diseases in a loop (FINEMAP)
+        - 📄integration_muti.R: Run data on multiple features or diseases in a loop using a parallel strategy
+        - 📄integration_susie.R: Run data for multiple traits or diseases in a loop (SuSiE)
+        - 📄run.R: The main execution code (FINEMAP)
+        - 📄run_susie.R: The main execution code (SuSiE)
     - 📁sc_variant: Store the root path of database data output
-      - 📁result: Store the results of g-chromVAR and SCAVENGE methods
+      - 📁result: Store the results of g-chromVAR and SCAVENGE methods (FINEMAP)
         - 📁`{scATAC-seq}`: Represent different single-cell data and store the result data of integrating all traits or diseases for a certain single-cell data
           - 📄`{scATAC-seq}__{genome}__{trait_label_file}__mat.txt`: Store information files such as TRS and enrichment status
           - 📄`{scATAC-seq}__{genome}__{trait_label_file}__mat_info.rda`: Store the result txt and mutual-KNN information files
+      - 📁result_susie: Store the results of g-chromVAR and SCAVENGE methods (SuSiE)
+        - The sub path structure is the same as under the FINEMAP method.
       - 📁scATAC: Store the pre-processing files and post-processing result files of single-cell data
         - 📁`{scATAC-seq}`: Represent different single-cell data and store the pre-processing files and post-processing result files of a certain single-cell data
           - 📄`{scATAC-seq}.txt`: Cell annotation file
           - 📄`{scATAC-seq}_all.rda`: Single-cell processing file, which is read when integrating with traits or diseases
           - 📄`{scATAC-seq}_SE_gvar_SE_gvar_bg.rda`: Intermediate file for single-cell processing, with less content than `{scATAC-seq}_all.rda`
-          - 📄`{scATAC-seq}_trs_scavenge_data.h5ad`: The result data of integrating all traits or diseases for a certain single-cell data in h5ad file format
+          - 📄`{scATAC-seq}_trs_scavenge_data.h5ad`: The result data of integrating all traits or diseases for a certain single-cell data in h5ad file format (FINEMAP)
+          - 📄`{scATAC-seq}_trs_scavenge_susie_data.h5ad`: The result data of integrating all traits or diseases for a certain single-cell data in h5ad file format (SuSiE)
       - 📁table: Store data related to database construction
+        - 📁cicero: Data for storing integrated regulatory networks (Trait-SNP-TF/Gene-Cell type-Single cell sample)
+          - 📁anno: 存储基因注释的文件
+            - 📄cicero_gene_`{genome}`_annotation.txt: 存储 hg19 和 hg38 的参考基因组数据，主要注释基因的染色质位置坐标
+          - 📁code: 生成 TF 和基因代码
+            - 📄tf_gene.py: 生成 TF 和基因代码
+          - 📁gene_peak: 存储基因和 peak 关系对
+            - 📄`{scATAC-seq ID}`_`{genome}`_gene_peak_map.txt: 对于某个单细胞样本的基因和 peak 关系对
+          - 📁interaction: (待完善)
+            - 📁source:
+            - 📁trait_gene_table:
+            - 📁trait_gene_table:
+            - 📄3D_liftOver1.py:
+            - 📄3D_liftOver2.py:
+            - 📄bedtools__init__.py:
+            - 📄bedtools__init__.py:
+            - 📄process_3d_data-1.py:
+            - 📄snp_gene_3d_new.py:
+          - 📁source: 存储收集得到的不同来源的单细胞样本 cicero peak 互作数据
+            - 📄`{scATAC-seq ID}`_cicero_interactions.txt: 对于某个单细胞样本的 cicero peak 互作数据
+          - 📁pair: 存储标准统一单细胞样本 cicero peak 互作数据
+            - 📄`{scATAC-seq ID}`_cicero_interactions.txt: 对于某个单细胞样本的 cicero peak 互作数据
+          - 📁peak: 存储单细胞样本 peak 的数据 (对 peak 互作的数据合并去重)
+            - 📄`{scATAC-seq ID}`_peak.txt: 对于某个单细胞样本的  peak 的数据
+          - 📁tf_gene: 存储 TF 和基因关系对
+            - 📄`{scATAC-seq ID}`_tf_gene_map.txt: 对于某个单细胞样本的 TF 和基因关系对
+          - 📁tf_peak: 存储 TF 和 peak 关系对
+            - 📄`{scATAC-seq ID}`_`{genome}`_tf_peak_map.txt: 对于某个单细胞样本的 TF 和 peak 关系对
+          - 📁trait_gene:
+            - 📁
+            - 📄
+          - 📁trait_gene_chunk_table:
+            - 📁
+            - 📄
+          - 📁trait_gene_table:
+            - 📁
+            - 📄
+          - 📁trait_peak:
+            - 📁
+            - 📄
+          - 📁trait_tf:
+            - 📁
+            - 📄
+          - 📁trait_tf_chunk_table:
+            - 📁
+            - 📄
+          - 📁trait_tf_table:
+            - 📁
+            - 📄
         - 📁download: Store scATAC-seq data processed by SnapATAC2
           - 📁scatac: Store scATAC-seq data processed by SnapATAC2
             - 📄`{scATAC-seq}_snapATAC2.h5ad`: Data downloaded from the download page on the website
@@ -100,12 +154,16 @@
           - 📁hg38: Store the fine-mapping result data with the reference genome hg38
             - 📄`t_variant_{group}_hg38.txt`: Corresponds to the `t_variant_hg38_{group}` table in the database
           - 📄t_trait_chr_count.txt: Store the number of different chromatin in traits or diseases, corresponding to the `t_trait_chr_count` table in the database
-      - 📁variant: Store the input fine-mapping result data for running data
+      - 📁variant: Store the input fine-mapping result data for running data (FINEMAP)
         - 📁hg19: Store the fine-mapping result data with the reference genome hg19
+          - 📄`{trait_label}`.bed
         - 📁hg38: Store the fine-mapping result data with the reference genome hg38
+          - 📄`{trait_label}`.bed
         - 📄fine_mapping_result.pkl: Store the fine-mapping result data of all reference genomes in a file
         - 📄fine_mapping_result_hg19.pkl: Store the fine-mapping result data with the reference genome hg19 in a file
         - 📄fine_mapping_result_hg38.pkl: Store the fine-mapping result data with the reference genome hg38 in a file
+      - 📁variant_susie: Store the input fine-mapping result data for running data (SuSiE)
+        - The sub path structure is the same as under the FINEMAP method.
   - 📁gene: Store gene-related data
     - 📁download: Store the gene version consistent with SnapATAC2 currently
       - 📄gencode.v41.annotation.gtf.gz: Reference genome hg38
@@ -440,3 +498,7 @@ tar -xzvf /mnt/data3/workspace/SCVdb/data/data/download/trait/fine_mapping_hg38.
 tar -xzvf /mnt/data3/workspace/SCVdb/data/data/download/trait/fine_mapping_trait.tar.gz -C /mnt/data3/workspace/SCVdb/data/data/download/variant/
 
 ```
+
+## 3. Data backup records
+
+> [record](record)
