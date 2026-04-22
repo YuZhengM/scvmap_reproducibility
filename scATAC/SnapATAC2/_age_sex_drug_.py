@@ -8,7 +8,7 @@ import snapatac2 as snap
 from pandas import DataFrame
 from anndata import AnnData
 
-import sciv
+import sciv # 0.0.1
 
 
 def get_path(gse_id: str, label: str):

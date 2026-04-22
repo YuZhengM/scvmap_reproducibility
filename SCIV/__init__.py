@@ -4,7 +4,7 @@
 import os
 
 import pandas as pd
-import sciv
+import sciv # 0.0.1
 import yzm_file as yf
 
 
