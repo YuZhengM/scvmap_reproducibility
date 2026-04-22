@@ -8,7 +8,7 @@ import snapatac2 as snap
 from pandas import DataFrame
 from anndata import AnnData
 
-import sciv # 0.0.1
+import sciv
 
 
 def get_path(gse_id: str, label: str):
@@ -75,7 +75,7 @@ def form_difference_gene():
                 # Difference genes
                 sciv.pp.get_difference_genes(
                     adata=_gene_data_,
-                    cluster=f"f_{_type_}",
+                    groupby=f"f_{_type_}",
                     cell_anno=None if is_add_cluster else cell_anno_sample_id,
                     diff_genes_file=diff_genes_file
                 )

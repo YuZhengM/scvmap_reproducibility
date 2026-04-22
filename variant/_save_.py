@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-import sciv # 0.0.1
+import sciv
 
 if __name__ == '__main__':
 

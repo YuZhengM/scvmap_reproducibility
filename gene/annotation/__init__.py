@@ -12,7 +12,7 @@ from tqdm import tqdm
 from yzm_log import Logger
 from yzm_file import StaticMethod
 from yzm_util import Util
-import sciv # 0.0.1
+import sciv
 
 
 class ProcessAnnotation:

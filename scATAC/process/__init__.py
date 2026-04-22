@@ -2,12 +2,11 @@
 # -*- coding: UTF-8 -*-
 
 import os
-import time
 
 import anndata as ad
 
 import pandas as pd
-import sciv # 0.0.1
+import sciv
 from pandas import DataFrame
 import warnings
 

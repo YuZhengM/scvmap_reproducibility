@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from anndata import AnnData
-import sciv # 0.0.1
+import sciv
 from pandas import DataFrame
 from tqdm import tqdm
 from yzm_file import StaticMethod

@@ -8,7 +8,7 @@ import snapatac2 as snap
 from pandas import DataFrame
 from anndata import AnnData
 
-import sciv # 0.0.1
+import sciv
 from yzm_file import StaticMethod
 from yzm_log import Logger
 
@@ -109,6 +109,27 @@ class SnapATAC2Handler:
         cell_anno.loc[cell_anno[self.cluster].isna(), self.cluster] = "unknown"
         return cell_anno
 
+    def preprocessing_sc_atac(self):
+
+        for label in self.label_list:
+
+            if self.is_exist_skip and os.path.exists(self.sc_atac_file(label)):
+                self.log.warning(f"The {self.sc_atac_file(label)} file already exists, skip this process.")
+                continue
+
+            self.log.info(f"Perform scATAC seq preprocessing for {label}.")
+            genome_anno = self.get_genome(label)
+
+            # Gene expression
+            sciv.pp.get_sc_atac(
+                fragment_file=self.fragments_gz_file(label),
+                h5ad_file=self.sc_atac_file(label),
+                genome_anno=genome_anno,
+                need_features=self.max_features,
+                min_tsse=self.min_tsse
+            )
+
+
     def form_gene_data(self):
 
         for label in self.label_list:
@@ -122,13 +143,12 @@ class SnapATAC2Handler:
             self.log.info(f"Generate gene expression file for {label}.")
             genome_anno = self.get_genome(label)
 
+            adata = sciv.fl.read_sc_atac(self.sc_atac_file(label))
+
             # Gene expression
             sciv.pp.get_gene_expression(
-                fragment_file=self.fragments_gz_file(label),
-                h5ad_file=self.sc_atac_file(label),
+                adata=adata,
                 genome_anno=genome_anno,
-                need_features=self.max_features,
-                min_tsse=self.min_tsse,
                 gene_save_file=gene_file
             )
 
@@ -145,15 +165,14 @@ class SnapATAC2Handler:
             self.log.info(f"Generate TF data file for {label}.")
             genome_anno = self.get_genome(label)
 
+            adata = sciv.fl.read_sc_atac(self.sc_atac_file(label))
+
             try:
                 # TF activity
                 sciv.pp.get_tf_data(
-                    fragment_file=self.fragments_gz_file(label),
-                    h5ad_file=self.sc_atac_file(label),
+                    adata=adata,
                     genome_anno=genome_anno,
-                    need_features=self.max_features,
-                    min_tsse=self.min_tsse,
-                    cluster=self.cluster,
+                    groupby=self.cluster,
                     # p_value=p_value,
                     cell_anno=self.cell_anno_file(label),
                     tf_save_file=tf_file
@@ -176,14 +195,13 @@ class SnapATAC2Handler:
             self.log.info(f"Generate difference peak file for {label}.")
             genome_anno = self.get_genome(label)
 
+            adata = sciv.fl.read_sc_atac(self.sc_atac_file(label))
+
             # Difference peaks
             sciv.pp.get_difference_peaks(
-                fragment_file=self.fragments_gz_file(label),
-                h5ad_file=self.sc_atac_file(label),
+                adata=adata,
                 genome_anno=genome_anno,
-                need_features=self.max_features,
-                min_tsse=self.min_tsse,
-                cluster=self.cluster,
+                groupby=self.cluster,
                 cell_anno=self.cell_anno_file(label),
                 diff_peaks_save_file=diff_peaks_file
             )
@@ -204,7 +222,7 @@ class SnapATAC2Handler:
             # Difference genes
             sciv.pp.get_difference_genes(
                 adata=gene_adata,
-                cluster=self.cluster,
+                groupby=self.cluster,
                 cell_anno=self.cell_anno_file(label),
                 diff_genes_file=diff_genes_file
             )
@@ -233,6 +251,7 @@ if __name__ == '__main__':
     handler = SnapATAC2Handler(base_path=path, sample_file=sample_info_file)
     # handler.process_cell_anno()
     handler.form_h5ad_and_fragments_file()
+    handler.preprocessing_sc_atac()
     handler.form_gene_data()
     handler.form_difference_gene()
     handler.form_gene_enrichment()

@@ -4,7 +4,7 @@
 import os
 
 import pandas as pd
-import sciv # 0.0.1
+import sciv
 from anndata import AnnData
 
 if __name__ == '__main__':
