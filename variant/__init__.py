@@ -44,8 +44,14 @@ class HandlerVariant:
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/112.0"
         }
-        self.column_line = "trait_code\tchr\tposition\tvariant\trsId\tallele1\tallele2\tmaf\taf\tbeta\tse\tp_value\tchisq\tz_score\tpp\tbeta_posterior\tsd_posterior\ttrait_abbr\ttrait\tindex\n"
-        self.trait_column = ["trait_code", "trait_abbr", "trait", "ICD10", "type", "meta_id", "mesh_term", "mesh_id", "category", "sample_size", "n_case", "n_control", "popu", "pmid", "cohort", "author", "url", "index"]
+        self.column_line = (
+            "trait_code\tchr\tposition\tvariant\trsId\tallele1\tallele2\tmaf\taf\tbeta\tse\t"
+            "p_value\tchisq\tz_score\tpp\tbeta_posterior\tsd_posterior\ttrait_abbr\ttrait\tindex\n"
+        )
+        self.trait_column = [
+            "trait_code", "trait_abbr", "trait", "ICD10", "type", "meta_id", "mesh_term", "mesh_id",
+            "category", "sample_size", "n_case", "n_control", "popu", "pmid", "cohort", "author", "url", "index"
+        ]
         # Define path folder name
         self.finemap_dir: str = "finemap"
         self.trait_dir: str = "trait"
@@ -142,7 +148,8 @@ class HandlerVariant:
         zip_files_path: list = self.file.get_files_path(file_path)
         for zip_file_path in zip_files_path:
             self.log.info(f"Start decompressing file {zip_file_path}")
-            # Check if there is an error message during decompression. If there is an error message during decompression, it may be caused by incomplete download.
+            # Check if there is an error message during decompression. If there is an error message during
+            # decompression, it may be caused by incomplete download.
             try:
                 z = zipfile.ZipFile(zip_file_path, 'r')
                 z.extractall(path=decompression_path)
@@ -162,7 +169,8 @@ class HandlerVariant:
         gz_files_path: list = self.file.get_files_path(file_path)
         for gz_file_path in gz_files_path:
             self.log.info(f"Start extracting file {gz_file_path}")
-            # 判断是否解压报错, 若解压报错则由于下载不完整导致的
+            # Check if there is an error message during decompression. If there is an error message during
+            # decompression, it may be caused by incomplete download
             filename = re.sub(".gz", ".txt", os.path.basename(gz_file_path))
             decompression_file = os.path.join(decompression_path, filename)
             try:
@@ -190,23 +198,30 @@ class HandlerVariant:
         download_info = self.read_header.get_content(read_file)
         need_download_count = download_info.shape[0] - len(files)
         number = 0
+
         # Prevent cyclic downloads due to download failures
         while need_download_count != 0 and number < 10:
             self.log.info(f"Download {download_info.shape[0] - len(files)}  files")
             pool = Pool(os.cpu_count() - 1)
+
             for name, url in zip(download_info["name"], download_info["url"]):
                 filename = f"{name}{suffix}"
+
                 # Determine if the download has been completed
                 if filename not in files:
                     pool.apply_async(self.file.download_file, (url, os.path.join(download_path, filename)))
+
             pool.close()
             pool.join()
             # Delete files with file size 0
             files_path = self.file.get_files_path(download_path)
+
             for file_path in files_path:
+
                 if os.stat(file_path).st_size == 0:
                     self.log.warning(f"Remove {file_path} file")
                     os.remove(file_path)
+
             files: list = self.file.get_files(download_path)
             need_download_count = download_info.shape[0] - len(files)
             number += 1
@@ -226,12 +241,15 @@ class HandlerVariant:
 
         # Store content
         self.log.info("Start writing connection content")
+
         with open("./data/BBJ/download.txt", "w", encoding="utf-8", buffering=1, newline="\n") as f:
             f.write("name\turl\n")
+
             for link in links_container:
                 link: str
                 name = re.sub(".zip", "", link.split("/")[-1])
                 f.write(f"{name}\thttps://humandbs.dbcls.jp{link}\n")
+
         self.log.info("Complete writing connection content")
 
         # Download files
@@ -302,11 +320,15 @@ class HandlerVariant:
 
                         rsId_list.append(split[5])
 
-                        w.write(f"chr{split[0]}\t{split[1]}\t{split[1]}\t{split[5]}\t{str(pip)}\t{trait_abbr}\t{str(__index__)}\n")
+                        w.write(
+                            f"chr{split[0]}\t{split[1]}\t{split[1]}\t"
+                            f"{split[5]}\t{str(pip)}\t{trait_abbr}\t{str(__index__)}\n"
+                        )
                         # split[5]: rsId, split[6]: af
                         f.write(
-                            f"{trait_code}\tchr{split[0]}\t{split[1]}\t{split[4]}\t{split[5]}\t{split[2]}\t{split[3]}\t{str(self.get_maf(float(split[6])))}\t"
-                            f"{split[6]}\t{split[7]}\t{split[8]}\t{split[9]}\t\t{str(float(split[7]) / float(split[8]))}\t"
+                            f"{trait_code}\tchr{split[0]}\t{split[1]}\t{split[4]}\t"
+                            f"{split[5]}\t{split[2]}\t{split[3]}\t{str(self.get_maf(float(split[6])))}\t{split[6]}\t"
+                            f"{split[7]}\t{split[8]}\t{split[9]}\t\t{str(float(split[7]) / float(split[8]))}\t"
                             f"{str(pip)}\t{split[13]}\t{split[14]}\t{trait_abbr}\t{trait}\t{str(__index__)}\n"
                         )
                         __index__ += 1
@@ -314,8 +336,12 @@ class HandlerVariant:
             f.close()
             self.log.info(f"Complete {filename} file processing")
 
-        trait_index_info = pd.DataFrame({"trait_abbr": trait_abbr_list, "trait_code": trait_code_list, "index": trait_index_list})
-        trait_info = pd.merge(left=trait_index_info, right=BBJ_trait_map, left_on="trait_abbr", right_on="Abbreviation", how="inner")
+        trait_index_info = pd.DataFrame(
+            {"trait_abbr": trait_abbr_list, "trait_code": trait_code_list, "index": trait_index_list})
+        trait_info = pd.merge(
+            left=trait_index_info, right=BBJ_trait_map,
+            left_on="trait_abbr", right_on="Abbreviation", how="inner"
+        )
         print(trait_info.columns)
         trait_info.columns = ["trait_abbr", "trait_code", "index", "trait", 'Abbreviation', "ICD10", "file_name"]
         trait_info = trait_info[["trait_abbr", "trait_code", "index", "trait", "ICD10", "file_name"]]
@@ -375,9 +401,15 @@ class HandlerVariant:
                     trait_code_list.append(trait_code)
 
                     # create a file
-                    finemap_file: TextIO = open(os.path.join(self.UKBB_finemap_output, f"{trait_code}.bed"), "w", encoding="utf-8", newline="\n", buffering=1)
+                    finemap_file: TextIO = open(
+                        os.path.join(self.UKBB_finemap_output, f"{trait_code}.bed"),
+                        "w", encoding="utf-8", newline="\n", buffering=1
+                    )
                     finemap_file_dict.update({trait_abbr: finemap_file})
-                    trait_file: TextIO = open(os.path.join(self.UKBB_trait_output, f"{trait_code}.txt"), "w", encoding="utf-8", newline="\n", buffering=1)
+                    trait_file: TextIO = open(
+                        os.path.join(self.UKBB_trait_output, f"{trait_code}.txt"),
+                        "w", encoding="utf-8", newline="\n", buffering=1
+                    )
                     trait_file.write(self.column_line)
                     trait_file_dict.update({trait_abbr: trait_file, f"{trait_abbr}_id": trait_code})
                     # variant index
@@ -391,26 +423,37 @@ class HandlerVariant:
                 trait_rsId_list_dict[trait_abbr].append(split[4])
 
                 finemap_f: TextIO = finemap_file_dict[trait_abbr]
-                finemap_f.write(f"{split[0]}\t{split[1]}\t{split[1]}\t{split[4]}\t{split[17]}\t{trait_abbr}\t{str(variant_index_dict[trait_abbr])}\n")
+                finemap_f.write(
+                    f"{split[0]}\t{split[1]}\t{split[1]}\t{split[4]}\t"
+                    f"{split[17]}\t{trait_abbr}\t{str(variant_index_dict[trait_abbr])}\n"
+                )
                 trait_f: TextIO = trait_file_dict[trait_abbr]
                 trait_code: str = trait_file_dict[f"{trait_abbr}_id"]
                 # split[5]: allele1
                 trait_f.write(
-                    f"{trait_code}\t{split[0]}\t{split[1]}\t{split[3]}\t{split[4]}\t{split[5]}\t{split[6]}\t{split[13]}\t"
-                    f"\t{split[14]}\t{split[15]}\t\t{split[16]}\t{str(float(split[14]) / float(split[15]))}\t"
-                    f"{split[17]}\t{split[19]}\t{split[20]}\t{trait_abbr}\t{trait}\t{str(variant_index_dict[trait_abbr])}\n"
+                    f"{trait_code}\t{split[0]}\t{split[1]}\t{split[3]}\t{split[4]}\t"
+                    f"{split[5]}\t{split[6]}\t{split[13]}\t\t{split[14]}\t"
+                    f"{split[15]}\t\t{split[16]}\t{str(float(split[14]) / float(split[15]))}\t{split[17]}\t"
+                    f"{split[19]}\t{split[20]}\t{trait_abbr}\t{trait}\t{str(variant_index_dict[trait_abbr])}\n"
                 )
                 variant_index_dict.update({trait_abbr: variant_index_dict[trait_abbr] + 1})
 
         self.log.info(f"Start closing file")
+
         for trait in trait_list:
             finemap_f: TextIO = finemap_file_dict[trait]
             finemap_f.close()
             trait_f: TextIO = trait_file_dict[trait]
             trait_f.close()
 
-        trait_index_info = pd.DataFrame({"trait_abbr": trait_list, "trait_code": trait_code_list, "index": trait_index_list})
-        trait_info = pd.merge(left=trait_index_info, right=UKBB_trait_map, left_on="trait_abbr", right_on="trait", how="inner")
+        trait_index_info = pd.DataFrame({
+            "trait_abbr": trait_list,
+            "trait_code": trait_code_list,
+            "index": trait_index_list}
+        )
+        trait_info = pd.merge(
+            left=trait_index_info, right=UKBB_trait_map, left_on="trait_abbr", right_on="trait", how="inner"
+        )
         # save
         trait_info.to_csv("./data/UKBB/trait_info.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
 
@@ -419,7 +462,10 @@ class HandlerVariant:
         # Read trait mapping file
         finngen_trait_map = self.read_header.get_content("./data/FinnGen/endpoints.tsv")
         # phenotype	phenocode	category	num_cases	num_cases_prev	num_controls	num_gw_significant	num_gw_significant_prev	lambda
-        finngen_trait_map.columns = ["trait", "trait_abbr", "category", "num_cases", "num_cases_prev", "num_controls", "num_gw_significant", "num_gw_significant_prev", "lambda"]
+        finngen_trait_map.columns = [
+            "trait", "trait_abbr", "category", "num_cases", "num_cases_prev", "num_controls",
+            "num_gw_significant", "num_gw_significant_prev", "lambda"
+        ]
 
         # Add download link
         url_prefix: str = "https://storage.googleapis.com/finngen-public-data-r11/finemap/full/finemap/finngen_R11_"
@@ -430,7 +476,9 @@ class HandlerVariant:
         download_info: DataFrame = finngen_trait_map[["trait_abbr", "url"]]
         download_info.columns = ["name", "url"]
         download_info["name"] = "finngen_R11_" + download_info["name"].astype(str)
-        download_info.to_csv("./data/FinnGen/download.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+        download_info.to_csv(
+            "./data/FinnGen/download.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n"
+        )
 
         # # Download files
         # self.download_files("./data/FinnGen/download.txt", self.FinnGen_download_path, suffix=".gz")
@@ -438,7 +486,9 @@ class HandlerVariant:
         # self.decompression_gz_file(self.FinnGen_download_path, self.FinnGen_decompression_path, "./data/FinnGen/download.txt", suffix=".gz")
 
         # Obtain information on the final success
-        finngen_trait_map.to_csv("./data/FinnGen/information.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+        finngen_trait_map.to_csv(
+            "./data/FinnGen/information.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n"
+        )
 
         # Obtain information on the final success
         files_dict = self.file.entry_files_dict(self.FinnGen_decompression_path)
@@ -494,11 +544,14 @@ class HandlerVariant:
 
                         rsId_list.append(split[4])
 
-                        w.write(f"{split[5]}\t{split[6]}\t{split[6]}\t{split[4]}\t{str(pip)}\t{split[0]}\t{str(__index__)}\n")
+                        w.write(
+                            f"{split[5]}\t{split[6]}\t{split[6]}\t{split[4]}\t"
+                            f"{str(pip)}\t{split[0]}\t{str(__index__)}\n")
                         # split[9]: maf
                         f.write(
-                            f"{trait_code}\t{split[5]}\t{split[6]}\t{split[2]}\t{split[4]}\t{split[7]}\t{split[8]}\t{split[9]}\t"
-                            f"\t{split[10]}\t{split[11]}\t{split[19]}\t\t{split[12]}\t"
+                            f"{trait_code}\t{split[5]}\t{split[6]}\t{split[2]}\t{split[4]}\t"
+                            f"{split[7]}\t{split[8]}\t{split[9]}\t\t"
+                            f"{split[10]}\t{split[11]}\t{split[19]}\t\t{split[12]}\t"
                             f"{str(pip)}\t\t\t{trait_abbr}\t{trait}\t{str(__index__)}\n"
                         )
 
@@ -507,9 +560,13 @@ class HandlerVariant:
             f.close()
             self.log.info(f"Complete {filename} file processing")
 
-        trait_index_info = pd.DataFrame({"trait_abbr": trait_abbr_name_list, "trait_code": trait_code_list, "index": trait_index_list})
+        trait_index_info = pd.DataFrame({
+            "trait_abbr": trait_abbr_name_list, "trait_code": trait_code_list, "index": trait_index_list
+        })
         finngen_trait_map_have = pd.merge(left=trait_index_info, right=finngen_trait_map, on="trait_abbr", how="inner")
-        finngen_trait_map_have.to_csv("./data/FinnGen/have_trait_info.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+        finngen_trait_map_have.to_csv(
+            "./data/FinnGen/have_trait_info.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n"
+        )
 
     def processing_causaldb(self, buffer_size: int = 10 * 1024 * 1024):
         """
@@ -522,7 +579,9 @@ class HandlerVariant:
         trait_info = self.read_header.get_content("./data/CAUSALdb/meta.txt")
 
         # get fine-mapping data
-        trait_file: str = os.path.join(self.CAUSALdb_download_path, "credible_set.v2.1.20240623", "v2.1", "credible_set.txt")
+        trait_file: str = os.path.join(
+            self.CAUSALdb_download_path, "credible_set.v2.1.20240623", "v2.1", "credible_set.txt"
+        )
 
         trait_meta_id_list: list = list(trait_info["meta_id"])
         trait_info.loc[:, "index"] = np.array(range(len(trait_meta_id_list))) + 1
@@ -560,7 +619,8 @@ class HandlerVariant:
 
             fine_mapping_file = os.path.join(self.CAUSALdb_finemap_output, f"{trait_code}.bed")
             variant_file = os.path.join(self.CAUSALdb_trait_output, f"{trait_code}.txt")
-            # file (It is recommended to execute this process in a Linux environment, which can effectively solve an error of restricted file opening.)
+            # file (It is recommended to execute this process in a Linux environment, which can effectively solve
+            # an error of restricted file opening.)
             fine_mapping_f: TextIO = open(fine_mapping_file, "w", encoding="utf-8", buffering=1024, newline="\n")
             variant_f: TextIO = open(variant_file, "w", encoding="utf-8", buffering=1024, newline="\n")
             variant_f.write(self.column_line)
@@ -580,7 +640,9 @@ class HandlerVariant:
         trait_info.loc[:, "trait_abbr"] = trait_abbr_list
         trait_info.loc[:, "trait_code"] = trait_code_list
 
-        trait_info.to_csv("./data/CAUSALdb/trait_info.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+        trait_info.to_csv(
+            "./data/CAUSALdb/trait_info.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n"
+        )
 
         # Record the number of processed lines, totaling over 36000000
         line_number: int = 0
@@ -647,11 +709,14 @@ class HandlerVariant:
                     __trait_index__: int = variant_index_dict[meta_id]
                     __trait_index__ += 1
 
-                    fine_mapping_file_w.write(f"chr{split[0]}\t{split[1]}\t{split[1]}\t{split[2]}\t{split[14]}\t{__trait_abbr__}\t{str(__trait_index__)}\n")
+                    fine_mapping_file_w.write(
+                        f"chr{split[0]}\t{split[1]}\t{split[1]}\t{split[2]}\t"
+                        f"{split[14]}\t{__trait_abbr__}\t{str(__trait_index__)}\n")
 
                     __variant__: str = f"{split[0]}:{split[1]}:{split[4]}:{split[5]}"
                     variant_file_w.write(
-                        f"{__trait_code__}\tchr{split[0]}\t{split[1]}\t{__variant__}\t{split[2]}\t{split[4]}\t{split[5]}\t{split[3]}\t"
+                        f"{__trait_code__}\tchr{split[0]}\t{split[1]}\t{__variant__}\t"
+                        f"{split[2]}\t{split[4]}\t{split[5]}\t{split[3]}\t"
                         f"\t{split[6]}\t{split[7]}\t{split[8]}\t\t{split[9]}\t"
                         f"{split[14]}\t\t\t{__trait_abbr__}\t{__trait__}\t{str(__trait_index__)}\n"
                     )
@@ -690,8 +755,14 @@ class HandlerVariant:
                 finemap_content.sort_values(["chr", "position"], inplace=True)
                 finemap_content["position"] = finemap_content["position"].astype(int)
                 finemap_content["bp"] = finemap_content["bp"].astype(int)
-                content.to_csv(os.path.join(self.filter_trait_output, filename), sep="\t", index=False, encoding="utf-8", lineterminator="\n")
-                finemap_content.to_csv(os.path.join(self.filter_finemap_output, finemap_filename), sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+                content.to_csv(
+                    os.path.join(self.filter_trait_output, filename), sep="\t",
+                    index=False, encoding="utf-8", lineterminator="\n"
+                )
+                finemap_content.to_csv(
+                    os.path.join(self.filter_finemap_output, finemap_filename), sep="\t",
+                    header=False, index=False, encoding="utf-8", lineterminator="\n"
+                )
 
     def filter_data(self, min_size: int = 1):
         dirs_path: dict = self.file.entry_dirs_dict(self.output)
@@ -769,10 +840,14 @@ class HandlerVariant:
         ukbb_trait_info = self.file_column_all(ukbb_trait_info)
 
         # save
-        trait_info: DataFrame = pd.concat([finngen_trait_info, bbj_trait_info, causaldb_trait_info, ukbb_trait_info], axis=0)
+        trait_info: DataFrame = pd.concat(
+            [finngen_trait_info, bbj_trait_info, causaldb_trait_info, ukbb_trait_info], axis=0
+        )
         trait_info = trait_info[self.trait_column]
         trait_info.reset_index(drop=True, inplace=True)
-        trait_info.to_csv("./data/trait_info.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+        trait_info.to_csv(
+            "./data/trait_info.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n"
+        )
 
     def processing_trait_consistent(self):
 
@@ -806,8 +881,11 @@ class HandlerVariant:
         _convert_to_int_type_("n_control")
 
         # Complete the sample size
-        index_values = (have_trait_info["sample_size"] < 0) & (have_trait_info["n_case"] > 0) & (have_trait_info["n_control"] > 0)
-        have_trait_info.loc[index_values, "sample_size"] = have_trait_info.loc[index_values, "n_case"].astype(int) + have_trait_info.loc[index_values, "n_control"].astype(int)
+        index_values = ((have_trait_info["sample_size"] < 0)
+                        & (have_trait_info["n_case"] > 0)
+                        & (have_trait_info["n_control"] > 0))
+        have_trait_info.loc[index_values, "sample_size"] = have_trait_info.loc[index_values, "n_case"].astype(int) + \
+                                                           have_trait_info.loc[index_values, "n_control"].astype(int)
 
         have_trait_info_tmp = have_trait_info.copy()
 
@@ -815,7 +893,9 @@ class HandlerVariant:
         have_trait_info.loc[have_trait_info_tmp["sample_size"] < 0, "sample_size"] = pd.NA
         have_trait_info.loc[have_trait_info_tmp["n_case"] < 0, "n_case"] = pd.NA
         have_trait_info.loc[have_trait_info_tmp["n_control"] < 0, "n_control"] = pd.NA
-        have_trait_info.to_csv("./data/trait_info_have.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n")
+        have_trait_info.to_csv(
+            "./data/trait_info_have.txt", sep="\t", index=False, encoding="utf-8", lineterminator="\n"
+        )
 
 
 if __name__ == '__main__':

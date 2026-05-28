@@ -104,7 +104,8 @@ class SnapATAC2Handler:
         data_file = os.path.join(self.label_dict[label], "annotation_stdn.txt")
         cell_anno = pd.read_table(data_file)
         new_barcodes = list(cell_anno["barcodes"].str.split("-", expand=True)[0])
-        cell_anno.index = cell_anno["barcodes"].astype(str) if len(new_barcodes) != len(set(new_barcodes)) else new_barcodes
+        cell_anno.index = cell_anno["barcodes"].astype(str) if len(new_barcodes) != len(set(new_barcodes)) \
+            else new_barcodes
         cell_anno.rename_axis("index", inplace=True)
         cell_anno.loc[cell_anno[self.cluster].isna(), self.cluster] = "unknown"
         return cell_anno
@@ -128,7 +129,6 @@ class SnapATAC2Handler:
                 need_features=self.max_features,
                 min_tsse=self.min_tsse
             )
-
 
     def form_gene_data(self):
 
@@ -247,7 +247,8 @@ class SnapATAC2Handler:
 
 if __name__ == '__main__':
     path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC"
-    sample_info_file: str = "/public/home/lcq/rgzn/yuzhengmin/keti/project_code/scvdb_reproducibility/scATAC/data/sample_info.txt"
+    sample_info_file: str = ("/public/home/lcq/rgzn/yuzhengmin/keti/project_code"
+                             "/scvdb_reproducibility/scATAC/data/sample_info.txt")
     handler = SnapATAC2Handler(base_path=path, sample_file=sample_info_file)
     # handler.process_cell_anno()
     handler.form_h5ad_and_fragments_file()

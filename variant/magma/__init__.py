@@ -23,7 +23,10 @@ def get_gene_anno():
         gene_data = gene_data[['f_gene_id', 'f_chr', 'f_start', 'f_end', 'f_strand', 'f_gene_name']]
         gene_data["f_gene_id"] = gene_data["f_gene_id"] + "__" + gene_data["f_gene_name"]
         gene_data["f_chr"] = gene_data["f_chr"].str.split("chr", expand=True)[1].values
-        gene_data.to_csv(f"{output_path}/gene/gene_{genome}.bed", sep="\t", header=False, index=False, lineterminator="\n", encoding="utf-8")
+        gene_data.to_csv(
+            f"{output_path}/gene/gene_{genome}.bed", sep="\t",
+            header=False, index=False, lineterminator="\n", encoding="utf-8"
+        )
 
 
 def get_variant_anno():
@@ -38,7 +41,9 @@ def get_variant_anno():
             if _trait_code_.startswith("UKBB"):
                 trait_data["p_value"] = 2 * (1 - norm.cdf(abs(trait_data["z_score"])))
 
-            trait_data[["rsId", "p_value"]].to_csv(_result_data_all_, sep="\t", header=False, index=False, lineterminator="\n")
+            trait_data[["rsId", "p_value"]].to_csv(
+                _result_data_all_, sep="\t", header=False, index=False, lineterminator="\n"
+            )
             trait_data = trait_data[["allele1", "allele2", "maf", "af", "index"]]
 
         _result_data_ = f"{output_path}/magma_input/{genome}/{_trait_code_}.bim"
@@ -117,7 +122,10 @@ def exec_magma_gene():
 
         file.makedirs(f"{output_path}/magma_output/{genome}_gene")
 
-        for trait_code, cohort, sample_size, popu in zip(trait_info["f_trait_code"], trait_info["f_cohort"], trait_info["f_sample_size"], trait_info["f_popu"]):
+        for trait_code, cohort, sample_size, popu in zip(trait_info["f_trait_code"],
+                                                         trait_info["f_cohort"],
+                                                         trait_info["f_sample_size"],
+                                                         trait_info["f_popu"]):
             output_file: str = f"{output_path}/magma_output/{genome}_gene/{trait_code}"
 
             if np.isnan(sample_size) or sample_size <= 50:
@@ -136,7 +144,8 @@ def exec_magma_gene():
                 print(f"{gene_anno_file} is not exist")
                 continue
 
-            exec_str: str = f"{magma_file} --bfile {bfile} --gene-annot {gene_anno_file} --pval {gene_file} use=1,2 N={int(sample_size)} --out {output_file}"
+            exec_str: str = (f"{magma_file} --bfile {bfile} --gene-annot {gene_anno_file} "
+                             f"--pval {gene_file} use=1,2 N={int(sample_size)} --out {output_file}")
             print(f"Exec `{exec_str}` command")
             util.exec_command(exec_str)
 
@@ -150,7 +159,9 @@ def form_magma_variant_result_file(group_count: int = 100):
         genome_file_dict: dict = {}
 
         for i in range(group_count):
-            genome_file_dict.update({i: open(f"{genome_result_path}/t_magma_{i}.txt", "w", encoding="utf-8", newline="\n")})
+            genome_file_dict.update({
+                i: open(f"{genome_result_path}/t_magma_{i}.txt", "w", encoding="utf-8", newline="\n")
+            })
 
         for trait_id, trait_code in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_code"])):
 
@@ -194,7 +205,9 @@ def form_magma_result_file(group_count: int = 100):
         genome_file_dict: dict = {}
 
         for i in range(group_count):
-            genome_file_dict.update({i: open(f"{genome_result_path}/t_magma_{i}.txt", "w", encoding="utf-8", newline="\n")})
+            genome_file_dict.update({
+                i: open(f"{genome_result_path}/t_magma_{i}.txt", "w", encoding="utf-8", newline="\n")
+            })
 
         for trait_id, trait_code in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_code"])):
 
@@ -215,7 +228,8 @@ def form_magma_result_file(group_count: int = 100):
                     new_line = re.sub(" +", "\t", line)
                     split = new_line.split("\t")
                     gene_split = str(split[0]).split("__")
-                    f.write(f"{trait_id}\t{gene_split[0]}\t{gene_split[1]}\t{split[1]}\t{split[2]}\t{split[3]}\t{split[4]}\t{split[7]}\t{split[8]}\n")
+                    f.write(f"{trait_id}\t{gene_split[0]}\t{gene_split[1]}\t{split[1]}\t{split[2]}\t"
+                            f"{split[3]}\t{split[4]}\t{split[7]}\t{split[8]}\n")
                     all_f.write(f"{trait_id}\t{gene_split[1]}\t{genome}\n")
 
         for i in range(group_count):
@@ -234,17 +248,21 @@ def gene_enrichment_analysis(group_count: int = 100, top: int = 50):
         _genome_ = param[2]
         _gene_list_ = param[3]
 
+        filename = f"{result_path}/gene_enrichment_trait/{_genome_}/{_trait_code_}_gene_enrichment_trait_data.txt"
+
         try:
             enrichr_data = sciv.pp.gsea_enrichr(gene_list=_gene_list_, is_verbose=False)
             enrichr_data.insert(0, "trait_id", _trait_id_)
-            enrichr_data.to_csv(f"{result_path}/gene_enrichment_trait/{_genome_}/{_trait_code_}_gene_enrichment_trait_data.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+            enrichr_data.to_csv(filename, sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
         except Exception as e:
             print(f"Error {param}")
             print(e)
             try:
                 enrichr_data = sciv.pp.gsea_enrichr(gene_list=_gene_list_, is_verbose=False)
                 enrichr_data.insert(0, "trait_id", _trait_id_)
-                enrichr_data.to_csv(f"{result_path}/gene_enrichment_trait/{_genome_}/{_trait_code_}_gene_enrichment_trait_data.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+                enrichr_data.to_csv(
+                    filename, sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n"
+                )
             except Exception as e:
                 print(f"Error {param}")
                 print(e)
@@ -259,8 +277,11 @@ def gene_enrichment_analysis(group_count: int = 100, top: int = 50):
         gene_enrichment_dict.update({genome: {}})
 
         for i in tqdm(range(group_count)):
-            magma_gene_genome_info = pd.read_csv(f"{result_path}/{genome}/t_magma_{i}.txt", sep="\t", header=None)
-            magma_gene_genome_info.columns = ["trait_id", "gene_id", "gene", "chr", "start", "end", "n_snps", "z_score", "p_value"]
+            magma_gene_genome_info = pd.read_csv(
+                f"{result_path}/{genome}/t_magma_{i}.txt", sep="\t", header=None
+            )
+            magma_gene_genome_info.columns = ["trait_id", "gene_id", "gene", "chr", "start", "end",
+                                              "n_snps", "z_score", "p_value"]
             gene_enrichment_dict[genome].update({i: magma_gene_genome_info})
 
             del i, magma_gene_genome_info
@@ -268,11 +289,12 @@ def gene_enrichment_analysis(group_count: int = 100, top: int = 50):
         del genome
 
     for genome in genomes:
-        file.makedirs(f"{result_path}/gene_enrichment_trait/{genome}")
+        genome_path = f"{result_path}/gene_enrichment_trait/{genome}"
+        file.makedirs(genome_path)
 
         for trait_id, trait_code in zip(trait_info["f_trait_id"], trait_info["f_trait_code"]):
 
-            if os.path.exists(f"{result_path}/gene_enrichment_trait/{genome}/{trait_code}_gene_enrichment_trait_data.txt"):
+            if os.path.exists(f"{genome_path}/{trait_code}_gene_enrichment_trait_data.txt"):
                 print(f"The gene list for cluster {trait_id} is exist.")
                 continue
 
@@ -315,12 +337,13 @@ def gene_enrichment_file(group_count: int = 100):
         )
 
     for genome in genomes:
-        file.makedirs(f"{result_path}/gene_enrichment_trait_table/{genome}")
+        genome_path = f"{result_path}/gene_enrichment_trait_table/{genome}"
+        file.makedirs(genome_path)
 
         for trait_id, trait_code in tqdm(zip(trait_info["f_trait_id"], trait_info["f_trait_code"])):
 
             # Read difference gene data
-            gene_enrich_file: str = f"{result_path}/gene_enrichment_trait/{genome}/{trait_code}_gene_enrichment_trait_data.txt"
+            gene_enrich_file: str = f"{genome_path}/{trait_code}_gene_enrichment_trait_data.txt"
 
             if not os.path.exists(gene_enrich_file):
                 continue
@@ -330,9 +353,13 @@ def gene_enrichment_file(group_count: int = 100):
             if gene_enrich.empty:
                 continue
 
-            gene_enrich.columns = ["f_trait_id", "f_gene_set", "f_term", "f_overlap", "f_p_value", "f_adjusted_p_value", "f_p_value_old", "f_adjusted_p_value_old", "f_odds_ratio", "f_combined_score", "f_gene"]
+            gene_enrich.columns = ["f_trait_id", "f_gene_set", "f_term", "f_overlap", "f_p_value",
+                                   "f_adjusted_p_value", "f_p_value_old", "f_adjusted_p_value_old",
+                                   "f_odds_ratio", "f_combined_score", "f_gene"]
             gene_enrich["f_count"] = gene_enrich["f_overlap"].str.split("/", expand=True)[0]
-            gene_enrich["f_overlap"] = gene_enrich["f_count"].astype(float) / gene_enrich["f_overlap"].str.split("/", expand=True)[1].astype(float)
+            gene_enrich["f_overlap"] = gene_enrich["f_count"].astype(float) / \
+                                       gene_enrich["f_overlap"].str.split("/", expand=True)[1].astype(float)
+
             gene_enrich = gene_enrich[[
                 "f_trait_id", "f_gene_set", "f_term", "f_overlap", "f_p_value", "f_adjusted_p_value",
                 "f_odds_ratio", "f_combined_score", "f_gene", "f_count"
@@ -340,20 +367,29 @@ def gene_enrichment_file(group_count: int = 100):
             gene_enrichment_dict[int(trait_id.split("_")[-1]) % group_count][genome].append(gene_enrich)
 
     for i in tqdm(range(group_count)):
+
         for genome in genomes:
             gene_enrich_trait_file = pd.concat(gene_enrichment_dict[i][genome], axis=0)
-            gene_enrich_trait_file.to_csv(f"{result_path}/gene_enrichment_trait_table/{genome}/t_gene_enrichment_trait_{genome}_{i}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+            genome_path = f"{result_path}/gene_enrichment_trait_table/{genome}"
+            gene_enrich_trait_file.to_csv(
+                f"{genome_path}/t_gene_enrichment_trait_{genome}_{i}.txt",
+                sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n"
+            )
 
 
 def form_gene_count_file():
-    trait_gene_data = pd.read_table(f"{result_path}/t_magma.txt", header=None, names=["f_trait_id", "f_gene", "f_genome"])
+    trait_gene_data = pd.read_table(f"{result_path}/t_magma.txt", header=None,
+                                    names=["f_trait_id", "f_gene", "f_genome"])
     genome_gene_trait_count_list = []
 
     for genome in genomes:
         print(f"Gene count {genome}...")
         genome_trait_gene = trait_gene_data[trait_gene_data["f_genome"] == genome]
         genome_trait_gene = genome_trait_gene[["f_trait_id", "f_gene"]]
-        genome_trait_gene.to_csv(f"{result_path}/t_magma_{genome}.txt", sep="\t", header=False, index=False, encoding="utf-8", lineterminator="\n")
+        genome_trait_gene.to_csv(
+            f"{result_path}/t_magma_{genome}.txt", sep="\t", header=False,
+            index=False, encoding="utf-8", lineterminator="\n"
+        )
 
         genome_gene_trait_count = genome_trait_gene.groupby("f_gene").size().reset_index()
         genome_gene_trait_count.columns = ["f_gene", "f_count"]
@@ -361,7 +397,10 @@ def form_gene_count_file():
         genome_gene_trait_count_list.append(genome_gene_trait_count)
 
     genome_gene_trait_count_data = pd.concat(genome_gene_trait_count_list, axis=0)
-    genome_gene_trait_count_data.to_csv(f"{result_path}/t_magma_gene_trait_count.txt", sep="\t", header=True, index=False, encoding="utf-8", lineterminator="\n")
+    genome_gene_trait_count_data.to_csv(
+        f"{result_path}/t_magma_gene_trait_count.txt", sep="\t", header=True,
+        index=False, encoding="utf-8", lineterminator="\n"
+    )
 
 
 def word_to_number(word: str) -> int:
@@ -383,14 +422,22 @@ def merge_trait_gene(group_count: int = 100):
             )
             genome_data_list.append(_group_data_)
             # anno
-            _group_anno_data_ = pd.read_table(f"{result_path}/{genome}_anno/t_magma_{_group_}.txt", header=None, names=["trait_id", "gene_id", "gene", "rsId"])
+            _group_anno_data_ = pd.read_table(
+                f"{result_path}/{genome}_anno/t_magma_{_group_}.txt", header=None,
+                names=["trait_id", "gene_id", "gene", "rsId"]
+            )
             genome_anno_data_list.append(_group_anno_data_)
 
         genome_data = pd.concat(genome_data_list, axis=0)
-        genome_data.to_csv(f"{result_path}/magma_{genome}_data.txt", sep="\t", header=True, index=False, encoding="utf-8")
+        genome_data.to_csv(
+            f"{result_path}/magma_{genome}_data.txt", sep="\t", header=True, index=False, encoding="utf-8"
+        )
 
         genome_anno_data = pd.concat(genome_anno_data_list, axis=0)
-        genome_anno_data.to_csv(f"{result_path}/magma_anno_{genome}_data.txt", sep="\t", header=True, index=False, encoding="utf-8")
+        genome_anno_data.to_csv(
+            f"{result_path}/magma_anno_{genome}_data.txt", sep="\t",
+            header=True, index=False, encoding="utf-8"
+        )
 
 
 def trait_gene_chunk(group_count: int = 100):
@@ -412,7 +459,10 @@ def trait_gene_chunk(group_count: int = 100):
         for _group_ in tqdm(range(group_count)):
             group_data = gene_data[gene_data["group"] == _group_]
             group_data = group_data.drop(columns=["group"], axis=0)
-            group_data.to_csv(os.path.join(path, f"t_trait_gene_{genome}_{_group_}.txt"), sep="\t", header=False, index=False, encoding="utf-8")
+            group_data.to_csv(
+                os.path.join(path, f"t_trait_gene_{genome}_{_group_}.txt"), sep="\t",
+                header=False, index=False, encoding="utf-8"
+            )
 
 
 def form_sql_file(group_count: int = 100):
