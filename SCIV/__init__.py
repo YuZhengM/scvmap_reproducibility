@@ -5,7 +5,6 @@ import os
 
 import pandas as pd
 import sciv
-import yzm_file as yf
 
 
 def run_sciv_trs():
@@ -26,8 +25,6 @@ def run_sciv_trs():
     for gse, label, genome in zip(sample_info["f_gse_id"], sample_info["f_label"], sample_info["f_genome"]):
 
         _label_path_: str = os.path.join(result_path, label)
-        _cache_path_: str = os.path.join(_label_path_, "cache")
-        _log_path_: str = os.path.join(_label_path_, "log")
 
         _is_skip_: bool = True
 
@@ -60,15 +57,8 @@ def run_sciv_trs():
 
             print(f"Start processing sample {gse}-{label}-{_method_}")
 
-            # set cache data path
-            sciv.ul.project_cache_path = _cache_path_
-
-            # set log information
-            sciv.ul.is_form_log_file = True
-            sciv.ul.log_file_path = _log_path_
-
             # run
-            trs = sciv.ml.core(
+            trs = sciv.ml.trs(
                 adata=sc_atac_data,
                 variants=variant_data_dict,
                 trait_info=trait_info,
@@ -85,7 +75,7 @@ def run_sciv_trs():
             print(trs)
 
 
-def run_sciv_variant():
+def run_sciv_vrs():
 
     for gse, label, genome in zip(sample_info["f_gse_id"], sample_info["f_label"], sample_info["f_genome"]):
 
@@ -99,23 +89,42 @@ def run_sciv_variant():
 
             # TRS results
             trs_data = sciv.fl.read_h5ad(trs_file)
+            sc_atac = sciv.fl.read_h5ad(os.path.join(_label_path_, "sc_atac.h5ad"))
+            da_peaks = sciv.fl.read_h5ad(os.path.join(_label_path_, "da_peaks.h5ad"))
+            cc_data = sciv.fl.read_h5ad(os.path.join(_label_path_, "cc_data.h5ad"))
+
+            trait_id_list = trs_data.var["id"]
+
+            for _trait_ in trait_id_list:
+
+                vrs = sciv.ml.vrs(
+                    adata=trs_data,
+                    sc_atac=sc_atac,
+                    da_peaks=da_peaks,
+                    cc_data=cc_data,
+                    trait=_trait_
+                )
+
+                
 
 
 if __name__ == '__main__':
     print("run...")
 
-    file = yf.StaticMethod("SCIV")
+    file = sciv.ul.file_method("SCIV")
 
-    sc_atac_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/scATAC"
-    database_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database"
-    variant_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti/database/sc_variant/variant"
+    base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti"
+
+    sc_atac_path: str = f"{base_path}/scATAC"
+    database_path: str = f"{base_path}/database"
+    variant_path: str = f"{database_path}/sc_variant/variant"
 
     # output path
     result_path: str = os.path.join(database_path, "sc_variant_sciv", "result")
 
-    # Read sample file
+    # Read the sample file
     sample_info = pd.read_table("../scATAC/data/sample_info_with_age_sex_drug.txt")
 
     run_sciv_trs()
 
-    # run_sciv_variant()
+    run_sciv_vrs()
