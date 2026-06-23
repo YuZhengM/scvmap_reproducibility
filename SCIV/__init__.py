@@ -29,7 +29,6 @@ def run_sciv_trs():
         _is_skip_: bool = True
 
         for _method_ in ["finemap", "susie"]:
-
             # result data
             trs_filename = f"{label}_trs_sciv_{_method_}_data.h5ad"
             trs_file = os.path.join(_label_path_, trs_filename)
@@ -62,50 +61,11 @@ def run_sciv_trs():
                 adata=sc_atac_data,
                 variants=variant_data_dict,
                 trait_info=trait_info,
-                save_path=_label_path_,
-                model_dir=os.path.join(_label_path_, "poisson_vi"),
-                is_file_exist_loading=True,
-                filename_dict={
-                    "atac_overlap": f"atac_overlap_{_method_}.h5ad",
-                    "init_score": f"init_score_{_method_}.h5ad",
-                    "trs": trs_filename
-                }
+                model_dir=os.path.join(_label_path_, "poisson_vi")
             )
-
             print(trs)
 
-
-def run_sciv_vrs():
-
-    for gse, label, genome in zip(sample_info["f_gse_id"], sample_info["f_label"], sample_info["f_genome"]):
-
-        _label_path_: str = os.path.join(result_path, label)
-
-        for _method_ in ["finemap", "susie"]:
-
-            # result data
-            trs_filename = f"{label}_trs_sciv_{_method_}_data.h5ad"
-            trs_file = os.path.join(_label_path_, trs_filename)
-
-            # TRS results
-            trs_data = sciv.fl.read_h5ad(trs_file)
-            sc_atac = sciv.fl.read_h5ad(os.path.join(_label_path_, "sc_atac.h5ad"))
-            da_peaks = sciv.fl.read_h5ad(os.path.join(_label_path_, "da_peaks.h5ad"))
-            cc_data = sciv.fl.read_h5ad(os.path.join(_label_path_, "cc_data.h5ad"))
-
-            trait_id_list = trs_data.var["id"]
-
-            for _trait_ in trait_id_list:
-
-                vrs = sciv.ml.vrs(
-                    adata=trs_data,
-                    sc_atac=sc_atac,
-                    da_peaks=da_peaks,
-                    cc_data=cc_data,
-                    trait=_trait_
-                )
-
-                
+            sciv.fl.save_h5ad(trs, trs_file)
 
 
 if __name__ == '__main__':
@@ -126,5 +86,3 @@ if __name__ == '__main__':
     sample_info = pd.read_table("../scATAC/data/sample_info_with_age_sex_drug.txt")
 
     run_sciv_trs()
-
-    run_sciv_vrs()
