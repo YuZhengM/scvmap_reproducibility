@@ -61,11 +61,20 @@ def run_sciv_trs():
                 adata=sc_atac_data,
                 variants=variant_data_dict,
                 trait_info=trait_info,
-                model_dir=os.path.join(_label_path_, "poisson_vi")
+                model_dir=os.path.join(_label_path_, "poisson_vi"),
+                save_path=_label_path_,
+                filename_dict={
+                    "sc_atac": f"{label}_sc_atac.h5ad",
+                    "da_peaks": f"{label}_da_peaks.h5ad",
+                    "atac_overlap": f"{label}_atac_overlap_{_method_}.h5ad",
+                    "init_score": f"{label}_init_score_{_method_}.h5ad",
+                    "cc_data": f"{label}_cc_data.h5ad",
+                    "trs": trs_filename
+                },
+                is_file_exist_loading=True
             )
             print(trs)
 
-            sciv.fl.save_h5ad(trs, trs_file)
 
 
 if __name__ == '__main__':
