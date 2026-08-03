@@ -56,6 +56,8 @@ def run_sciv_trs():
 
             print(f"Start processing sample {gse}-{label}-{_method_}")
 
+            label: str
+
             # run
             trs = sciv.ml.trs(
                 adata=sc_atac_data,
@@ -63,6 +65,7 @@ def run_sciv_trs():
                 trait_info=trait_info,
                 model_dir=os.path.join(_label_path_, "poisson_vi"),
                 save_path=_label_path_,
+                cell_rate=0.005 if label.startswith("GSE149683") else None,
                 filename_dict={
                     "sc_atac": f"{label}_sc_atac.h5ad",
                     "da_peaks": f"{label}_da_peaks.h5ad",
@@ -82,7 +85,8 @@ if __name__ == '__main__':
 
     file = sciv.ul.file_method("SCIV")
 
-    base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti"
+    # base_path: str = "/public/home/lcq/rgzn/yuzhengmin/keti"
+    base_path: str = "/public/home/ac1dyrvmyl/keti"
 
     sc_atac_path: str = f"{base_path}/scATAC"
     database_path: str = f"{base_path}/database"

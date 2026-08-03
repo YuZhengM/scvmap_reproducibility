@@ -29,7 +29,7 @@
 
 1. keti/gene: Stores gene-related information data
 
-> The data in keti/database/gene/sc2GWAS_annotaion is not used
+> The data in keti/database/gene/sc2GWAS_annotation is not used
 
 > For specific information, please check: [https://github.com/YuZhengM/scvmap_reproducibility/tree/main/gene](https://github.com/YuZhengM/scvmap_reproducibility/tree/main/gene)
 

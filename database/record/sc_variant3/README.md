@@ -30,7 +30,7 @@
 
 1. keti/gene: 存储有关基因的信息数据
 
-> 其中 keti/database/gene/sc2GWAS_annotaion 中数据没有使用
+> 其中 keti/database/gene/sc2GWAS_annotation 中数据没有使用
 
 > 具体信息可以查看：[https://github.com/YuZhengM/scvmap_reproducibility/tree/main/gene](https://github.com/YuZhengM/scvmap_reproducibility/tree/main/gene)
 
