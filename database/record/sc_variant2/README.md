@@ -19,7 +19,11 @@
 
 > keti/topic/comparison_result/sc_variant/scATAC/variant: 运行 g-chromVAR 和 SCAVENGE 的输入数据（fine-mapping 结果）
 
-> keti/topic/comparison_result/scATAC: 收集的 scATAC-seq 数据
+_keti/topic/comparison_result/scATAC_ 数据在 ``sc_variant1`` 中
+
+3. keti/topic/plot: 存储生成图的路径
+
+4. keti/topic/result: 存储跑 SCIV 方法后的结果
 
 #### 1.2 keti/project_code 路径
 
